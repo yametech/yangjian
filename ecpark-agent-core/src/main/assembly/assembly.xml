@@ -1,0 +1,14 @@
+<assembly>
+    <id>assembly</id>
+    <formats>
+        <format>dir</format>
+        <format>tar.gz</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <fileSets>
+    	<fileSet>
+            <directory>dist/ecpark-agent</directory>
+            <outputDirectory>/</outputDirectory>
+        </fileSet>
+    </fileSets>
+</assembly>

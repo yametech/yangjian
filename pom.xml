@@ -1,0 +1,86 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+<!--     <parent> -->
+<!--         <groupId>cn.ecpark.pom</groupId> -->
+<!--         <artifactId>pom-rpc</artifactId> -->
+<!--         <version>1.0.0-SNAPSHOT</version> -->
+<!--     </parent> -->
+    <groupId>cn.ecpark.tool</groupId>
+    <artifactId>tool-ecpark-agent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>ecpark-agent-api</module>
+        <module>ecpark-agent-core</module>
+        <module>ecpark-agent-plugins</module>
+        <module>ecpark-agent-util</module>
+        <module>ecpark-agent-appid</module>
+    </modules>
+
+    <properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
+		<build.skip.test>true</build.skip.test>
+	</properties>
+
+	<dependencyManagement>
+		<!-- 使用基础框架指定的依赖和版本 -->
+		<dependencies>
+			<dependency>
+				<groupId>cn.ecpark.framework.dependencies</groupId>
+				<artifactId>ecpark-framework-dependencies</artifactId>
+				<version>1.1.0-SNAPSHOT</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<!-- 在API和部署服务中公共使用的jar包放在这里 -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+		</dependency>
+		<dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- 以下plugin会在CI时用到 -->
+			<plugin><artifactId>maven-compiler-plugin</artifactId></plugin>
+			<plugin><artifactId>maven-resources-plugin</artifactId></plugin>
+			<plugin><artifactId>maven-source-plugin</artifactId></plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.18.1</version>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
+			</plugin>  
+		</plugins>
+	</build>
+	<distributionManagement>
+		<repository>
+			<id>releases</id>
+			<name>Yame Repository</name>
+			<url>http://repo.hq.in.ecpark.cn:8081/nexus/content/repositories/releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshots</id>
+			<name>Yame Repository</name>
+			<url>http://repo.hq.in.ecpark.cn:8081/nexus/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
+</project>

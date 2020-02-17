@@ -1,0 +1,124 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>cn.ecpark.tool</groupId>
+		<artifactId>tool-ecpark-agent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>ecpark-agent-plugins</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>agent-plugin-dubbo</module>
+        <module>agent-plugin-httpclient</module>
+        <module>agent-plugin-jedis</module>
+        <module>agent-plugin-kafka</module>
+        <module>agent-plugin-method</module>
+        <module>agent-plugin-mongo</module>
+        <module>agent-plugin-mysql</module>
+        <module>agent-plugin-okhttp</module>
+        <module>agent-plugin-rabbitmq</module>
+        <module>agent-plugin-redisson</module>
+        <module>agent-plugin-spring</module>
+        <module>agent-plugin-druid</module>
+        <module>agent-plugin-hikaricp</module>
+    </modules>
+
+    <properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
+		<agent.package.dest.dir>${project.basedir}/../../ecpark-agent-core/dist/ecpark-agent</agent.package.dest.dir>
+	</properties>
+
+	<dependencies>
+    	<dependency>
+            <groupId>cn.ecpark.tool</groupId>
+            <artifactId>ecpark-agent-api</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+	</dependencies>
+	
+	<profiles>
+        <profile>
+            <id>local</id>
+            <activation><activeByDefault>true</activeByDefault></activation>
+        </profile>
+        <!-- 覆盖父POM定义的jenkins，父POM中将resources下的文件全排除了，该应用不应该排除services目录 -->
+        <profile>
+            <id>jenkins</id>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+<!--                         <excludes> -->
+<!--                             <exclude>**/*</exclude> -->
+<!--                         </excludes> -->
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+    </profiles>
+    
+    <build>
+        <!-- 打包不带版本号，用于线上更新时不会因版本号改变，造成多个jar包 -->
+<!--         <finalName>${project.artifactId}</finalName> -->
+		<plugins>
+			<!-- 这里plugin不管是否有注释都会执行 -->
+			<plugin><artifactId>maven-surefire-plugin</artifactId></plugin>
+            <plugin><artifactId>maven-dependency-plugin</artifactId></plugin>
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                	<excludes>
+						<exclude>**/*.properties</exclude>
+						<exclude>**/*.sh</exclude>
+						<exclude>**/*.xml</exclude>
+					</excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                            	<copy todir="${agent.package.dest.dir}/plugins" overwrite="true" > 
+		                            <fileset dir="${project.build.directory}" erroronmissingdir="false">
+		                                <include name="*SNAPSHOT.jar"/>
+		                            </fileset>
+		                        </copy>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- 发布时带源码，需添加该配置 -->
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1</version>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

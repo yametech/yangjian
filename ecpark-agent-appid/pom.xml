@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>cn.ecpark.tool</groupId>
+        <artifactId>tool-ecpark-agent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>ecpark-agent-appid</artifactId>
+
+    <properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <build.skip.assembly>false</build.skip.assembly>
+        <build.skip.test>true</build.skip.test>
+        <agent.package.dest.dir>${project.basedir}/../ecpark-agent-core/dist/ecpark-agent</agent.package.dest.dir>
+    </properties>
+
+    <dependencies>
+    </dependencies>
+    
+    <profiles>
+        <profile>
+            <id>local</id>
+            <activation><activeByDefault>true</activeByDefault></activation>
+        </profile>
+        <!-- 覆盖父POM定义的jenkins，父POM中将resources下的文件全排除了，该应用不应该排除services目录 -->
+        <profile>
+            <id>jenkins</id>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+<!--                         <excludes> -->
+<!--                             <exclude>**/*</exclude> -->
+<!--                         </excludes> -->
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+    </profiles>
+    
+    <build>
+        <!-- 打包不带版本号，用于线上更新时不会因版本号改变，造成多个jar包 -->
+        <finalName>${project.artifactId}</finalName>
+		<plugins>
+			<!-- 这里plugin不管是否有注释都会执行 -->
+			<plugin><artifactId>maven-surefire-plugin</artifactId></plugin>
+            <plugin><artifactId>maven-dependency-plugin</artifactId></plugin>
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                	<excludes>
+						<exclude>**/*.properties</exclude>
+						<exclude>**/*.sh</exclude>
+						<exclude>**/*.xml</exclude>
+					</excludes>
+                    <archive>
+                        <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <copy file="${project.build.directory}/ecpark-agent-appid.jar" tofile="${agent.package.dest.dir}/lib/ecpark-agent-appid.jar" overwrite="true" />
+								<!-- 此处不能拷贝src下的文件，所以使用maven-resources-plugin拷贝config -->
+<!-- 								<copy src="${project.basedir}/src/main/resources/agent.properties" dest="${project.basedir}/dist/ecpark-agent/config" forceoverwrite="true" /> -->
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+<!--         	<plugin><artifactId>maven-assembly-plugin</artifactId></plugin> -->
+        	<!-- 发布时带源码，需添加该配置 -->
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1</version>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

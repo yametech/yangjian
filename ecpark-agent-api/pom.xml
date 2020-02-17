@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>cn.ecpark.tool</groupId>
+        <artifactId>tool-ecpark-agent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>ecpark-agent-api</artifactId>
+
+    <properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <build.skip.assembly>false</build.skip.assembly>
+        <build.skip.test>true</build.skip.test>
+    </properties>
+
+    <dependencies>
+    </dependencies>
+    
+    <build>
+        <!-- 打包不带版本号，用于线上更新时不会因版本号改变，造成多个jar包 -->
+<!--         <finalName>${project.artifactId}</finalName> -->
+		<plugins>
+			<!-- 这里plugin不管是否有注释都会执行 -->
+			<plugin><artifactId>maven-surefire-plugin</artifactId></plugin>
+            <plugin><artifactId>maven-dependency-plugin</artifactId></plugin>
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                	<excludes>
+						<exclude>**/*.properties</exclude>
+						<exclude>**/*.sh</exclude>
+						<exclude>**/*.xml</exclude>
+					</excludes>
+                </configuration>
+            </plugin>
+            <!-- 发布时带源码，需添加该配置 -->
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1</version>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
