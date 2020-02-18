@@ -1,0 +1,6 @@
+com.yametech.yangjian.agent.plugin.rabbitmq.context.AddressMatcher
+com.yametech.yangjian.agent.plugin.rabbitmq.context.ConsumerMatcher
+com.yametech.yangjian.agent.plugin.rabbitmq.context.ExchangeMatcher
+com.yametech.yangjian.agent.plugin.rabbitmq.context.QueueNameMatcher
+com.yametech.yangjian.agent.plugin.rabbitmq.ConsumeMatcher
+com.yametech.yangjian.agent.plugin.rabbitmq.PublishMatcher

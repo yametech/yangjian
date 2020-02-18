@@ -1,0 +1,2 @@
+com.yametech.yangjian.agent.plugin.httpclient.CloseableHttpClientMatcher
+com.yametech.yangjian.agent.plugin.httpclient.HttpMethodDirectorMatcher

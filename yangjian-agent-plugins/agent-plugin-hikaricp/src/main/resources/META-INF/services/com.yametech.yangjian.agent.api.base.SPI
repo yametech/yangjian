@@ -1,0 +1,3 @@
+com.yametech.yangjian.agent.plugin.hikaricp.context.HikariPoolConstructorMatcher
+com.yametech.yangjian.agent.plugin.hikaricp.HikariPoolShutDownMatcher
+com.yametech.yangjian.agent.plugin.hikaricp.HikariConnectionMatcher

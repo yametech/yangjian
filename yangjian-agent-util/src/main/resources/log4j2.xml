@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--日志级别以及优先级排序: OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
+<!--status：这个用于设置log4j2自身内部的信息输出，可以不设置，当设置成trace时，你会看到log4j2内部各种详细输出-->
+<!--monitorInterval：Log4j能够自动检测修改配置 文件和重新配置本身，设置间隔秒数，默认5秒检测一次配置变化 -->
+<Configuration status="info" monitorInterval="5" shutdownHook="disable">
+	<!-- 将一些常用值提取出来，然后在文件的其他部分通过${}的形式引用，这些值可以随便定义 -->
+    <Properties>
+        <!-- 定义日志文件根目录 -->
+        <Property name="logDir" value="./logs" />
+        <!-- 定义日志的通用格式 -->
+<!--         <Property name="pattern" value="%d{HH:mm:ss.SSS}[%-5level]-[%t]-[%l]: %msg%n" /> -->
+        <Property name="pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS}[%-level]-[%t]-[%c{1.}.%M(%L)]: %msg%n" />
+        <!-- 定义日志分卷文件通用文件名形式:%d{yyyy-MM-dd}-%i -->
+        <Property name="fileNamePattern" value="%d{yyyy-MM-dd}-%i" />
+        <!-- 文件滚动周期，此处的1是fileNamePattern中最小单位的数量，这里为1天 -->
+        <Property name="fileRolloverNum" value="1" />
+        <!-- 文件滚动大小，单个文件大小超过配置大小后滚动日志 -->
+        <Property name="fileMaxSize" value="5 GB" />
+        <!-- 针对fileNamePattern value中的i最多生成的文件个数，超过该个数，覆盖旧文件，默认是7个 -->
+        <Property name="fileMaxNum" value="10" />
+        <!-- 最多保存的日志天数 -->
+        <Property name="fileDay" value="15d" />
+        <!-- 文件归档时，文件压缩比，0-9，值越大压缩越高，为0，不压缩，需结合文件名后缀.tar.gz才生效 -->
+        <Property name="fileCompressionRatio" value="9" />
+    </Properties>
+	<!-- 先定义所有的appender -->
+	<Appenders>
+		<!-- 这个输出控制台的配置 -->
+		<Console name="console" target="SYSTEM_OUT">
+			<!-- 控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch） -->
+			<ThresholdFilter level="trace" onMatch="ACCEPT" onMismatch="DENY" />
+			<!-- 这个都知道是输出日志的格式 -->
+			<PatternLayout pattern="${pattern}" />
+		</Console>
+
+		<!-- append为TRUE表示消息增加到指定文件中，false表示消息覆盖指定的文件内容，默认值是true -->
+		<!-- 添加过滤器ThresholdFilter,可以有选择的输出某个级别以上的类别 onMatch="ACCEPT" onMismatch="DENY"意思是匹配就接受,否则直接拒绝 -->
+<!-- 		<File name="error" fileName="../logs/error.log" append="false"> -->
+<!-- 			<ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY" /> -->
+<!-- 			<PatternLayout pattern="%d{yyyy.MM.dd 'at' HH:mm:ss z} %-5level %class{36} %L %M - %msg%xEx%n" /> -->
+<!-- 		</File> -->
+
+		<!-- 这个会打印出所有的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
+		<RollingFile name="info" fileName="${logDir}/info.log" 
+			filePattern="${logDir}/info-${fileNamePattern}.log">
+<!-- 			<ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY" /> -->
+            <PatternLayout pattern="${pattern}" />
+            <Policies>
+				<!-- TimeBasedTriggeringPolicy表示按照时间来分卷，interval表示时间间隔，时间单位有点诡异，不是明确设置的，而是从filePattern推导的，是filePattern中最小的时间的单位，比如上述示例中的filePattern为%d{yyyy-MM-dd}，这个日期时间格式必须符合java日期时间规范，其中最小日期单位为dd，也就是天，推导出来也就是1天分一个日志文件出来，如果filePattern的配置为%d{yyyy-MM-dd HH:mm}，最小单位是mm，也就是分钟，那就是1分钟分一个日志文件出来 -->
+                <TimeBasedTriggeringPolicy interval="${fileRolloverNum}" />
+				<!-- SizeBasedTriggeringPolicy表示日志文件大小超过多大时对其进行分卷，size表示日志大小，单位推荐写MB，数值为大于0的整数，数值与单位中间有个空格，推荐写上 -->
+				<!-- <SizeBasedTriggeringPolicy size="10 GB" /> -->
+                <SizeBasedTriggeringPolicy size="${fileMaxSize}" />
+            </Policies>
+			<!-- DefaultRolloverStrategy表示分卷策略，只需要记住这个必须要配就行了，不必深究，max表示最多可以有多少个分卷文件，默认为7个，超出7个的日志分卷文件将被删除，也就是说可能导致重要日志丢失，所以该参数配大点，100000应该够了，compressionLevel表示压缩等级，值为0-9，只在filePattern以.zip结尾，也就是说压缩格式为zip时起作用，这也是为什么前面说建议压缩格式为zip。0表示不压缩，只打包为zip格式，9表示最高压缩比（个人测试1MB日志文件某些情况下能压缩到4KB左右）。如果不想启用压缩功能，前面说过，日志filePattern不以.zip结尾就行了，这时compressionLevel是不起作用的 -->
+            <DefaultRolloverStrategy max="${fileMaxNum}" compressionLevel="${fileCompressionRatio}">
+            	<!-- 以下配置为删除策略，上面的max是无效的，这里的删除策略是删除日志所在目录下所有修改时间大于fileDay的日志文件 -->
+            	<Delete basePath="${logDir}/" maxDepth="1">
+					<IfFileName glob="info-*.log" />
+					<IfLastModified age="${fileDay}" />
+				</Delete>
+            </DefaultRolloverStrategy>
+		</RollingFile>
+		<RollingFile name="warn" fileName="${logDir}/warn.log" 
+			filePattern="${logDir}/warn-${fileNamePattern}.log">
+			<ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY" />
+            <PatternLayout pattern="${pattern}" />
+            <Policies>
+				<!-- TimeBasedTriggeringPolicy表示按照时间来分卷，interval表示时间间隔，时间单位有点诡异，不是明确设置的，而是从filePattern推导的，是filePattern中最小的时间的单位，比如上述示例中的filePattern为%d{yyyy-MM-dd}，这个日期时间格式必须符合java日期时间规范，其中最小日期单位为dd，也就是天，推导出来也就是1天分一个日志文件出来，如果filePattern的配置为%d{yyyy-MM-dd HH:mm}，最小单位是mm，也就是分钟，那就是1分钟分一个日志文件出来 -->
+                <TimeBasedTriggeringPolicy interval="${fileRolloverNum}" />
+				<!-- SizeBasedTriggeringPolicy表示日志文件大小超过多大时对其进行分卷，size表示日志大小，单位推荐写MB，数值为大于0的整数，数值与单位中间有个空格，推荐写上 -->
+                <SizeBasedTriggeringPolicy size="${fileMaxSize}" />
+            </Policies>
+			<!-- DefaultRolloverStrategy表示分卷策略，只需要记住这个必须要配就行了，不必深究，max表示最多可以有多少个分卷文件，默认为7个，超出7个的日志分卷文件将被删除，也就是说可能导致重要日志丢失，所以该参数配大点，100000应该够了，compressionLevel表示压缩等级，值为0-9，只在filePattern以.zip结尾，也就是说压缩格式为zip时起作用，这也是为什么前面说建议压缩格式为zip。0表示不压缩，只打包为zip格式，9表示最高压缩比（个人测试1MB日志文件某些情况下能压缩到4KB左右）。如果不想启用压缩功能，前面说过，日志filePattern不以.zip结尾就行了，这时compressionLevel是不起作用的 -->
+            <DefaultRolloverStrategy max="${fileMaxNum}" compressionLevel="${fileCompressionRatio}">
+            	<!-- 以下配置为删除策略，上面的max是无效的，这里的删除策略是删除日志所在目录下所有修改时间大于fileDay的日志文件 -->
+            	<Delete basePath="${logDir}/" maxDepth="1">
+					<IfFileName glob="warn-*.log" />
+					<IfLastModified age="${fileDay}" />
+				</Delete>
+            </DefaultRolloverStrategy>
+		</RollingFile>
+		
+		<!-- RollingRandomAccessFile刷新到文件很慢，延迟可能到10分钟，并且SizeBasedTriggeringPolicy可能不生效，如果希望实时看到日志文件更新，则使用RollingFile -->
+		
+		<!-- 定义一个文件appender，如果需要，可以以这个为原型粘贴复制修改再定义适合自己的，该appender的详细解释会在教程接下来的部分给出 -->
+<!--         <RollingRandomAccessFile name="info" fileName="${logDir}/info.log" -->
+<!--         	immediateFlush="true" bufferSize="512" -->
+<!--             filePattern="${logDir}/info-${fileNamePattern}.log" append="true"> -->
+<!--             <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY" /> -->
+<!--             <PatternLayout pattern="${pattern}" /> -->
+<!--             <Policies> -->
+				<!-- TimeBasedTriggeringPolicy表示按照时间来分卷，interval表示时间间隔，时间单位有点诡异，不是明确设置的，而是从filePattern推导的，是filePattern中最小的时间的单位，比如上述示例中的filePattern为%d{yyyy-MM-dd}，这个日期时间格式必须符合java日期时间规范，其中最小日期单位为dd，也就是天，推导出来也就是1天分一个日志文件出来，如果filePattern的配置为%d{yyyy-MM-dd HH:mm}，最小单位是mm，也就是分钟，那就是1分钟分一个日志文件出来 -->
+<!--                 <TimeBasedTriggeringPolicy interval="1" /> -->
+				<!-- SizeBasedTriggeringPolicy表示日志文件大小超过多大时对其进行分卷，size表示日志大小，单位推荐写MB，数值为大于0的整数，数值与单位中间有个空格，推荐写上 -->
+<!--                 <SizeBasedTriggeringPolicy size="10 GB" /> -->
+<!--                 <SizeBasedTriggeringPolicy size="1 MB" /> -->
+<!--             </Policies> -->
+			<!-- DefaultRolloverStrategy表示分卷策略，只需要记住这个必须要配就行了，不必深究，max表示最多可以有多少个分卷文件，默认为7个，超出7个的日志分卷文件将被删除，也就是说可能导致重要日志丢失，所以该参数配大点，100000应该够了，compressionLevel表示压缩等级，值为0-9，只在filePattern以.zip结尾，也就是说压缩格式为zip时起作用，这也是为什么前面说建议压缩格式为zip。0表示不压缩，只打包为zip格式，9表示最高压缩比（个人测试1MB日志文件某些情况下能压缩到4KB左右）。如果不想启用压缩功能，前面说过，日志filePattern不以.zip结尾就行了，这时compressionLevel是不起作用的 -->
+<!--             <DefaultRolloverStrategy max="5" compressionLevel="9" /> -->
+<!--         </RollingRandomAccessFile> -->
+<!--         <RollingRandomAccessFile name="warn" fileName="${logDir}/warn.log" -->
+<!--             filePattern="${logDir}/warn-${fileNamePattern}.log" append="true"> -->
+<!--             <ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY" /> -->
+<!--             <PatternLayout pattern="${pattern}" /> -->
+<!--             <Policies> -->
+				<!-- TimeBasedTriggeringPolicy表示按照时间来分卷，interval表示时间间隔，时间单位有点诡异，不是明确设置的，而是从filePattern推导的，是filePattern中最小的时间的单位，比如上述示例中的filePattern为%d{yyyy-MM-dd}，这个日期时间格式必须符合java日期时间规范，其中最小日期单位为dd，也就是天，推导出来也就是1天分一个日志文件出来，如果filePattern的配置为%d{yyyy-MM-dd HH:mm}，最小单位是mm，也就是分钟，那就是1分钟分一个日志文件出来 -->
+<!--                 <TimeBasedTriggeringPolicy interval="1" /> -->
+				<!-- SizeBasedTriggeringPolicy表示日志文件大小超过多大时对其进行分卷，size表示日志大小，单位推荐写MB，数值为大于0的整数，数值与单位中间有个空格，推荐写上 -->
+<!--                 <SizeBasedTriggeringPolicy size="10 GB" /> -->
+<!--             </Policies> -->
+			<!-- DefaultRolloverStrategy表示分卷策略，只需要记住这个必须要配就行了，不必深究，max表示最多可以有多少个分卷文件，默认为7个，超出7个的日志分卷文件将被删除，也就是说可能导致重要日志丢失，所以该参数配大点，100000应该够了，compressionLevel表示压缩等级，值为0-9，只在filePattern以.zip结尾，也就是说压缩格式为zip时起作用，这也是为什么前面说建议压缩格式为zip。0表示不压缩，只打包为zip格式，9表示最高压缩比（个人测试1MB日志文件某些情况下能压缩到4KB左右）。如果不想启用压缩功能，前面说过，日志filePattern不以.zip结尾就行了，这时compressionLevel是不起作用的 -->
+<!--             <DefaultRolloverStrategy max="10" compressionLevel="9" /> -->
+<!--         </RollingRandomAccessFile> -->
+	</Appenders>
+
+	<!-- 然后定义logger，只有定义了logger并引入的appender，appender才会生效 -->
+	<Loggers>
+<!-- 		<AsyncLogger name="cn.ecpark.tool.monitor" level="info" additivity="false" includeLocation="true"> -->
+<!--         	<AppenderRef ref="console" /> -->
+<!--             <AppenderRef ref="warn" /> -->
+<!--             <AppenderRef ref="info" /> -->
+<!--         </AsyncLogger> -->
+		<!-- 建立一个默认的root的logger，level-打印的最小等级日志，如果appender中设置的级别小于该level，则不打印低级别的 -->
+		<Root level="info" includeLocation="true">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="warn" />
+			<AppenderRef ref="info" />
+		</Root>
+	</Loggers>
+</Configuration>

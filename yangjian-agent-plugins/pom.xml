@@ -1,0 +1,71 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.github.yametech</groupId>
+        <artifactId>yangjian-agent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>yangjian-agent-plugins</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>agent-plugin-dubbo</module>
+        <module>agent-plugin-httpclient</module>
+        <module>agent-plugin-jedis</module>
+        <module>agent-plugin-kafka</module>
+        <module>agent-plugin-method</module>
+        <module>agent-plugin-mongo</module>
+        <module>agent-plugin-mysql</module>
+        <module>agent-plugin-okhttp</module>
+        <module>agent-plugin-rabbitmq</module>
+        <module>agent-plugin-redisson</module>
+        <module>agent-plugin-spring</module>
+        <module>agent-plugin-druid</module>
+        <module>agent-plugin-hikaricp</module>
+    </modules>
+
+    <properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
+	</properties>
+
+	<dependencies>
+    	<dependency>
+            <groupId>com.github.yametech</groupId>
+            <artifactId>yangjian-agent-api</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+	</dependencies>
+    
+    <build>
+        <!-- 打包不带版本号，用于线上更新时不会因版本号改变，造成多个jar包 -->
+<!--         <finalName>${project.artifactId}</finalName> -->
+		<plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                            	<copy todir="${project.basedir}/../../${agent.package.name}/plugins" overwrite="true" > 
+		                            <fileset dir="${project.build.directory}" erroronmissingdir="false">
+		                                <include name="agent-plugin-*-SNAPSHOT.jar"/>
+		                            </fileset>
+		                        </copy>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
