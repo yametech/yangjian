@@ -4,10 +4,7 @@ yangjian-agent是一个基于javaagent运行的java性能监控工具，具备�
 
 ## 参考
 
-该工具开发时参考的开源项目：
-* [skywalking](https://github.com/apache/skywalking)
-* [MyPerf4J](https://github.com/LinShunKang/MyPerf4J )
-* [druid](https://github.com/alibaba/druid )
+该工具开发时参考的开源项目：[skywalking](https://github.com/apache/skywalking)、[MyPerf4J](https://github.com/LinShunKang/MyPerf4J )、[druid](https://github.com/alibaba/druid )；
 
 ## 功能
 
@@ -107,7 +104,7 @@ CPU：Intel(R) Core(TM) i7-8550U CPU @ 1.80GHZ
 |P99.9	|33.227ms	|33.489ms|
 
 #### 拦截Http请求-1
- [测试用例](yangjian-agent-benchmark/src/main/java/com/yametech/yangjian/agent/benchmark/httpclient/HttpClientBenchmark.java )
+| [测试用例](yangjian-agent-plugins/agent-plugin-httpclient/src/test/java/cn/ecpark/tool/agent/plugin/httpclient/HttpClientBenchmark.java )
 | 请求外部接口：http://whois.pconline.com.cn/?ip=117.89.35.98 
 
 |Benchmark	|Baseline(基线)	|With Agent（加入探针）|
@@ -120,7 +117,7 @@ CPU：Intel(R) Core(TM) i7-8550U CPU @ 1.80GHZ
 |P99.9	|324.534ms	|166.986ms|
 
 #### 拦截Http请求-2
-[测试用例](yangjian-agent-benchmark/src/main/java/com/yametech/yangjian/agent/benchmark/httpclient/HttpClientBenchmark.java ) | 使用本地接口(该接口不做任何处理直接返回)
+[测试用例](yangjian-agent-plugins/agent-plugin-httpclient/src/test/java/cn/ecpark/tool/agent/plugin/httpclient/HttpClientBenchmark.java ) |  使用本地接口(该接口不做任何处理直接返回)
 
 |Benchmark	|Baseline(基线)	|With Agent（加入探针）|
 |-----------|---------------|----------------------|
@@ -133,7 +130,7 @@ CPU：Intel(R) Core(TM) i7-8550U CPU @ 1.80GHZ
 
 由于请求url为外部接口受网路、接口服务器负载和稳定性等影响，压测结果会存在误差
 
-#### 拦截Jedis方法：[测试用例](yangjian-agent-benchmark/src/main/java/com/yametech/yangjian/agent/benchmark/redis/RedisBenchmark.java )
+#### 拦截Jedis方法：[测试用例](yangjian-agent-plugins/agent-plugin-jedis/src/test/java/cn/ecpark/tool/agent/plugin/jedis/RedisBenchmark.java )
 
 结果：
 
@@ -146,7 +143,7 @@ CPU：Intel(R) Core(TM) i7-8550U CPU @ 1.80GHZ
 |P99	|0.142ms	|0.144ms|
 |P99.9	|0.193ms	|0.223ms|
 
-#### MongoDB：[测试用例](yangjian-agent-benchmark/src/main/java/com/yametech/yangjian/agent/benchmark/mongo/MongoBenchmark.java )
+#### MongoDB：[测试用例](yangjian-agent-plugins/agent-plugin-mongo/src/test/java/cn/ecpark/tool/agent/plugin/mongo/MongoBenchmark.java )
 
 | Benchmark    | Baseline(基线) | With Agent（加入探针）   |
 | -------------| ---------------|-------------------------|
@@ -326,7 +323,7 @@ public class TestService {
 
 <dependencies>
     <dependency>
-        <groupId>com.github.yametech</groupId>
+        <groupId>com.yametech.yangjian.agent</groupId>
         <artifactId>yangjian-agent-api</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </dependency>
