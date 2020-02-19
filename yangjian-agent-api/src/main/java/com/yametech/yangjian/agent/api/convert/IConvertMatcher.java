@@ -28,9 +28,8 @@ public interface IConvertMatcher {
 	default void setMetricMatcher(IMetricMatcher metricMatcher) {}
 	
 	/**
-	 * 获取一个默认的TimeEvent
-	 * @param useTimeMillis
-	 * @return
+	 * @param startTime	开始事件
+	 * @return	获取默认TimeEvent
 	 */
 	default TimeEvent get(long startTime) {
 		TimeEvent event = new TimeEvent();

@@ -21,10 +21,8 @@ import com.yametech.yangjian.agent.api.bean.MethodDefined;
 
 /**
  * 方法指定参数类型匹配
- * @Description 
  * 
  * @author liuzhao
- * @date 2019年11月7日 下午6:12:13
  */
 public class MethodArgumentIndexMatch implements IConfigMatch {
 	private int index;

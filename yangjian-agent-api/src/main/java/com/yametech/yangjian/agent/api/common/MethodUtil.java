@@ -89,8 +89,8 @@ public class MethodUtil {
 	
 	/**
 	 * 根据方法实例以及匹配条件获取匹配的methodId
-	 * @param method
-	 * @return
+	 * @param method	方法
+	 * @return 方法字符串标识
 	 */
 	public static String getCacheMethodId(Method method) {
 		String methodId = cacheMethod.get(method);

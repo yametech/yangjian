@@ -24,7 +24,6 @@ import com.yametech.yangjian.agent.api.convert.statistic.StatisticType;
 
 /**
  * @author zcn
- * @date: 2019-10-16
  **/
 public class StringUtil {
 	private static final String DEFAULT_CHARSET = "UTF-8";
@@ -48,8 +47,8 @@ public class StringUtil {
     /**
      * 过滤请求url后面的参数
      *
-     * @param url
-     * @return
+     * @param url	带参数的url
+     * @return	去除参数后的url
      */
     public static String filterUrlParams(String url) {
         if (notEmpty(url)) {

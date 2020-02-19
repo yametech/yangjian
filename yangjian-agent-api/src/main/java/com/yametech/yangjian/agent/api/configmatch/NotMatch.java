@@ -23,7 +23,6 @@ import com.yametech.yangjian.agent.api.bean.MethodDefined;
  * 取非匹配
  *
  * @author dengliming
- * @date 2019/11/22
  */
 public class NotMatch implements IConfigMatch {
     private IConfigMatch match;

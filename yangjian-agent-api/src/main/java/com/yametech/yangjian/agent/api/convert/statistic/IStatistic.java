@@ -24,21 +24,20 @@ public interface IStatistic {
 	
 	/**
 	 * 合并数据
-	 * @param timeEvent
+	 * @param timeEvent	事件对象
 	 */
 	void combine(TimeEvent timeEvent);
 	
 	/**
 	 * 重置数据
-	 * @param type
-	 * @param identify
-	 * @param second
+	 * @param type	类型
+	 * @param identify	标识
+	 * @param second	秒数
 	 */
 	void reset(String type, String identify, long second);
 	
 	/**
-	 * 返回当前统计的数据key-value
-	 * @return
+	 * @return	当前统计的数据key-value
 	 */
 	Entry<String, Object>[] kv();
 }

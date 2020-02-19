@@ -22,6 +22,7 @@ public interface IMetricMatcher extends InterceptorMatcher {
 	
 	/**
      * 须指定事件类型，如：dubbo-client、dubbo-server、http-server、redis、mysql、kafka、rabbitmq、mongo、http-client
+     * @return	事件类型
      */
     default String type() {
         return Constants.EventType.METHOD;

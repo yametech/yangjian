@@ -27,7 +27,8 @@ public interface InterceptorMatcher extends IMatch, IWeight, SPI {
 	/**
 	 * 返回拦截器的类路径，如:cn.ecpark.tool.javaagent.YMAgent，可包含interceptor包下任意一个接口的实现类
 	 * 	因interceptor类中可能会依赖应用中的类，为了避免出现ClassNotFound，interceptor的实例使用依赖类加载的classLoader初始化，而InterceptorMatcher子类不需要，所以拆分为两个类定义
-	 * @return
+	 * @param	type 类型
+	 * @return	LoadClassKey
 	 */
 	LoadClassKey loadClass(MethodType type);
 }

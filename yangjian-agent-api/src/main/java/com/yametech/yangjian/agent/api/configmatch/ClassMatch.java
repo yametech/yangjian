@@ -21,10 +21,8 @@ import com.yametech.yangjian.agent.api.bean.MethodDefined;
 
 /**
  * 继承类匹配（可以是父类或间接父类）
- * @Description 
  * 
  * @author liuzhao
- * @date 2019年11月7日 下午6:12:26
  */
 public class ClassMatch implements IConfigMatch {
 	private String cls;

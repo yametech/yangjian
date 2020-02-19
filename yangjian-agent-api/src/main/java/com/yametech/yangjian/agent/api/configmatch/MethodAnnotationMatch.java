@@ -21,10 +21,8 @@ import com.yametech.yangjian.agent.api.bean.MethodDefined;
 
 /**
  * 方法注解匹配
- * @Description 
  * 
  * @author liuzhao
- * @date 2019年11月7日 下午6:13:46
  */
 public class MethodAnnotationMatch implements IConfigMatch {
 	private String annotation;

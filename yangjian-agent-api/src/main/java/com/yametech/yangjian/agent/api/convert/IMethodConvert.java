@@ -24,10 +24,8 @@ import com.yametech.yangjian.agent.api.bean.TimeEvent;
 
 /**
  * 注意：实现类不能同时实现SPI接口
- * @Description 
  * 
  * @author liuzhao
- * @date 2019年12月21日 下午10:05:06
  */
 public interface IMethodConvert extends IConvertMatcher {
 	
@@ -40,7 +38,8 @@ public interface IMethodConvert extends IConvertMatcher {
 	 * @param ret	方法返回值
 	 * @param t	方法抛出的异常（未抛出则为null）
 	 * @param globalVar	本次调用中所有拦截器设置的上下文数据
-	 * @return
+	 * @return	TimeEvent列表
+	 * @throws Throwable	转换异常
 	 */
 	List<TimeEvent> convert(Object thisObj, long startTime, Object[] allArguments, Method method,
             Object ret, Throwable t, Map<Class<?>, Object> globalVar) throws Throwable;

@@ -25,10 +25,9 @@ package com.yametech.yangjian.agent.api.base;
  * 		IAppStatusListener
  * 		IConfigReader
  * 接口可实现的功能参考接口注释，实现类可实现上述的多个接口同时拥有多个接口的功能，必须通过SPI的方式实例化，否则不会具备对应的功能
- * @Description 
  * 
  * @author liuzhao
- * @date 2019年10月10日 下午10:38:02
+ * 2019年10月10日 下午10:38:02
  */
 public interface SPI {
 

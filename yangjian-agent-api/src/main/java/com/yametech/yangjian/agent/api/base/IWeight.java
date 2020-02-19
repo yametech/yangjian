@@ -20,7 +20,7 @@ public interface IWeight {
 	
 	/**
 	 * 权重高的先执行
-     * @return
+     * @return	权重
      */
     default int weight() {
         return 0;

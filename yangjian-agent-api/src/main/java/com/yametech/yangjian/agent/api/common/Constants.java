@@ -18,7 +18,6 @@ package com.yametech.yangjian.agent.api.common;
 
 /**
  * @author zcn
- * @date: 2019-10-15
  **/
 public class Constants {
 

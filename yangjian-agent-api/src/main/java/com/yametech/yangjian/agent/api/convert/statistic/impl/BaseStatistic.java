@@ -25,10 +25,8 @@ import com.yametech.yangjian.agent.api.convert.statistic.StatisticType;
 
 /**
  * 子类必须包含
- * @Description 
  * 
  * @author liuzhao
- * @date 2019年11月25日 下午2:40:27
  */
 public abstract class BaseStatistic implements IStatistic {
 	private String type;// 事件类型
@@ -89,13 +87,13 @@ public abstract class BaseStatistic implements IStatistic {
 	
 	/**
 	 * 统计类型
-	 * @return
+	 * @return	StatisticType
 	 */
 	public abstract StatisticType statisticType();
 	
 	/**
 	 * 统计输出key-value
-	 * @return
+	 * @return	Map
 	 */
 	public abstract Map<String, Object> statisticKV();
 

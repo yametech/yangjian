@@ -26,7 +26,7 @@ public interface IConfigReader extends IWeight, SPI {
 	
 	/**
 	 * 申明需要哪些key的正则
-	 * @return
+	 * @return	key列表
 	 */
 	default Set<String> configKey() {
 		return null;

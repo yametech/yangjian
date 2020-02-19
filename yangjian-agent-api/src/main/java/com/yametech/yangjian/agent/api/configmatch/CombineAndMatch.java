@@ -23,10 +23,8 @@ import com.yametech.yangjian.agent.api.bean.MethodDefined;
 
 /**
  * 组合And匹配，全部匹配
- * @Description 
  * 
  * @author liuzhao
- * @date 2019年11月7日 下午6:13:10
  */
 public class CombineAndMatch implements IConfigMatch {
 	private List<IConfigMatch> matches;

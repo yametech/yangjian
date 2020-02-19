@@ -22,10 +22,8 @@ import java.util.Map;
 
 /**
  * 注意：实现类不能同时实现SPI接口
- * @Description 
  * 
  * @author liuzhao
- * @date 2019年12月21日 下午10:05:13
  */
 public interface IStatisticMethodAsyncConvert extends IAsyncConvert, IConvertMatcher {
 	
@@ -37,7 +35,8 @@ public interface IStatisticMethodAsyncConvert extends IAsyncConvert, IConvertMat
 	 * @param ret	方法返回值
 	 * @param t	方法抛出的异常（未抛出则为null）
 	 * @param globalVar	本次调用中所有拦截器设置的上下文数据
-	 * @return
+	 * @return	临时对象列表
+	 * @throws Throwable	转换异常
 	 */
 	List<Object> convert(long startTime, Object[] allArguments, Method method,
             Object ret, Throwable t, Map<Class<?>, Object> globalVar) throws Throwable;

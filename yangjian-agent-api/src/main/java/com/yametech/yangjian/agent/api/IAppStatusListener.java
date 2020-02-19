@@ -29,6 +29,8 @@ public interface IAppStatusListener extends SPI {
 
 	/**
 	 * 应用关闭时执行
+	 * @param duration	最大等待时间
+	 * @return	是否成功关闭
 	 */
 	boolean shutdown(Duration duration);
 	

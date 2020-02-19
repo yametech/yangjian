@@ -18,7 +18,6 @@ package com.yametech.yangjian.agent.api.common;
 
 /**
  * @author dengliming
- * @date 2020/1/6
  */
 public class ClassUtil {
 
@@ -29,8 +28,8 @@ public class ClassUtil {
      * <p>
      * 如：AccountInfoServiceImpl$$EnhancerBySpringCGLIB$$88abb036 return AccountInfoServiceImpl
      *
-     * @param clazz
-     * @return
+     * @param clazz	代理class
+     * @return	返回代理前的class类型
      */
     public static Class<?> getOriginalClass(Class<?> clazz) {
         if (clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {

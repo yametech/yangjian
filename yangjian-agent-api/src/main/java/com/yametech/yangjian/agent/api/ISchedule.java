@@ -24,15 +24,13 @@ import java.util.concurrent.TimeUnit;
  * 实现该接口即可定时调用execute方法，目前用于定时打印日志
  *
  * @author liuzhao
- * @Description
- * @date 2019年10月12日 上午9:12:36
  */
 public interface ISchedule extends SPI {
 
     /**
      * 首次执行的延迟时间
      *
-     * @return 秒数
+     * @return int 秒数
      */
     default int initialDelay() {
         return 0;
@@ -41,7 +39,7 @@ public interface ISchedule extends SPI {
     /**
      * 时间间隔单位（默认秒）
      *
-     * @return
+     * @return	TimeUnit
      */
     default TimeUnit timeUnit() {
         return TimeUnit.SECONDS;
@@ -50,7 +48,7 @@ public interface ISchedule extends SPI {
     /**
      * 调度间隔
      *
-     * @return 秒数
+     * @return int 秒数
      */
     int interval();
 

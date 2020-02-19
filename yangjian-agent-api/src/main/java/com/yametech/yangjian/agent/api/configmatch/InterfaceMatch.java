@@ -21,10 +21,8 @@ import com.yametech.yangjian.agent.api.bean.MethodDefined;
 
 /**
  * 是否继承了指定接口
- * @Description 
  * 
  * @author liuzhao
- * @date 2019年11月7日 下午6:13:10
  */
 public class InterfaceMatch implements IConfigMatch {
 	private String interfaceName;
