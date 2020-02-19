@@ -54,7 +54,7 @@ CPU：Intel(R) Core(TM) i7-8550U CPU @ 1.80GHZ
 
 这个常见Springboot项目，包含SpringBoot、HikariCP连接池（模拟mysql客户端）、模拟redis客户端。
 
-**请注意：**这里参考skywalking使用模拟客户端主要是避免服务端性能和网络的波动等这些干扰因素影响测试结果，实际上不直接跟具体mysql、redis服务交互，但操作方法会被探针拦截，跟实际使用一样。
+**请注意：** 这里参考skywalking使用模拟客户端主要是避免服务端性能和网络的波动等这些干扰因素影响测试结果，实际上不直接跟具体mysql、redis服务交互，但操作方法会被探针拦截，跟实际使用一样。
 这里使用Jmeter模拟300用户并发访问，设置思考时间为10ms，预热时间为20s
 
 压测结果：
@@ -165,11 +165,34 @@ TODO
 
 ## 目录结构
 
-![directory-structure](docs/readme-files/directory-structure.png)
+```
 
-config：存放监控配置文件以及日志配置文件
+├─config	//存放监控配置文件以及日志配置文件
+│      agent.properties //探针相关配置
+│      log.properties	//日志相关配置
+│      
+├─lib		//探针包
+│      yangjian-agent.jar
+│      
+├─logs		//探针输出的日志目录
+└─plugins	//插件包
+        agent-plugin-druid-1.0.0-SNAPSHOT.jar
+        agent-plugin-dubbo-1.0.0-SNAPSHOT.jar
+        agent-plugin-hikaricp-1.0.0-SNAPSHOT.jar
+        agent-plugin-httpclient-1.0.0-SNAPSHOT.jar
+        agent-plugin-jedis-1.0.0-SNAPSHOT.jar
+        agent-plugin-kafka-1.0.0-SNAPSHOT.jar
+        agent-plugin-method-1.0.0-SNAPSHOT.jar
+        agent-plugin-mongo-1.0.0-SNAPSHOT.jar
+        agent-plugin-mysql-1.0.0-SNAPSHOT.jar
+        agent-plugin-okhttp-1.0.0-SNAPSHOT.jar
+        agent-plugin-rabbitmq-1.0.0-SNAPSHOT.jar
+        agent-plugin-redisson-1.0.0-SNAPSHOT.jar
+        agent-plugin-spring-1.0.0-SNAPSHOT.jar
+	
+```
 
-​		agent.properties
+* agent.properties
 
 | key                             | 是否必须 | 说明                                                         | 示例                                                         |
 | ------------------------------- | -------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -183,7 +206,7 @@ config：存放监控配置文件以及日志配置文件
 | InstanceMethodMatcher.唯一标识  | 否       | 自定义实例方法RT/QPS统计，value为正则匹配                    | InstanceMethodMatcher.test=.\*cn\\\\.ecpark\\\\.tool\\\\.javaagent\\\\.TestService\\\\.add\\\\(.* |
 | StatisticMethodMatcher.唯一标识 | 否       | 自定义静态方法RT/QPS统计，value为正则匹配                    | StatisticMethodMatcher.test=.\*java\\\\.time\\\\.Duration\\\\.ofHours\\\\(.* |
 
-​		log.properties
+* log.properties
 
 | key               | 是否必须 | 说明                                                         | 示例                                                         |
 | ----------------- | -------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -194,11 +217,6 @@ config：存放监控配置文件以及日志配置文件
 | log.max_file_num  | 否       | 日志数量，超过数量的日志文件，按照最后编辑时间删除           | 100                                                          |
 | log.pattern       | 否       | 日志格式                                                     | %timestamp[%level]-[%thread]-[%class.method]: %msg%throwable |
 
-lib：探针包
-
-logs：探针输出的日志目录
-
-plugins：插件包
 
 ## 接入
 

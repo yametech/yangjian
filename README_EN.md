@@ -4,7 +4,10 @@ yangjian-agent是一个基于javaagent运行的java性能监控工具，具备�
 
 ## 参考
 
-该工具开发时参考的开源项目：[skywalking](https://github.com/apache/skywalking)、[MyPerf4J](https://github.com/LinShunKang/MyPerf4J )、[druid](https://github.com/alibaba/druid )；
+该工具开发时参考的开源项目：
+* [skywalking](https://github.com/apache/skywalking)
+* [MyPerf4J](https://github.com/LinShunKang/MyPerf4J )
+* [druid](https://github.com/alibaba/druid )
 
 ## 功能
 
@@ -51,7 +54,7 @@ CPU：Intel(R) Core(TM) i7-8550U CPU @ 1.80GHZ
 
 这个常见Springboot项目，包含SpringBoot、HikariCP连接池（模拟mysql客户端）、模拟redis客户端。
 
-**请注意：**这里参考skywalking使用模拟客户端主要是避免服务端性能和网络的波动等这些干扰因素影响测试结果，实际上不直接跟具体mysql、redis服务交互，但操作方法会被探针拦截，跟实际使用一样。
+**请注意：** 这里参考skywalking使用模拟客户端主要是避免服务端性能和网络的波动等这些干扰因素影响测试结果，实际上不直接跟具体mysql、redis服务交互，但操作方法会被探针拦截，跟实际使用一样。
 这里使用Jmeter模拟300用户并发访问，设置思考时间为10ms，预热时间为20s
 
 压测结果：
@@ -104,7 +107,7 @@ CPU：Intel(R) Core(TM) i7-8550U CPU @ 1.80GHZ
 |P99.9	|33.227ms	|33.489ms|
 
 #### 拦截Http请求-1
-| [测试用例](yangjian-agent-plugins/agent-plugin-httpclient/src/test/java/cn/ecpark/tool/agent/plugin/httpclient/HttpClientBenchmark.java )
+ [测试用例](yangjian-agent-benchmark/src/main/java/com/yametech/yangjian/agent/benchmark/httpclient/HttpClientBenchmark.java )
 | 请求外部接口：http://whois.pconline.com.cn/?ip=117.89.35.98 
 
 |Benchmark	|Baseline(基线)	|With Agent（加入探针）|
@@ -117,7 +120,7 @@ CPU：Intel(R) Core(TM) i7-8550U CPU @ 1.80GHZ
 |P99.9	|324.534ms	|166.986ms|
 
 #### 拦截Http请求-2
-[测试用例](yangjian-agent-plugins/agent-plugin-httpclient/src/test/java/cn/ecpark/tool/agent/plugin/httpclient/HttpClientBenchmark.java ) |  使用本地接口(该接口不做任何处理直接返回)
+[测试用例](yangjian-agent-benchmark/src/main/java/com/yametech/yangjian/agent/benchmark/httpclient/HttpClientBenchmark.java ) | 使用本地接口(该接口不做任何处理直接返回)
 
 |Benchmark	|Baseline(基线)	|With Agent（加入探针）|
 |-----------|---------------|----------------------|
@@ -130,7 +133,7 @@ CPU：Intel(R) Core(TM) i7-8550U CPU @ 1.80GHZ
 
 由于请求url为外部接口受网路、接口服务器负载和稳定性等影响，压测结果会存在误差
 
-#### 拦截Jedis方法：[测试用例](yangjian-agent-plugins/agent-plugin-jedis/src/test/java/cn/ecpark/tool/agent/plugin/jedis/RedisBenchmark.java )
+#### 拦截Jedis方法：[测试用例](yangjian-agent-benchmark/src/main/java/com/yametech/yangjian/agent/benchmark/redis/RedisBenchmark.java )
 
 结果：
 
@@ -143,7 +146,7 @@ CPU：Intel(R) Core(TM) i7-8550U CPU @ 1.80GHZ
 |P99	|0.142ms	|0.144ms|
 |P99.9	|0.193ms	|0.223ms|
 
-#### MongoDB：[测试用例](yangjian-agent-plugins/agent-plugin-mongo/src/test/java/cn/ecpark/tool/agent/plugin/mongo/MongoBenchmark.java )
+#### MongoDB：[测试用例](yangjian-agent-benchmark/src/main/java/com/yametech/yangjian/agent/benchmark/mongo/MongoBenchmark.java )
 
 | Benchmark    | Baseline(基线) | With Agent（加入探针）   |
 | -------------| ---------------|-------------------------|
@@ -162,11 +165,34 @@ TODO
 
 ## 目录结构
 
-![directory-structure](docs/readme-files/directory-structure.png)
+```
 
-config：存放监控配置文件以及日志配置文件
+├─config	//存放监控配置文件以及日志配置文件
+│      agent.properties //探针相关配置
+│      log.properties	//日志相关配置
+│      
+├─lib		//探针包
+│      yangjian-agent.jar
+│      
+├─logs		//探针输出的日志目录
+└─plugins	//插件包
+        agent-plugin-druid-1.0.0-SNAPSHOT.jar
+        agent-plugin-dubbo-1.0.0-SNAPSHOT.jar
+        agent-plugin-hikaricp-1.0.0-SNAPSHOT.jar
+        agent-plugin-httpclient-1.0.0-SNAPSHOT.jar
+        agent-plugin-jedis-1.0.0-SNAPSHOT.jar
+        agent-plugin-kafka-1.0.0-SNAPSHOT.jar
+        agent-plugin-method-1.0.0-SNAPSHOT.jar
+        agent-plugin-mongo-1.0.0-SNAPSHOT.jar
+        agent-plugin-mysql-1.0.0-SNAPSHOT.jar
+        agent-plugin-okhttp-1.0.0-SNAPSHOT.jar
+        agent-plugin-rabbitmq-1.0.0-SNAPSHOT.jar
+        agent-plugin-redisson-1.0.0-SNAPSHOT.jar
+        agent-plugin-spring-1.0.0-SNAPSHOT.jar
+	
+```
 
-​		agent.properties
+* agent.properties
 
 | key                             | 是否必须 | 说明                                                         | 示例                                                         |
 | ------------------------------- | -------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -180,7 +206,7 @@ config：存放监控配置文件以及日志配置文件
 | InstanceMethodMatcher.唯一标识  | 否       | 自定义实例方法RT/QPS统计，value为正则匹配                    | InstanceMethodMatcher.test=.\*cn\\\\.ecpark\\\\.tool\\\\.javaagent\\\\.TestService\\\\.add\\\\(.* |
 | StatisticMethodMatcher.唯一标识 | 否       | 自定义静态方法RT/QPS统计，value为正则匹配                    | StatisticMethodMatcher.test=.\*java\\\\.time\\\\.Duration\\\\.ofHours\\\\(.* |
 
-​		log.properties
+* log.properties
 
 | key               | 是否必须 | 说明                                                         | 示例                                                         |
 | ----------------- | -------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -191,11 +217,6 @@ config：存放监控配置文件以及日志配置文件
 | log.max_file_num  | 否       | 日志数量，超过数量的日志文件，按照最后编辑时间删除           | 100                                                          |
 | log.pattern       | 否       | 日志格式                                                     | %timestamp[%level]-[%thread]-[%class.method]: %msg%throwable |
 
-lib：探针包
-
-logs：探针输出的日志目录
-
-plugins：插件包
 
 ## 接入
 
@@ -323,7 +344,7 @@ public class TestService {
 
 <dependencies>
     <dependency>
-        <groupId>com.yametech.yangjian.agent</groupId>
+        <groupId>com.github.yametech</groupId>
         <artifactId>yangjian-agent-api</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </dependency>
