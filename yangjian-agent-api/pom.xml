@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>yangjian-agent-api</artifactId>
-    <version>0.0.6</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 	<name>yangjian-agent-api</name>
 	
