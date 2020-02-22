@@ -6,18 +6,18 @@
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>https://github.com/yametech/yangjian</url>
-	<description>yangjian javaagent api</description>
-	
+    <description>yangjian javaagent api</description>
+
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
-	<scm>
-		<url>https://github.com/yametech/yangjian</url>
-		<connection>https://github.com/yametech/yangjian.git</connection>
-	</scm>
+    <scm>
+        <url>https://github.com/yametech/yangjian</url>
+        <connection>https://github.com/yametech/yangjian.git</connection>
+    </scm>
     <!-- 开发人员信息 -->
     <developers>
         <developer>
@@ -27,51 +27,57 @@
             <timezone>+8</timezone>
         </developer>
     </developers>
-    
+
     <modules>
         <module>yangjian-agent-api</module>
         <module>yangjian-agent-util</module>
         <module>yangjian-agent-core</module>
         <module>yangjian-agent-plugins</module>
-<!--         <module>yangjian-agent-benchmark</module> -->
+        <!--         <module>yangjian-agent-benchmark</module> -->
     </modules>
 
     <properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.8</java.version>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
-		<agent.package.name>deploy</agent.package.name>
-		<agent.package.path>${project.basedir}/${agent.package.name}</agent.package.path>
-		<build.skip.test>true</build.skip.test>
-<!-- 		<additionalparam>-Xdoclint:none</additionalparam> -->
-	</properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
+        <agent.package.name>deploy</agent.package.name>
+        <agent.package.path>${project.basedir}/${agent.package.name}</agent.package.path>
+        <build.skip.test>true</build.skip.test>
+        <junit.version>4.12</junit.version>
+        <maven-compiler-plugin.version>3.6.1</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
+        <maven-resources-plugin.version>2.6</maven-resources-plugin.version>
+        <maven-jar-plugin.version>2.6</maven-jar-plugin.version>
+        <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
+        <!-- 		<additionalparam>-Xdoclint:none</additionalparam> -->
+    </properties>
 
-	<dependencies>
-		<dependency>
+    <dependencies>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-	</dependencies>
+    </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.18.1</version>
-				<configuration>
-					<skipTests>${build.skip.test}</skipTests>
-				</configuration>
-			</plugin>
-			<plugin>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <configuration>
+                    <skipTests>${build.skip.test}</skipTests>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version><!--ver-->
+                <version>${maven-compiler-plugin.version}</version><!--ver-->
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
@@ -81,7 +87,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version><!--ver-->
+                <version>${maven-resources-plugin.version}</version><!--ver-->
                 <configuration>
                     <encoding>${project.build.sourceEncoding}</encoding>
                     <useDefaultDelimiters>true</useDefaultDelimiters>
@@ -93,36 +99,36 @@
                     </nonFilteredFileExtensions>
                 </configuration>
             </plugin>
-			<plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.6</version>
+                <version>${maven-jar-plugin.version}</version>
                 <configuration>
-                	<excludes>
-						<exclude>**/*.properties</exclude>
-						<exclude>**/*.sh</exclude>
-						<exclude>**/*.xml</exclude>
-					</excludes>
-<!--                     <archive> -->
-<!--                         <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile> -->
-<!--                     </archive> -->
+                    <excludes>
+                        <exclude>**/*.properties</exclude>
+                        <exclude>**/*.sh</exclude>
+                        <exclude>**/*.xml</exclude>
+                    </excludes>
+                    <!--                     <archive> -->
+                    <!--                         <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile> -->
+                    <!--                     </archive> -->
                 </configuration>
             </plugin>
-			<!-- 发布时带源码，需添加该配置 -->
+            <!-- 发布时带源码，需添加该配置 -->
             <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.2.1</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${maven-source-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
@@ -133,13 +139,13 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <delete dir="${agent.package.path}" />
+                                <delete dir="${agent.package.path}"/>
                             </tasks>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-		</plugins>
-	</build>
-	
+        </plugins>
+    </build>
+
 </project>

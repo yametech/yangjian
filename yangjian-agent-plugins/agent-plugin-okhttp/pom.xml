@@ -11,6 +11,7 @@
     <artifactId>agent-plugin-okhttp</artifactId>
 
     <properties>
+        <okhttp.version>3.12.0</okhttp.version>
     </properties>
 
     <dependencies>
@@ -18,7 +19,7 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>3.12.0</version>
+            <version>${okhttp.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

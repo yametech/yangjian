@@ -16,42 +16,47 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<build.skip.assembly>false</build.skip.assembly>
 		<build.skip.test>true</build.skip.test>
+		<disruptor.version>3.4.2</disruptor.version>
+		<slf4j-api.version>1.7.28</slf4j-api.version>
+		<log4j-core.version>2.11.0</log4j-core.version>
+		<reactor-core.version>3.2.6.RELEASE</reactor-core.version>
+		<fastjson.version>1.2.61</fastjson.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
             <groupId>com.github.yametech</groupId>
             <artifactId>yangjian-agent-api</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 		<!-- https://mvnrepository.com/artifact/com.lmax/disruptor -->
 		<dependency>
 		    <groupId>com.lmax</groupId>
 		    <artifactId>disruptor</artifactId>
-		    <version>3.4.2</version>
+		    <version>${disruptor.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.28</version>
+			<version>${slf4j-api.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.11.0</version>
+			<version>${log4j-core.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
-            <version>3.2.6.RELEASE</version>
+            <version>${reactor-core.version}</version>
             <scope>test</scope>
         </dependency>
 		<dependency>
 		    <groupId>com.alibaba</groupId>
 		    <artifactId>fastjson</artifactId>
-		    <version>1.2.61</version>
+		    <version>${fastjson.version}</version>
 		    <scope>test</scope>
 		</dependency>
 		

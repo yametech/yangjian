@@ -11,13 +11,14 @@
     <artifactId>agent-plugin-rabbitmq</artifactId>
 
     <properties>
+        <amqp-client.version>5.4.2</amqp-client.version>
     </properties>
 
     <dependencies>
     	<dependency>
 		    <groupId>com.rabbitmq</groupId>
 		    <artifactId>amqp-client</artifactId>
-		    <version>5.4.2</version>
+		    <version>${amqp-client.version}</version>
 		    <scope>provided</scope>
 		</dependency>
     </dependencies>

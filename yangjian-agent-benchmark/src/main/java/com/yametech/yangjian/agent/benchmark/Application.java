@@ -46,7 +46,7 @@ public class Application {
 
     public static void main(String[] args) {
         Properties properties = new Properties();
-        properties.setProperty("server.port", "8080");
+        properties.setProperty("server.port", "8088");
         properties.setProperty("server.tomcat.max-threads", "400");
         SpringApplication application = new SpringApplication(Application.class);
         application.setDefaultProperties(properties);

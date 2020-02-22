@@ -11,13 +11,14 @@
     <artifactId>agent-plugin-spring</artifactId>
 
     <properties>
+        <spring-web.version>5.1.5.RELEASE</spring-web.version>
     </properties>
 
     <dependencies>
 		<dependency>
 		    <groupId>org.springframework</groupId>
 		    <artifactId>spring-web</artifactId>
-		    <version>5.1.5.RELEASE</version>
+		    <version>${spring-web.version}</version>
             <scope>provided</scope>
 		</dependency>
     </dependencies>

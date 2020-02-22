@@ -10,26 +10,31 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>agent-plugin-hikaricp</artifactId>
 
+    <properties>
+        <hikaricp.version>3.2.0</hikaricp.version>
+        <mysql-connector-java.version>6.0.6</mysql-connector-java.version>
+    </properties>
+
     <dependencies>
 <!--     	TODO 日志api包独立出来后去掉该依赖 -->
     	<dependency>
             <groupId>com.github.yametech</groupId>
 	    	<artifactId>yangjian-agent-core</artifactId>
-	    	<version>1.0.0-SNAPSHOT</version>
+	    	<version>${project.version}</version>
 	    	 <scope>provided</scope>
     	</dependency>
 
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>3.2.0</version>
+            <version>${hikaricp.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>6.0.6</version>
+            <version>${mysql-connector-java.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -11,13 +11,14 @@
     <artifactId>agent-plugin-redisson</artifactId>
 
     <properties>
+        <redisson.version>3.3.2</redisson.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
-            <version>3.3.2</version>
+            <version>${redisson.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
