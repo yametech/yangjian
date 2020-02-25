@@ -1,5 +1,5 @@
 # 杨戬(yangjian)
-![build](https://github.com/yametech/yangjian/workflows/build/badge.svg)
+![build](https://github.com/yametech/yangjian/workflows/build/badge.svg) [![License](https://img.shields.io/github/license/yametech/yangjian)](/LICENSE)
 
 yangjian-agent是一个基于javaagent运行的java性能监控工具，具备较强的扩展性与性能
 
@@ -48,7 +48,7 @@ OS：Windows 10
 CPU：Intel(R) Core(TM) i7-8550U CPU @ 1.80GHZ
 
 
-注：以下压测只考虑应用在不安装探针的情况下和安装探针情况的对比，中间件本身性能在其各自官方一般都有提供，这里不作考虑。
+**注：** 以下压测只考虑应用在不安装探针的情况下和安装探针情况的对比，中间件本身性能在其各自官方一般都有提供，这里不作考虑。
 
 ### WEB场景压测
 [测试用例](yangjian-agent-benchmark/src/main/java/com/yametech/yangjian/agent/benchmark/Application.java )  |  [压测脚本](docs/readme-files/jmeter.jmx )  
@@ -459,3 +459,7 @@ public class Main {
 ### IConfigMatch实现使用说明
 
 ![IConfigMatch](docs/readme-files/IConfigMatch.png)
+
+## License
+
+[Apache License 2.0](/LICENSE)
