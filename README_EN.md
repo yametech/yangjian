@@ -1,4 +1,5 @@
 # 杨戬(yangjian)
+![build](https://github.com/yametech/yangjian/workflows/build/badge.svg) [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](/LICENSE)
 
 yangjian-agent是一个基于javaagent运行的java性能监控工具，具备较强的扩展性与性能
 
@@ -458,3 +459,7 @@ public class Main {
 ### IConfigMatch实现使用说明
 
 ![IConfigMatch](docs/readme-files/IConfigMatch.png)
+
+## License
+
+[Apache License 2.0](/LICENSE)
