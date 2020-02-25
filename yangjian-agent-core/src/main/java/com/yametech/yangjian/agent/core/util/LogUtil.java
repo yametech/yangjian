@@ -64,7 +64,7 @@ public class LogUtil {
 	 * @param canRepeat	当前日志是否可以重复打印，如果当前打印的所有参数key-value与前一次的参数一样，即为重复，此时跳过日志输出，如果其中一个参数不一样，则输出
 	 * @param kvs
 	 */
-	public static void println(long second, String path, boolean canRepeat, List<Entry<String, Object>> kvs) {
+	private static void println(long second, String path, boolean canRepeat, List<Entry<String, Object>> kvs) {
 		if(path == null || path.contains("?")) {
 			throw new RuntimeException("参数错误");
 		}

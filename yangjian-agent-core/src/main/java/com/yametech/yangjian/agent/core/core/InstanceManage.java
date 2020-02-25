@@ -20,6 +20,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -74,6 +76,33 @@ public class InstanceManage {
 			}
 		});
     }
+	
+	/**
+	 * 使用InstanceManage托管实例，以便于更方便获取实例，并且包含配置变更通知
+	 * 	注意：调用时间需在配置通知前
+	 * @param cls	需要创建的实例class
+	 * @param paramsCls	创建实例使用的参数类型
+	 * @param args	创建实例使用的参数
+	 * @throws NoSuchMethodException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends SPI> T loadInstance(Class<?> cls, Class<?>[] paramsCls, Object[] args) {
+		if(cls == null || !SPI.class.isAssignableFrom(cls)) {
+			throw new IllegalArgumentException("cls必须实现SPI");
+		}
+		Constructor<?> constructor;
+		try {
+			constructor = cls.getConstructor(paramsCls);
+			SPI spi = (SPI) constructor.newInstance(args);
+			spis.add(spi);
+			return (T) spi;
+		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	
 	private static List<String> getSPIClass() {
         List<String> spiClasses = new ArrayList<>();
@@ -130,7 +159,7 @@ public class InstanceManage {
 
 
 	/**
-	 * 下发配置给各个插件
+	 * 下发配置给各个插件，不管配置有没变化都全量通知订阅的key（这个逻辑不要改，会影响订阅者）
 	 */
 	public static void notifyReader() {
 		for (IConfigReader spi : listSpiInstance(IConfigReader.class)) {

@@ -17,24 +17,25 @@
 package com.yametech.yangjian.agent.core.aop.base;
 
 import java.time.Duration;
-import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.ExceptionHandler;
-
 import com.yametech.yangjian.agent.api.IAppStatusListener;
 import com.yametech.yangjian.agent.api.ISchedule;
+import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.core.aop.consume.RTEventListener;
 import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.log.ILogger;
 import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.report.ReportManage;
 import com.yametech.yangjian.agent.core.util.CustomThreadFactory;
-import com.yametech.yangjian.agent.core.util.LogUtil;
 import com.yametech.yangjian.agent.util.eventbus.EventBusBuilder;
 import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
 import com.yametech.yangjian.agent.util.eventbus.process.EventBus;
@@ -44,11 +45,12 @@ import com.yametech.yangjian.agent.util.eventbus.process.EventBus;
  * @date 2019/12/12
  */
 public class MetricEventBus implements IAppStatusListener, ISchedule {
-
     private static final ILogger log = LoggerFactory.getLogger(MetricEventBus.class);
     private static final int MIN_BUFFER_SIZE = 1 << 6;
     private EventBus<ConvertTimeEvent> eventBus;
-
+    private IReportData report = InstanceManage.loadInstance(ReportManage.class, 
+    		new Class[] {Class.class}, new Object[] {this.getClass()});
+    
     @Override
     public void beforeRun() {
         List<ConsumeConfig<?>> consumes = new ArrayList<>();
@@ -140,9 +142,12 @@ public class MetricEventBus implements IAppStatusListener, ISchedule {
     public void execute() {
         long periodTotal = periodTotalNum.getAndSet(0);
         long periodDiscard = periodDiscardNum.getAndSet(0);
-        LogUtil.println("method-event/product", false,
-                new AbstractMap.SimpleEntry<String, Object>("total_num", totalNum.get()),
-                new AbstractMap.SimpleEntry<String, Object>("period_seconds", interval()), new AbstractMap.SimpleEntry<String, Object>("period_num", periodTotal),
-                new AbstractMap.SimpleEntry<String, Object>("total_discard_num", discardNum.get()), new AbstractMap.SimpleEntry<String, Object>("period_discard_num", periodDiscard));
+        Map<String, Object> params = new HashMap<>();
+        params.put("total_num", totalNum.get());
+        params.put("period_seconds", interval());
+        params.put("period_num", periodTotal);
+        params.put("total_discard_num", discardNum.get());
+        params.put("period_discard_num", periodDiscard);
+        report.report("method-event/product", null, params);
     }
 }

@@ -16,8 +16,27 @@
 
 package com.yametech.yangjian.agent.core;
 
-import com.yametech.yangjian.agent.api.*;
+import static net.bytebuddy.matcher.ElementMatchers.isInterface;
+
+import java.lang.instrument.Instrumentation;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import com.yametech.yangjian.agent.api.IAppStatusListener;
+import com.yametech.yangjian.agent.api.IConfigLoader;
+import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
+import com.yametech.yangjian.agent.api.IMetricMatcher;
+import com.yametech.yangjian.agent.api.ISchedule;
+import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
+import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodRegexMatch;
@@ -31,28 +50,18 @@ import com.yametech.yangjian.agent.core.core.classloader.AgentClassLoader;
 import com.yametech.yangjian.agent.core.core.elementmatch.ClassElementMatcher;
 import com.yametech.yangjian.agent.core.log.ILogger;
 import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.report.ReportManage;
 import com.yametech.yangjian.agent.core.util.CustomThreadFactory;
-import com.yametech.yangjian.agent.core.util.LogUtil;
 import com.yametech.yangjian.agent.core.util.OSUtil;
+
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatchers;
 
-import java.lang.instrument.Instrumentation;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import static net.bytebuddy.matcher.ElementMatchers.isInterface;
-
 public class YMAgent {
 	private static ILogger log = LoggerFactory.getLogger(YMAgent.class);
+	private static IReportData report = InstanceManage.loadInstance(ReportManage.class, 
+			new Class[] {Class.class}, new Object[] {YMAgent.class});;
 	private static ScheduledExecutorService service;
 	private static final String[] IGNORE_CLASS_CONFIG = new String[] {"^net\\.bytebuddy\\.", "^org\\.slf4j\\.", // ".*\\$auxiliary\\$.*", 
 			"^org\\.apache\\.logging\\.", "^org\\.groovy\\.", "^sun\\.reflect\\.", // ".*javassist.*", ".*\\.asm\\..*", 这两个会有误拦截：com.alibaba.dubbo.rpc.proxy.javassist.JavassistProxyFactory
@@ -83,7 +92,7 @@ public class YMAgent {
         // 埋点日志，不允许删除
     	startSchedule();
     	addShutdownHook();
-        LogUtil.println("status/start");
+    	report.report("status/start", null, null);
     }
     
     private static void instrumentation(Instrumentation instrumentation) {
@@ -168,7 +177,7 @@ public class YMAgent {
             @Override
     		public void run() {
             	// 埋点日志，不允许删除
-            	LogUtil.println("status/shutdown");
+            	report.report("status/shutdown", null, null);
             	List<IAppStatusListener> shutdowns = InstanceManage.listSpiInstance(IAppStatusListener.class);
             	Collections.reverse(shutdowns);// 启动时顺序init，关闭时倒序showdown
             	try {
@@ -181,7 +190,7 @@ public class YMAgent {
 					log.warn(e, "关闭服务异常，可能丢失数据");
 				}
             	// 埋点日志，不允许删除
-            	LogUtil.println("status/closed");
+            	report.report("status/closed", null, null);
             }
         });
     }

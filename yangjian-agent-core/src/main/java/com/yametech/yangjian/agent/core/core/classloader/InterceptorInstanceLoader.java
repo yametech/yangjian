@@ -79,7 +79,6 @@ public class InterceptorInstanceLoader {
             log.info("InstanceLoader:{}	{}	{}", className, pluginLoader, inst.getClass().getClassLoader());
             INSTANCE_CACHE.put(instanceKey, inst);
         }
-
         return (T) inst;
     }
 }

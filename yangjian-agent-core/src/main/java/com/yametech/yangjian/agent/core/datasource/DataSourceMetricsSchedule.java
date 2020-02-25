@@ -16,23 +16,27 @@
 
 package com.yametech.yangjian.agent.core.datasource;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.yametech.yangjian.agent.api.IDataSourceMonitor;
 import com.yametech.yangjian.agent.api.ISchedule;
+import com.yametech.yangjian.agent.api.base.IReportData;
+import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.log.ILogger;
 import com.yametech.yangjian.agent.core.log.LoggerFactory;
-import com.yametech.yangjian.agent.core.util.LogUtil;
-
-import java.util.AbstractMap;
-import java.util.List;
+import com.yametech.yangjian.agent.core.report.ReportManage;
 
 /**
  * @author dengliming
  * @date 2019/12/21
  */
 public class DataSourceMetricsSchedule implements ISchedule {
-
     private static final ILogger LOGGER = LoggerFactory.getLogger(DataSourceMetricsSchedule.class);
-
+    private IReportData report = InstanceManage.loadInstance(ReportManage.class, 
+    		new Class[] {Class.class}, new Object[] {this.getClass()});
+    
     @Override
     public int interval() {
         return 1;
@@ -43,9 +47,10 @@ public class DataSourceMetricsSchedule implements ISchedule {
         try {
             List<IDataSourceMonitor> dataSourceMonitors = DataSourceMonitorRegistry.INSTANCE.getDataSourceMonitors();
             for (IDataSourceMonitor monitor : dataSourceMonitors) {
-                LogUtil.println("statistic/" + monitor.getType() + "/connectionPool", true,
-                        new AbstractMap.SimpleEntry<String, Object>(monitor.getType() + "_active_count", monitor.getActiveCount()),
-                        new AbstractMap.SimpleEntry<String, Object>(monitor.getType() + "_max_total", monitor.getMaxTotalConnectionCount()));
+            	Map<String, Object> params = new HashMap<>();
+            	params.put(monitor.getType() + "_active_count", monitor.getActiveCount());
+            	params.put(monitor.getType() + "_max_total", monitor.getMaxTotalConnectionCount());
+            	report.report("statistic/" + monitor.getType() + "/connectionPool", null, params);
             }
         } catch (Exception e) {
             LOGGER.error(e, "DataSourceMetricsScheduler execute error.");

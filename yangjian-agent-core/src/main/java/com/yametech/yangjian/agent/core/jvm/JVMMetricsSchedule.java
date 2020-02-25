@@ -16,31 +16,42 @@
 
 package com.yametech.yangjian.agent.core.jvm;
 
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.yametech.yangjian.agent.api.IAppStatusListener;
 import com.yametech.yangjian.agent.api.ISchedule;
-import com.yametech.yangjian.agent.core.jvm.collector.*;
-import com.yametech.yangjian.agent.core.jvm.metrics.*;
-import com.yametech.yangjian.agent.core.jvm.collector.*;
-import com.yametech.yangjian.agent.core.jvm.metrics.*;
+import com.yametech.yangjian.agent.api.base.IReportData;
+import com.yametech.yangjian.agent.core.core.InstanceManage;
+import com.yametech.yangjian.agent.core.jvm.collector.BufferPoolCollector;
+import com.yametech.yangjian.agent.core.jvm.collector.ClassCollector;
+import com.yametech.yangjian.agent.core.jvm.collector.GcCollector;
+import com.yametech.yangjian.agent.core.jvm.collector.MemoryCollector;
+import com.yametech.yangjian.agent.core.jvm.collector.MemoryPoolCollector;
+import com.yametech.yangjian.agent.core.jvm.collector.ProcessCollector;
+import com.yametech.yangjian.agent.core.jvm.collector.ThreadCollector;
+import com.yametech.yangjian.agent.core.jvm.metrics.BufferPoolMetrics;
+import com.yametech.yangjian.agent.core.jvm.metrics.ClassMetrics;
+import com.yametech.yangjian.agent.core.jvm.metrics.JVMGcMetrics;
+import com.yametech.yangjian.agent.core.jvm.metrics.MemoryMetrics;
+import com.yametech.yangjian.agent.core.jvm.metrics.MemoryPoolMetrics;
+import com.yametech.yangjian.agent.core.jvm.metrics.ProcessMetrics;
+import com.yametech.yangjian.agent.core.jvm.metrics.ThreadMetrics;
 import com.yametech.yangjian.agent.core.log.ILogger;
 import com.yametech.yangjian.agent.core.log.LoggerFactory;
-import com.yametech.yangjian.agent.core.util.LogUtil;
-
-import java.time.Duration;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map.Entry;
+import com.yametech.yangjian.agent.core.report.ReportManage;
 
 /**
  * @author zcn
  * @date: 2019-10-25
  **/
 public class JVMMetricsSchedule implements IAppStatusListener, ISchedule {
-
     private static final ILogger logger = LoggerFactory.getLogger(JVMMetricsSchedule.class);
-
+    
+    private IReportData report = InstanceManage.loadInstance(ReportManage.class, 
+    		new Class[] {Class.class}, new Object[] {this.getClass()});
     private BufferPoolCollector bufferPoolCollector;
     private GcCollector gcCollector;
     private ThreadCollector threadCollector;
@@ -83,61 +94,61 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule {
     }
 
     private void processMemoryMetrics() {
-        List<Entry<String, Object>> simpleEntryList = new ArrayList<>();
+        Map<String, Object> params = new HashMap<>();
         MemoryMetrics memoryMetrics = memoryCollector.collect();
         ProcessMetrics processMetrics = processCollector.collect();
         List<MemoryPoolMetrics> memoryPoolMetricsList = memoryPoolCollector.collect();
         for (MemoryPoolMetrics memoryPoolMetrics : memoryPoolMetricsList) {
-            simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>(memoryPoolMetrics.getType().name().toLowerCase(), memoryPoolMetrics.getUsed()));
+        	params.put(memoryPoolMetrics.getType().name().toLowerCase(), memoryPoolMetrics.getUsed());
         }
-        simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>("direct_memory", memoryMetrics.getDirectMemory()));
-        simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>("mapped_cache", memoryMetrics.getMappedCache()));
-        simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>("heap", memoryMetrics.getHeapUsed()));
-        simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>("non_heap", memoryMetrics.getNonHeapUsed()));
-        simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>("cpu", processMetrics.getCpuUsagePercent()));
-        simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>("memory_total", processMetrics.getMemoryUsage()));
-        LogUtil.println("resources", true, simpleEntryList);
+        params.put("direct_memory", memoryMetrics.getDirectMemory());
+        params.put("mapped_cache", memoryMetrics.getMappedCache());
+        params.put("heap", memoryMetrics.getHeapUsed());
+        params.put("non_heap", memoryMetrics.getNonHeapUsed());
+        params.put("cpu", processMetrics.getCpuUsagePercent());
+        params.put("memory_total", processMetrics.getMemoryUsage());
+    	report.report("resources", null, params);
     }
 
     private void processBufferPoolMetrics() {
         List<BufferPoolMetrics> bufferPoolMetricsList = bufferPoolCollector.collect();
-        List<Entry<String, Object>> simpleEntryList = new ArrayList<>();
+        Map<String, Object> params = new HashMap<>();
         for (BufferPoolMetrics bufferPoolMetrics : bufferPoolMetricsList) {
-            simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>(bufferPoolMetrics.getName() + "_buffer_pool_count", bufferPoolMetrics.getCount()));
-            simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>(bufferPoolMetrics.getName() + "_buffer_pool_memory_used", bufferPoolMetrics.getMemoryUsed()));
-            simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>(bufferPoolMetrics.getName() + "_buffer_pool_memory_capacity", bufferPoolMetrics.getMemoryCapacity()));
+            params.put(bufferPoolMetrics.getName() + "_buffer_pool_count", bufferPoolMetrics.getCount());
+            params.put(bufferPoolMetrics.getName() + "_buffer_pool_memory_used", bufferPoolMetrics.getMemoryUsed());
+            params.put(bufferPoolMetrics.getName() + "_buffer_pool_memory_capacity", bufferPoolMetrics.getMemoryCapacity());
         }
-        LogUtil.println("resources", true, simpleEntryList);
+        report.report("resources", null, params);
     }
 
     private void processJVMMetrics() {
-        List<Entry<String, Object>> simpleEntryList = new ArrayList<>();
+    	Map<String, Object> params = new HashMap<>();
         JVMGcMetrics jvmGcMetrics = gcCollector.collect();
         ClassMetrics classMetrics = classCollector.collect();
-        simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>("young_gc_count", jvmGcMetrics.getYoungGcCount()));
-        simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>("young_gc_time", jvmGcMetrics.getYoungGcTime()));
-        simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>("avg_young_gc_time", jvmGcMetrics.getAvgYoungGcTime()));
-        simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>("full_gc_count", jvmGcMetrics.getFullGcCount()));
-        simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>("full_gc_time", jvmGcMetrics.getFullGcTime()));
-        simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>("class_total", classMetrics.getTotal()));
-        simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>("class_loaded", classMetrics.getLoaded()));
-        simpleEntryList.add(new AbstractMap.SimpleEntry<String, Object>("class_unloaded", classMetrics.getUnloaded()));
-        LogUtil.println("resources", true, simpleEntryList);
+        params.put("young_gc_count", jvmGcMetrics.getYoungGcCount());
+        params.put("young_gc_time", jvmGcMetrics.getYoungGcTime());
+        params.put("avg_young_gc_time", jvmGcMetrics.getAvgYoungGcTime());
+        params.put("full_gc_count", jvmGcMetrics.getFullGcCount());
+        params.put("full_gc_time", jvmGcMetrics.getFullGcTime());
+        params.put("class_total", classMetrics.getTotal());
+        params.put("class_loaded", classMetrics.getLoaded());
+        params.put("class_unloaded", classMetrics.getUnloaded());
+        report.report("resources", null, params);
     }
 
     private void processThreadMetrics() {
         ThreadMetrics threadMetrics = threadCollector.collect();
-        LogUtil.println("resources", true, Arrays.asList(
-                new AbstractMap.SimpleEntry<String, Object>("thread_total_started", threadMetrics.getTotalStarted()),
-                new AbstractMap.SimpleEntry<String, Object>("thread_active", threadMetrics.getActive()),
-                new AbstractMap.SimpleEntry<String, Object>("thread_daemon", threadMetrics.getDaemon()),
-                new AbstractMap.SimpleEntry<String, Object>("thread_runnable", threadMetrics.getRunnable()),
-                new AbstractMap.SimpleEntry<String, Object>("thread_blocked", threadMetrics.getBlocked()),
-                new AbstractMap.SimpleEntry<String, Object>("thread_waiting", threadMetrics.getWaiting()),
-                new AbstractMap.SimpleEntry<String, Object>("thread_timed_waiting", threadMetrics.getTimedWaiting()),
-                new AbstractMap.SimpleEntry<String, Object>("thread_terminated", threadMetrics.getTerminated()),
-                new AbstractMap.SimpleEntry<String, Object>("thread_peak", threadMetrics.getPeak()),
-                new AbstractMap.SimpleEntry<String, Object>("thread_news", threadMetrics.getNews())
-        ));
+        Map<String, Object> params = new HashMap<>();
+        params.put("thread_total_started", threadMetrics.getTotalStarted());
+        params.put("thread_active", threadMetrics.getActive());
+        params.put("thread_daemon", threadMetrics.getDaemon());
+        params.put("thread_runnable", threadMetrics.getRunnable());
+        params.put("thread_blocked", threadMetrics.getBlocked());
+        params.put("thread_waiting", threadMetrics.getWaiting());
+        params.put("thread_timed_waiting", threadMetrics.getTimedWaiting());
+        params.put("thread_terminated", threadMetrics.getTerminated());
+        params.put("thread_peak", threadMetrics.getPeak());
+        params.put("thread_news", threadMetrics.getNews());
+        report.report("resources", null, params);
     }
 }

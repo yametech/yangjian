@@ -34,6 +34,7 @@ import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
 import com.yametech.yangjian.agent.api.interceptor.IMethodAOP;
 import com.yametech.yangjian.agent.api.interceptor.IStaticMethodAOP;
+import com.yametech.yangjian.agent.core.aop.MetricMatcherProxy;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
 import com.yametech.yangjian.agent.core.core.elementmatch.ElementMatcherConvert;
@@ -42,9 +43,9 @@ import com.yametech.yangjian.agent.core.core.interceptor.ContextInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmInstanceConstructorInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmInstanceInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmStaticInterceptor;
-import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
 import com.yametech.yangjian.agent.core.log.ILogger;
 import com.yametech.yangjian.agent.core.log.LoggerFactory;
+
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -118,7 +119,10 @@ public class AgentTransformer implements AgentBuilder.Transformer {
     					return null;
     				}
 					try {
-						Object obj = InterceptorInstanceLoader.load(loadClass.getKey(), loadClass.getCls(), classLoader);
+						Object obj = MetricMatcherProxy.getInstance(loadClass.getKey(), loadClass.getCls());
+						if(obj == null) {
+							obj = InterceptorInstanceLoader.load(loadClass.getKey(), loadClass.getCls(), classLoader);
+						}
 						if(obj instanceof SPI) {
 							throw new IllegalStateException("不能实现SPI接口");
 						}
@@ -129,8 +133,7 @@ public class AgentTransformer implements AgentBuilder.Transformer {
 //						log.info("{}:map init", inDefinedShape);
 						log.debug("classLoader:{}	{}	{}	{}", obj, classLoader, loadClass, inDefinedShape);
 						return obj;
-					} catch (IllegalAccessException | InstantiationException | ClassNotFoundException
-							| AgentPackageNotFoundException e) {
+					} catch (Exception e) {
 						log.warn(e, "加载实例异常{}", loadClass);
 						return null;
 					}

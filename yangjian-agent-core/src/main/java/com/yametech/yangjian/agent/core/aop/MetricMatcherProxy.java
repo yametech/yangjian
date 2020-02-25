@@ -16,6 +16,10 @@
 
 package com.yametech.yangjian.agent.core.aop;
 
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.yametech.yangjian.agent.api.IMetricMatcher;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
@@ -23,16 +27,26 @@ import com.yametech.yangjian.agent.api.base.IInterceptorInit;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.convert.IConvertMatcher;
+import com.yametech.yangjian.agent.core.aop.base.ConvertMethodAOP;
+import com.yametech.yangjian.agent.core.aop.base.ConvertStatisticMethodAOP;
 import com.yametech.yangjian.agent.core.aop.base.MetricEventBus;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
 import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
 import com.yametech.yangjian.agent.core.log.ILogger;
 import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.util.Value;
 
 public class MetricMatcherProxy implements IInterceptorInit, InterceptorMatcher {
 	private static ILogger log = LoggerFactory.getLogger(MetricMatcherProxy.class);
+	private static Map<MethodType, Class<?>> typeClass = new EnumMap<>(MethodType.class);
+	private static Map<String, Object> convertAopInstance = new ConcurrentHashMap<>();
 	private IMetricMatcher metricMatcher;
 	private MetricEventBus metricEventBus;
+	
+	static {
+		typeClass.put(MethodType.STATIC, ConvertStatisticMethodAOP.class);
+		typeClass.put(MethodType.INSTANCE, ConvertMethodAOP.class);
+	}
 	
 	public MetricMatcherProxy(IMetricMatcher metricMatcher, MetricEventBus metricEventBus) {
 		this.metricMatcher = metricMatcher;
@@ -73,12 +87,51 @@ public class MetricMatcherProxy implements IInterceptorInit, InterceptorMatcher 
 		}
 		// 其他type因无需求，未实现对应的类，如果后续有需求，可增加实现类
 		String convertCls = null;
-		if(MethodType.STATIC.equals(type)) {
-			convertCls = "com.yametech.yangjian.agent.core.aop.base.ConvertStatisticMethodAOP";// TODO 此处使用getClass试试会不会有类加载问题，如果可行，就换成类加载，避免类换路径时此处不自动更换，也无法通过类依赖查询
-		} else if(MethodType.INSTANCE.equals(type)) {
-			convertCls = "com.yametech.yangjian.agent.core.aop.base.ConvertMethodAOP";
+		if(typeClass.containsKey(type)) {
+			convertCls = typeClass.get(type).getName();
 		}
+//		if(MethodType.STATIC.equals(type)) {
+//			convertCls = ConvertStatisticMethodAOP.class.getName();
+////					"com.yametech.yangjian.agent.core.aop.base.ConvertStatisticMethodAOP";// TODO 此处使用getClass试试会不会有类加载问题，如果可行，就换成类加载，避免类换路径时此处不自动更换，也无法通过类依赖查询
+//		} else if(MethodType.INSTANCE.equals(type)) {
+//			convertCls = ConvertMethodAOP.class.getName();
+////			convertCls = "com.yametech.yangjian.agent.core.aop.base.ConvertMethodAOP";
+//		}
 		return convertCls == null ? null : new LoadClassKey(convertCls, "ConvertAOP:" + convertClass.getCls());
+	}
+	
+	/**
+	 * 加载类
+	 * @param className
+	 * @return
+	 * @throws Exception 
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T getInstance(String key, String className) throws Exception {
+		Class<?> keyCls = null;
+		for(Class<?> cls : typeClass.values()) {
+			if(cls.getName().equals(className)) {
+				keyCls = cls;
+				break;
+			}
+		}
+		if(keyCls == null) {
+			return null;
+		}
+		Class<?> instanceCls = keyCls;
+		Value<Exception> value = Value.absent();
+		Object instance = convertAopInstance.computeIfAbsent(key, cls -> {
+			try {
+				return instanceCls.newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				value.set(e);
+				return null;
+			}
+		});
+		if(value.get() != null) {
+			throw value.get();
+		}
+		return (T) instance;
 	}
 
 }

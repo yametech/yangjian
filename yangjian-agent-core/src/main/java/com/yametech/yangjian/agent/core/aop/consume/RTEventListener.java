@@ -17,18 +17,21 @@
 package com.yametech.yangjian.agent.core.aop.consume;
 
 import java.time.Duration;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.yametech.yangjian.agent.api.IAppStatusListener;
 import com.yametech.yangjian.agent.api.ISchedule;
+import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.convert.statistic.impl.BaseStatistic;
 import com.yametech.yangjian.agent.core.aop.base.ConvertTimeEvent;
+import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.log.ILogger;
 import com.yametech.yangjian.agent.core.log.LoggerFactory;
-import com.yametech.yangjian.agent.core.util.LogUtil;
+import com.yametech.yangjian.agent.core.report.ReportManage;
 import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
 import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeFactory;
 
@@ -40,6 +43,9 @@ import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeFactory;
 public class RTEventListener implements IAppStatusListener, ConsumeFactory<ConvertTimeEvent>, ISchedule {
     private static final ILogger log = LoggerFactory.getLogger(RTEventListener.class);
     private List<RTEventConsume> consumes = new ArrayList<>();
+    private IReportData report = InstanceManage.loadInstance(ReportManage.class, 
+    		new Class[] {Class.class}, new Object[] {this.getClass()});
+    
 //    private Map<String, String> configMatches = new HashMap<>();
 //    private List<IConfigMatch> matches = new ArrayList<>();
 
@@ -86,17 +92,21 @@ public class RTEventListener implements IAppStatusListener, ConsumeFactory<Conve
 
     @Override
     public void execute() {
-        LogUtil.println("method-event/consume", false,
-                new SimpleEntry<String, Object>("total_num", getTotalNum()),
-                new SimpleEntry<String, Object>("period_seconds", interval()),
-                new SimpleEntry<String, Object>("period_num", getPeriodNum()));
+    	Map<String, Object> params = new HashMap<>();
+    	params.put("total_num", getTotalNum());
+    	params.put("period_seconds", interval());
+    	params.put("period_num", getPeriodNum());
+    	report.report("method-event/consume", null, params);
         // 循环consumes输出累加统计值，或者直接输出每个的统计值，ecpark-monitor做聚合
         for (RTEventConsume consume : consumes) {
             for (BaseStatistic statistic : consume.getReportStatistics()) {
                 Entry<String, Object>[] kvs = statistic.kv();
                 if (kvs != null) {
-                    LogUtil.println(statistic.getSecond(),
-                            "statistic/" + statistic.getType() + "/" + statistic.statisticType(), true, statistic.kv());
+                	Map<String, Object> thisParams = new HashMap<>();
+                	for(Entry<String, Object> entry : kvs) {
+                		thisParams.put(entry.getKey(), entry.getValue());
+                	}
+                	report.report("statistic/" + statistic.getType() + "/" + statistic.statisticType(), statistic.getSecond(), params);
                 }
             }
         }
