@@ -48,7 +48,7 @@ OS：Windows 10
 CPU：Intel(R) Core(TM) i7-8550U CPU @ 1.80GHZ
 
 
-注：以下压测只考虑应用在不安装探针的情况下和安装探针情况的对比，中间件本身性能在其各自官方一般都有提供，这里不作考虑。
+**注：** 以下压测只考虑应用在不安装探针的情况下和安装探针情况的对比，中间件本身性能在其各自官方一般都有提供，这里不作考虑。
 
 ### WEB场景压测
 [测试用例](yangjian-agent-benchmark/src/main/java/com/yametech/yangjian/agent/benchmark/Application.java )  |  [压测脚本](docs/readme-files/jmeter.jmx )  
