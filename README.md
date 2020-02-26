@@ -12,17 +12,17 @@ yangjian-agent是一个基于javaagent运行的java性能监控工具，具备�
 
 ## 功能
 
-每秒调用量（QPS），已支持spring-controller、dubbo-client、dubbo-server、httpclient、okhttp、kafka、rabbitmq、mongo集合、mysql表及sql自动统计，jedis、redisson、方法配置化统计；
+* 每秒调用量（QPS），已支持spring-controller、dubbo-client、dubbo-server、httpclient、okhttp、kafka、rabbitmq、mongo集合、mysql表及sql自动统计，jedis、redisson、方法配置化统计；
 
-每秒平均耗时（RT），已支持spring-controller、dubbo-client、dubbo-server、httpclient、okhttp、kafka、rabbitmq、mongo集合、mysql表及sql自动统计，jedis、redisson、方法配置化统计；
+* 每秒平均耗时（RT），已支持spring-controller、dubbo-client、dubbo-server、httpclient、okhttp、kafka、rabbitmq、mongo集合、mysql表及sql自动统计，jedis、redisson、方法配置化统计；
 
-连接池使用量，已支持druid、hikaricp自动统计；
+* 连接池使用量，已支持druid、hikaricp自动统计；
 
-进程CPU、内存占用量；
+* 进程CPU、内存占用量；
 
-JVM内存使用量；
+* JVM内存使用量；
 
-GC执行耗时与次数；
+* GC执行耗时与次数；
 
 ## 设计
 
@@ -41,11 +41,11 @@ GC执行耗时与次数；
 ## Benchmark
 
 ### 压测环境
-VM version：JDK 1.8.0_211, Java HotSpot(TM) 64-Bit Server VM, 25.211-b12
+* VM version：JDK 1.8.0_211, Java HotSpot(TM) 64-Bit Server VM, 25.211-b12
 
-OS：Windows 10
+* OS：Windows 10
 
-CPU：Intel(R) Core(TM) i7-8550U CPU @ 1.80GHZ
+* CPU：Intel(R) Core(TM) i7-8550U CPU @ 1.80GHZ
 
 
 **注：** 以下压测只考虑应用在不安装探针的情况下和安装探针情况的对比，中间件本身性能在其各自官方一般都有提供，这里不作考虑。
