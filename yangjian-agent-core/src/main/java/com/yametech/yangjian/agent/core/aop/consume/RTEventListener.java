@@ -106,7 +106,7 @@ public class RTEventListener implements IAppStatusListener, ConsumeFactory<Conve
                 	for(Entry<String, Object> entry : kvs) {
                 		thisParams.put(entry.getKey(), entry.getValue());
                 	}
-                	report.report("statistic/" + statistic.getType() + "/" + statistic.statisticType(), statistic.getSecond(), params);
+                	report.report("statistic/" + statistic.getType() + "/" + statistic.statisticType(), statistic.getSecond(), thisParams);
                 }
             }
         }
