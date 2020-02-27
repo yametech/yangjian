@@ -89,6 +89,7 @@
                     </archive>
                 </configuration>
             </plugin>
+            
 			<!-- 将依赖jar包，打包到主jar包中 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
