@@ -29,6 +29,8 @@ public class Constants {
     public static final String CONFIG_PATH = "config.path";
     public static final String CONFIG_REMOTE_URL = "config.remote_url";
 
+    public static final String EXTEND_PLUGINS_DIR = "extend.plugins.dir";
+
     public static final String LOG_OUTPUT = "log.output";
     public static final String LOG_DIR = "log.dir";
     public static final String LOG_LEVEL = "log.level";

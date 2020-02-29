@@ -45,8 +45,8 @@ public class InstanceManage {
 	// 已加载的spi实例
 	private static ILogger log = LoggerFactory.getLogger(InstanceManage.class);
     private static List<SPI> spis = new ArrayList<>();
-//    private static ScheduledExecutorService service;
-    
+    private static final String SPI_PATH = "META-INF/services/com.yametech.yangjian.agent.api.base.SPI";
+
 	/**
 	 * 加载所有的spi
 	 */
@@ -107,7 +107,7 @@ public class InstanceManage {
 	private static List<String> getSPIClass() {
         List<String> spiClasses = new ArrayList<>();
         try {
-        	Enumeration<URL> urls = AgentClassLoader.getDefault().getResources("META-INF/services/com.yametech.yangjian.agent.api.base.SPI");
+        	Enumeration<URL> urls = AgentClassLoader.getDefault().getResources(SPI_PATH);
             while (urls.hasMoreElements()) {
             	URL url = urls.nextElement();
             	if("file".equals(url.getProtocol())) {// 开发环境，在ecpark-agent调试时会重复加载，所以使用protocol过滤
@@ -183,49 +183,4 @@ public class InstanceManage {
 			spi.configKeyValue(kvs);
 		}
 	}
-	
-	 /**
-     * 初始化逻辑
-     */
-//    private static void beforeRun(Object appStatusListener) {
-//    	if(!(appStatusListener instanceof IAppStatusListener)) {
-//    		return;
-//    	}
-//    	((IAppStatusListener)appStatusListener).beforeRun();
-//    }
-
-    /**
-     * 开启定时调度
-     */
-//    private static void startSchedule(Object instance) {
-//    	initThreadPool();
-//    	if(!(instance instanceof ISchedule)) {
-//    		return;
-//    	}
-//    	ISchedule schedule = (ISchedule) instance;
-//    	service.scheduleAtFixedRate(() -> {
-//			try {
-//				schedule.execute();
-//			} catch(Exception e) {
-//				log.warn(e, "执行定时任务异常：{}", schedule.getClass());
-//			}
-//    	} , 0, schedule.interval(), TimeUnit.SECONDS);
-//	}
-    
-//    private static void initThreadPool() {
-//    	if(service != null) {
-//    		return;
-//    	}
-//    	synchronized (InstanceManage.class) {
-//    		if(service != null) {
-//        		return;
-//        	}
-//    		service = Executors.newScheduledThreadPool(Config.SCHEDULE_CORE_POOL_SIZE.getValue(), new CustomThreadFactory("schedule", true));
-//		}
-//    }
-    
-//    public static void shutdown() throws InterruptedException {
-//    	service.shutdown();
-//		service.awaitTermination(5, TimeUnit.SECONDS);
-//    }
 }
