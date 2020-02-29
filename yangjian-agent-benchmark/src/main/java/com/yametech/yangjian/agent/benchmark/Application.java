@@ -21,6 +21,8 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,16 +43,11 @@ import java.util.Properties;
  * @date 2020/2/5
  */
 @RestController
-@SpringBootApplication
+@SpringBootApplication(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 public class Application {
 
     public static void main(String[] args) {
-        Properties properties = new Properties();
-        properties.setProperty("server.port", "8088");
-        properties.setProperty("server.tomcat.max-threads", "400");
-        SpringApplication application = new SpringApplication(Application.class);
-        application.setDefaultProperties(properties);
-        application.run(args);
+        SpringApplication.run(Application.class, args);
     }
 
     @Bean
