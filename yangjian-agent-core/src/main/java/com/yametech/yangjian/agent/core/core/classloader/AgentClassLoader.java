@@ -36,6 +36,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.core.YMAgent;
 import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
 import com.yametech.yangjian.agent.core.log.ILogger;
@@ -119,6 +121,13 @@ public class AgentClassLoader extends ClassLoader {
         classpath = new LinkedList<File>();
         classpath.add(new File(agentDictionary, "plugins"));
 //        classpath.add(new File(agentDictionary, "activations"));
+        // 自定义扩展插件目录配置
+        String optionPluginsDir = System.getProperty(Constants.EXTEND_PLUGINS_DIR);
+        if (StringUtil.notEmpty(optionPluginsDir)) {
+            classpath.add(new File(optionPluginsDir));
+        } else {
+            classpath.add(new File(agentDictionary, "extend-plugins"));
+        }
     }
 
 //    @Override

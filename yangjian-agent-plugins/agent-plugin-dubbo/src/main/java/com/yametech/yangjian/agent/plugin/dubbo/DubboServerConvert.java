@@ -16,15 +16,15 @@
 
 package com.yametech.yangjian.agent.plugin.dubbo;
 
+import com.yametech.yangjian.agent.api.bean.TimeEvent;
+import com.yametech.yangjian.agent.api.common.MethodUtil;
+import com.yametech.yangjian.agent.api.convert.IMethodConvert;
+import com.yametech.yangjian.agent.plugin.dubbo.util.ClassUtil;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import com.yametech.yangjian.agent.api.bean.TimeEvent;
-import com.yametech.yangjian.agent.api.common.ClassUtil;
-import com.yametech.yangjian.agent.api.common.MethodUtil;
-import com.yametech.yangjian.agent.api.convert.IMethodConvert;
 
 /**
  * 将dubbo服务端调用，转换成实际调用的接口
@@ -41,14 +41,16 @@ public class DubboServerConvert implements IMethodConvert {
 	@Override
 	public List<TimeEvent> convert(Object thisObj, long startTime, Object[] allArguments, Method method, Object ret,
 			Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
-        if (allArguments[0] == null || allArguments[1] == null || !(allArguments[2] instanceof Class<?>[])) {
+	    Object proxy = allArguments[0];
+        if (proxy == null || allArguments[1] == null || !(allArguments[2] instanceof Class<?>[])) {
             return null;
         }
-        Class<?> instanceCls = allArguments[0].getClass();
         String methodName = (String) allArguments[1];
         Class<?>[] parameterTypes = (Class<?>[]) allArguments[2];
         TimeEvent event = get(startTime);
-		event.setIdentify(MethodUtil.getCacheMethodId(ClassUtil.getOriginalClass(instanceCls), methodName, parameterTypes));
+		event.setIdentify(MethodUtil.getCacheMethodId(ClassUtil.getOriginalClass(proxy), methodName, parameterTypes));
 		return Arrays.asList(event);
     }
+
+
 }

@@ -33,8 +33,6 @@ import java.util.Arrays;
  */
 public class DataSourceCloseMatcher implements InterceptorMatcher {
 
-    private final DataSourceMonitorRegistry dataSourceMonitorRegistry = DataSourceMonitorRegistry.INSTANCE;
-
     @Override
     public IConfigMatch match() {
         return new CombineAndMatch(Arrays.asList(

@@ -23,7 +23,6 @@ import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
 import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodNameMatch;
-import com.yametech.yangjian.agent.core.datasource.DataSourceMonitorRegistry;
 
 import java.util.Arrays;
 
@@ -32,8 +31,6 @@ import java.util.Arrays;
  * @date 2019/12/21
  */
 public class HikariPoolShutDownMatcher implements InterceptorMatcher {
-
-    private final DataSourceMonitorRegistry dataSourceMonitorRegistry = DataSourceMonitorRegistry.INSTANCE;
 
     @Override
     public IConfigMatch match() {
