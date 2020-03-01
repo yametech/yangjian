@@ -17,10 +17,9 @@
 package com.yametech.yangjian.agent.core.jvm.collector;
 
 import com.yametech.yangjian.agent.core.jvm.accessor.*;
-import com.yametech.yangjian.agent.core.jvm.accessor.*;
 import com.yametech.yangjian.agent.core.jvm.metrics.MemoryPoolMetrics;
-import com.yametech.yangjian.agent.core.log.ILogger;
-import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;

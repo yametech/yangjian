@@ -18,8 +18,8 @@ package com.yametech.yangjian.agent.plugin.mysql.druid.sql.parser;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.yametech.yangjian.agent.core.log.ILogger;
-import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.plugin.mysql.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.yametech.yangjian.agent.plugin.mysql.druid.util.FnvHash;
 

@@ -25,8 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
-import com.yametech.yangjian.agent.core.log.ILogger;
-import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 
 /**
  * The <code>InterceptorInstanceLoader</code> is a classes finder and container.

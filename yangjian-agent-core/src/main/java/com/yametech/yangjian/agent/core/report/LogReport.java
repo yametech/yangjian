@@ -22,8 +22,8 @@ import java.util.Map.Entry;
 import com.yametech.yangjian.agent.api.IReport;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.core.config.Config;
-import com.yametech.yangjian.agent.core.log.ILogger;
-import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 
 public class LogReport implements IReport {
 	private static ILogger log = LoggerFactory.getLogger(LogReport.class);

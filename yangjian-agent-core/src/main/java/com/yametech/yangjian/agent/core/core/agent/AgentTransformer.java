@@ -43,8 +43,8 @@ import com.yametech.yangjian.agent.core.core.interceptor.ContextInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmInstanceConstructorInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmInstanceInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmStaticInterceptor;
-import com.yametech.yangjian.agent.core.log.ILogger;
-import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.util.Util;
 
 import net.bytebuddy.agent.builder.AgentBuilder;

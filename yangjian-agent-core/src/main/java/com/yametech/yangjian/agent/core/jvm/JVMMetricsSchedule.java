@@ -39,8 +39,8 @@ import com.yametech.yangjian.agent.core.jvm.metrics.MemoryMetrics;
 import com.yametech.yangjian.agent.core.jvm.metrics.MemoryPoolMetrics;
 import com.yametech.yangjian.agent.core.jvm.metrics.ProcessMetrics;
 import com.yametech.yangjian.agent.core.jvm.metrics.ThreadMetrics;
-import com.yametech.yangjian.agent.core.log.ILogger;
-import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.report.ReportManage;
 
 /**

@@ -26,7 +26,7 @@ import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.log.Appender;
 import com.yametech.yangjian.agent.core.log.AppenderFactory;
 import com.yametech.yangjian.agent.core.log.Converter;
-import com.yametech.yangjian.agent.core.log.ILogger;
+import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.core.log.LogEvent;
 import com.yametech.yangjian.agent.core.log.LogLevel;
 import com.yametech.yangjian.agent.core.log.LoggerFactory;
