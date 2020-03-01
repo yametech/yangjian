@@ -19,17 +19,21 @@ package com.yametech.yangjian.agent.plugin.redisson;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
-import com.yametech.yangjian.agent.plugin.redisson.bean.RedisKeyBean;
 import org.redisson.client.protocol.CommandData;
 import org.redisson.client.protocol.CommandsData;
 
-import com.yametech.yangjian.agent.api.IMetricMatcher;
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.convert.IMethodAsyncConvert;
+import com.yametech.yangjian.agent.plugin.redisson.bean.RedisKeyBean;
+
 import io.netty.buffer.ByteBuf;
 
 /**
@@ -39,11 +43,12 @@ import io.netty.buffer.ByteBuf;
  * @date 2019/12/5
  */
 public class RedissionConvert implements IMethodAsyncConvert {
-    private RedissionMatcher redissionMatcher;
+    private List<String> keyRules = new CopyOnWriteArrayList<>();
     
-    @Override
-    public void setMetricMatcher(IMetricMatcher metricMatcher) {
-    	redissionMatcher = (RedissionMatcher) metricMatcher;
+    @SuppressWarnings("unchecked")
+	@Override
+    public void setConvertConfig(Object config) {
+    	keyRules = (List<String>) config;
     }
     
     @Override
@@ -81,7 +86,41 @@ public class RedissionConvert implements IMethodAsyncConvert {
     @Override
     public List<TimeEvent> convert(Object eventBean) {
         RedisKeyBean redisKeyBean = (RedisKeyBean) eventBean;
-        return redissionMatcher.getMatchKeyTimeEvents(redisKeyBean);
+        return getMatchKeyTimeEvents(redisKeyBean);
+    }
+    
+    private List<TimeEvent> getMatchKeyTimeEvents(RedisKeyBean redisKeyBean) {
+        Map<String, Integer> matchKeyNums = new HashMap<>();
+        for (String key : redisKeyBean.getKeys()) {
+            Set<String> matchKeyRules = getMatchKeyRules(key);
+            if (matchKeyRules == null) {
+                continue;
+            }
+            for (String keyRule : matchKeyRules) {
+                Integer num = matchKeyNums.getOrDefault(keyRule, 0);
+                matchKeyNums.put(key, num + 1);
+            }
+        }
+        return matchKeyNums.entrySet()
+                .stream()
+                .map(o -> {
+                    TimeEvent timeEvent = new TimeEvent();
+                    timeEvent.setEventTime(redisKeyBean.getEventTime());
+                    timeEvent.setUseTime(redisKeyBean.getUseTime());
+                    timeEvent.setIdentify(o.getKey());
+                    timeEvent.setNumber(o.getValue());
+                    return timeEvent;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private Set<String> getMatchKeyRules(String key) {
+        if (StringUtil.isEmpty(key) || keyRules == null) {
+            return null;
+        }
+        return keyRules.stream()
+                .filter(r -> key.indexOf(r) != -1)
+                .collect(Collectors.toSet());
     }
     
     /**

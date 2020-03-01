@@ -106,7 +106,7 @@ public class ConvertStatisticMethodAOP extends BaseConvertAOP implements IStatic
         event.setData(data);
         
         event.setStatisticTypes(statisticTypes);
-        event.setType(metricMatcher.type());
+        event.setType(type);
         event.setEventTime(eventTime);
         event.setIdentify(identify);
         event.setUseTime(useTime);

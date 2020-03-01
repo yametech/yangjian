@@ -53,6 +53,7 @@ import com.yametech.yangjian.agent.core.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.report.ReportManage;
 import com.yametech.yangjian.agent.core.util.CustomThreadFactory;
 import com.yametech.yangjian.agent.core.util.OSUtil;
+import com.yametech.yangjian.agent.core.util.Util;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
@@ -85,6 +86,9 @@ public class YMAgent {
     	}
     	AgentClassLoader.initDefaultLoader();
     	InstanceManage.loadSpi();
+    	InstanceManage.getSpis().forEach(spi -> {
+    		log.debug("spiClassLoader:{}, {}", spi, Util.join(" > ", Util.listClassLoaders(spi.getClass())));
+    	});
     	loadConfig(arguments);
     	InstanceManage.notifyReader();
     	beforeRun();

@@ -27,4 +27,12 @@ public interface IMetricMatcher extends InterceptorMatcher {
     default String type() {
         return Constants.EventType.METHOD;
     }
+    
+    /**
+     * 
+     * @return	返回对应convert需要的配置数据
+     */
+    default Object convertConfig() {
+    	return null;
+    }
 }

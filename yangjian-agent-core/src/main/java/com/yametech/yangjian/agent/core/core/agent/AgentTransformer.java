@@ -45,6 +45,7 @@ import com.yametech.yangjian.agent.core.core.interceptor.YmInstanceInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmStaticInterceptor;
 import com.yametech.yangjian.agent.core.log.ILogger;
 import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.util.Util;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.method.MethodDescription;
@@ -123,6 +124,7 @@ public class AgentTransformer implements AgentBuilder.Transformer {
 						if(obj == null) {
 							obj = InterceptorInstanceLoader.load(loadClass.getKey(), loadClass.getCls(), classLoader);
 						}
+//						Object obj = InterceptorInstanceLoader.load(loadClass.getKey(), loadClass.getCls(), classLoader);
 						if(obj instanceof SPI) {
 							throw new IllegalStateException("不能实现SPI接口");
 						}
@@ -131,10 +133,10 @@ public class AgentTransformer implements AgentBuilder.Transformer {
 							((IInterceptorInit)matcher).init(obj, classLoader, type);
 						}
 //						log.info("{}:map init", inDefinedShape);
-						log.debug("classLoader:{}	{}	{}	{}", obj, classLoader, loadClass, inDefinedShape);
+						log.debug("loadInstance:{}	{}	{}	{}", obj, classLoader, loadClass, inDefinedShape);
 						return obj;
 					} catch (Exception e) {
-						log.warn(e, "加载实例异常{}", loadClass);
+						log.warn(e, "加载实例异常{},\n{}", loadClass, Util.join(" > ", Util.listClassLoaders(classLoader)));
 						return null;
 					}
 				}).filter(interceptor -> {

@@ -31,9 +31,9 @@ import com.yametech.yangjian.agent.core.aop.base.ConvertMethodAOP;
 import com.yametech.yangjian.agent.core.aop.base.ConvertStatisticMethodAOP;
 import com.yametech.yangjian.agent.core.aop.base.MetricEventBus;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
-import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
 import com.yametech.yangjian.agent.core.log.ILogger;
 import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.util.Util;
 import com.yametech.yangjian.agent.core.util.Value;
 
 public class MetricMatcherProxy implements IInterceptorInit, InterceptorMatcher {
@@ -62,15 +62,19 @@ public class MetricMatcherProxy implements IInterceptorInit, InterceptorMatcher 
 		if(convertClass == null) {
 			return;
 		}
+		Object convertInstance = null;
 		try {
-			Object convertInstance = InterceptorInstanceLoader.load(convertClass.getKey(), convertClass.getCls(), classLoader);
+			convertInstance = InterceptorInstanceLoader.load(convertClass.getKey(), convertClass.getCls(), classLoader);
 			if(convertInstance instanceof IConvertMatcher) {
-				((IConvertMatcher)convertInstance).setMetricMatcher(metricMatcher);
+				((IConvertMatcher)convertInstance).setConvertConfig(metricMatcher.convertConfig());
 			}
-			((BaseConvertAOP) obj).init(convertInstance, metricEventBus, metricMatcher);
-		} catch (IllegalAccessException | InstantiationException | ClassNotFoundException
-				| AgentPackageNotFoundException e) {
-			log.warn(e, "加载convert异常:{}", convertClass);
+			((BaseConvertAOP) obj).init(convertInstance, metricEventBus, metricMatcher.type());
+		} catch (Exception e) {
+			log.warn(e, "加载convert异常：{}，\nclassLoader={}，\nmetricMatcher classLoader：{},\nconvertInstance classLoader：{}", 
+					convertClass, classLoader,
+					Util.join(" > ", Util.listClassLoaders(metricMatcher.getClass())),
+					Util.join(" > ", Util.listClassLoaders(convertInstance == null ? null : convertInstance.getClass())));
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -87,16 +91,18 @@ public class MetricMatcherProxy implements IInterceptorInit, InterceptorMatcher 
 		}
 		// 其他type因无需求，未实现对应的类，如果后续有需求，可增加实现类
 		String convertCls = null;
-		if(typeClass.containsKey(type)) {
-			convertCls = typeClass.get(type).getName();
-		}
-//		if(MethodType.STATIC.equals(type)) {
-//			convertCls = ConvertStatisticMethodAOP.class.getName();
-////					"com.yametech.yangjian.agent.core.aop.base.ConvertStatisticMethodAOP";// TODO 此处使用getClass试试会不会有类加载问题，如果可行，就换成类加载，避免类换路径时此处不自动更换，也无法通过类依赖查询
-//		} else if(MethodType.INSTANCE.equals(type)) {
-//			convertCls = ConvertMethodAOP.class.getName();
-////			convertCls = "com.yametech.yangjian.agent.core.aop.base.ConvertMethodAOP";
+//		if(typeClass.containsKey(type)) {
+//			convertCls = typeClass.get(type).getName();
 //		}
+		if(MethodType.STATIC.equals(type)) {
+			convertCls = 
+					ConvertStatisticMethodAOP.class.getName();
+//					"com.yametech.yangjian.agent.core.aop.base.ConvertStatisticMethodAOP";// TODO 此处使用getClass试试会不会有类加载问题，如果可行，就换成类加载，避免类换路径时此处不自动更换，也无法通过类依赖查询
+		} else if(MethodType.INSTANCE.equals(type)) {
+			convertCls = 
+					ConvertMethodAOP.class.getName();
+//					"com.yametech.yangjian.agent.core.aop.base.ConvertMethodAOP";
+		}
 		return convertCls == null ? null : new LoadClassKey(convertCls, "ConvertAOP:" + convertClass.getCls());
 	}
 	

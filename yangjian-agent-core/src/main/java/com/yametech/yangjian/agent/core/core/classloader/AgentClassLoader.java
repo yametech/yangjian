@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -61,6 +63,7 @@ public class AgentClassLoader extends ClassLoader {
     private List<File> classpath;
     private List<Jar> allJars;
     private ReentrantLock jarScanLock = new ReentrantLock();
+//    private List<ClassLoader> classLoaders;
 
     /**
      * Functional Description: solve the classloader dead lock when jvm start
@@ -103,8 +106,13 @@ public class AgentClassLoader extends ClassLoader {
         }
     }
 
-    public AgentClassLoader(ClassLoader parent) throws AgentPackageNotFoundException {
+    public AgentClassLoader(ClassLoader parent, ClassLoader... extClassLoader) throws AgentPackageNotFoundException {
         super(parent);
+//        classLoaders =  new ArrayList<>();
+////        classLoaders.add(parent);
+//        if(extClassLoader != null && extClassLoader.length > 0) {
+//        	classLoaders.addAll(Arrays.asList(extClassLoader));
+//        }
 //        System.err.println("parent classLoader:" + parent);
         File agentDictionary = AgentPath.getPath();
 //        System.err.println(agentDictionary.getAbsolutePath());
@@ -113,6 +121,33 @@ public class AgentClassLoader extends ClassLoader {
 //        classpath.add(new File(agentDictionary, "activations"));
     }
 
+//    @Override
+//	public Class<?> loadClass(String name) throws ClassNotFoundException {
+//    	if(classLoaders.isEmpty()) {
+//    		return super.loadClass(name);
+//    	}
+    	
+//    	List<ClassLoader> thisClassLoaders = new ArrayList<>();
+//    	thisClassLoaders.add(getParent());
+//    	thisClassLoaders.addAll(classLoaders);
+//    	
+//    	Class<?> cls = null;
+//    	ClassNotFoundException exception = null;
+//    	for(ClassLoader cl : thisClassLoaders) {
+//    		try {
+//    			cls = cl.loadClass(name);
+//    		} catch (ClassNotFoundException e) {
+//    			if(exception == null) {
+//    				exception = e;
+//    			}
+//    		}
+//    	}
+//    	if(cls == null && exception != null) {
+//    		throw exception;
+//    	}
+//		return cls;
+//	}
+    
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
         List<Jar> allJars = getAllJars();

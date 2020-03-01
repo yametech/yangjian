@@ -16,17 +16,16 @@
 
 package com.yametech.yangjian.agent.core.aop;
 
-import com.yametech.yangjian.agent.api.IMetricMatcher;
 import com.yametech.yangjian.agent.core.aop.base.MetricEventBus;
 
 public class BaseConvertAOP {
 	protected Object convert;
 	protected MetricEventBus metricEventBus;
-	protected IMetricMatcher metricMatcher;
+	protected String type;
 	
-	void init(Object convert, MetricEventBus metricEventBus, IMetricMatcher metricMatcher) {
+	void init(Object convert, MetricEventBus metricEventBus, String type) {
 		this.convert = convert;
 		this.metricEventBus = metricEventBus;
-		this.metricMatcher = metricMatcher;
+		this.type = type;
 	}
 }

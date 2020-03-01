@@ -16,16 +16,15 @@
 
 package com.yametech.yangjian.agent.api.convert;
 
-import com.yametech.yangjian.agent.api.IMetricMatcher;
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
 
 public interface IConvertMatcher {
 	
 	/**
-	 * 初始化convert绑定的metricMatcher
-	 * @param metricMatcher 与convert关联的metricMatcher，该参数可用于携带convert需要的数据
+	 * 初始化convert需要的配置
+	 * @param config convert需要的配置对象，不要使用自定义的对象，尽量使用jdk自带的类携带配置，避免类加载失败问题
 	 */
-	default void setMetricMatcher(IMetricMatcher metricMatcher) {}
+	default void setConvertConfig(Object config) {}
 	
 	/**
 	 * @param startTime	开始事件

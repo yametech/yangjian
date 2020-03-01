@@ -17,25 +17,21 @@
 package com.yametech.yangjian.agent.plugin.redisson;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.IMetricMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
-import com.yametech.yangjian.agent.api.bean.TimeEvent;
 import com.yametech.yangjian.agent.api.common.Constants;
-import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
 import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodNameMatch;
-import com.yametech.yangjian.agent.plugin.redisson.bean.RedisKeyBean;
 
 /**
  * 转换redission事件
@@ -63,7 +59,7 @@ public class RedissionMatcher implements IMetricMatcher, IConfigReader {
     	return new LoadClassKey("com.yametech.yangjian.agent.plugin.redisson.RedissionConvert");
     }
     
-    private Set<String> keyRules = new HashSet<>();
+    private List<String> keyRules = new CopyOnWriteArrayList<>();// 此处会更改，如果不使用线程安全的List会导致convert中使用时异常
 
     @Override
     public Set<String> configKey() {
@@ -80,41 +76,13 @@ public class RedissionMatcher implements IMetricMatcher, IConfigReader {
         if (kv == null) {
             return;
         }
-        keyRules = kv.values().stream()
-                .collect(Collectors.toCollection(HashSet::new));
+        keyRules.clear();// 此处没有原子的方法可以直接替换其中的元素，所以在有更新时可能导致短暂的无配置数据
+        keyRules.addAll(kv.values());
     }
 
-    public List<TimeEvent> getMatchKeyTimeEvents(RedisKeyBean redisKeyBean) {
-        Map<String, Integer> matchKeyNums = new HashMap<>();
-        for (String key : redisKeyBean.getKeys()) {
-            Set<String> matchKeyRules = getMatchKeyRules(key);
-            if (matchKeyRules == null) {
-                continue;
-            }
-            for (String keyRule : matchKeyRules) {
-                Integer num = matchKeyNums.getOrDefault(keyRule, 0);
-                matchKeyNums.put(key, num + 1);
-            }
-        }
-        return matchKeyNums.entrySet()
-                .stream()
-                .map(o -> {
-                    TimeEvent timeEvent = new TimeEvent();
-                    timeEvent.setEventTime(redisKeyBean.getEventTime());
-                    timeEvent.setUseTime(redisKeyBean.getUseTime());
-                    timeEvent.setIdentify(o.getKey());
-                    timeEvent.setNumber(o.getValue());
-                    return timeEvent;
-                })
-                .collect(Collectors.toList());
+    @Override
+    public Object convertConfig() {
+    	return keyRules;
     }
-
-    public Set<String> getMatchKeyRules(String key) {
-        if (StringUtil.isEmpty(key) || keyRules == null) {
-            return null;
-        }
-        return keyRules.stream()
-                .filter(r -> key.indexOf(r) != -1)
-                .collect(Collectors.toSet());
-    }
+    
 }
