@@ -21,6 +21,8 @@ import java.io.IOException;
 
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.StringUtil;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.ILoggerFactory;
 import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.log.impl.PatternLogger;
 import com.yametech.yangjian.agent.core.util.AgentPath;
@@ -31,7 +33,7 @@ import com.yametech.yangjian.agent.core.util.OSUtil;
  * @date: 2019-10-14
  * @description: logger factory
  **/
-public class LoggerFactory {
+public class LoggerFactory implements ILoggerFactory {
 	private static final String LOG_CONFIG_NAME = "log.properties";
 	private static final String SKYWALKING_SERVICE_NAME_CONFIGKEY = "skywalking.agent.service_name";
     public static final LogOutput DEFAULT_OUTPUT = LogOutput.CONSOLE;
@@ -75,8 +77,9 @@ public class LoggerFactory {
 		}
 //		System.err.println("日志输出目录：" + Config.getKv(Constants.LOG_DIR));// 线上调试
     }
-    
-    public static ILogger getLogger(Class<?> clazz){
+
+    @Override
+    public ILogger getLogger(Class<?> clazz){
         return new PatternLogger(Config.getKv(Constants.LOG_PATTERN, DEFAULT_PATTERN), clazz);
     }
 }

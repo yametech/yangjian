@@ -38,8 +38,8 @@ import com.yametech.yangjian.agent.api.base.IWeight;
 import com.yametech.yangjian.agent.api.base.SPI;
 import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.core.classloader.AgentClassLoader;
-import com.yametech.yangjian.agent.core.log.ILogger;
-import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 
 public class InstanceManage {
 	// 已加载的spi实例

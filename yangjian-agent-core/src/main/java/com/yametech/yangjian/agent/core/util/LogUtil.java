@@ -16,18 +16,15 @@
 
 package com.yametech.yangjian.agent.core.util;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.core.config.Config;
-import com.yametech.yangjian.agent.core.log.ILogger;
-import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 
 public class LogUtil {
 	private static ILogger log = LoggerFactory.getLogger(LogUtil.class);
@@ -121,10 +118,8 @@ public class LogUtil {
 		}
 		return StringUtil.encode(value.toString());
 	}
-	
-	public static void main(String[] args) throws UnsupportedEncodingException {
-		String encode = StringUtil.encode("test=123&test--中文");
-		System.err.println(encode);
-		System.err.println(URLDecoder.decode(encode, "UTF-8"));
+
+	public static void main(String[] args) {
+		log.info("==================================>");
 	}
 }

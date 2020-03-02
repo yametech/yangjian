@@ -15,14 +15,11 @@
     </properties>
 
     <dependencies>
-<!--     	TODO 日志api包独立出来后去掉该依赖 -->
-    	<dependency>
+        <dependency>
             <groupId>com.github.yametech</groupId>
-	    	<artifactId>yangjian-agent-core</artifactId>
-	    	<version>${project.version}</version>
-	    	 <scope>provided</scope>
-    	</dependency>
-
+            <artifactId>yangjian-agent-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>

@@ -17,8 +17,8 @@
 package com.yametech.yangjian.agent.core.jvm.collector;
 
 import com.yametech.yangjian.agent.core.jvm.metrics.MemoryMetrics;
-import com.yametech.yangjian.agent.core.log.ILogger;
-import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;

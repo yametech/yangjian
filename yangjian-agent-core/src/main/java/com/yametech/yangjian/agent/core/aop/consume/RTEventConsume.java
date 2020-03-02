@@ -30,8 +30,8 @@ import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.convert.statistic.StatisticType;
 import com.yametech.yangjian.agent.api.convert.statistic.impl.BaseStatistic;
 import com.yametech.yangjian.agent.core.aop.base.ConvertTimeEvent;
-import com.yametech.yangjian.agent.core.log.ILogger;
-import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
 
 public class RTEventConsume implements BaseConsume<ConvertTimeEvent> {
