@@ -54,7 +54,7 @@ public class AppenderFactory {
         if (appenderName == null) {
             appenderName = ROOT_APPENDER;
         }
-        IAppender appender = APPENDER_REGISTRY.get(appenderName == null  ? ROOT_APPENDER : appenderName);
+        IAppender appender = APPENDER_REGISTRY.get(appenderName);
         if (appender != null) {
             return appender;
         }

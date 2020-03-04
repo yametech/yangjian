@@ -63,8 +63,8 @@ public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<Lo
     private int lineNum;
 
     public RollingFileAppender(String appenderName) {
-        this.dir = getAppenderDir(appenderName);
         this.serviceName = Config.SERVICE_NAME.getValue();
+        this.dir = getAppenderDir(appenderName);
         this.maxFileSize = Long.valueOf(Config.getKv(Constants.LOG_MAX_FILE_SIZE, LoggerFactory.DEFAULT_MAX_FILE_SIZE.toString()));
         this.maxFileNum = Integer.valueOf(Config.getKv(Constants.LOG_MAX_FILE_NUM, LoggerFactory.DEFAULT_MAX_FILE_NUM.toString()));
 

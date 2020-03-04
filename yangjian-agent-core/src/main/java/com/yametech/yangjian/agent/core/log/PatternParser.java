@@ -19,8 +19,6 @@ package com.yametech.yangjian.agent.core.log;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import com.yametech.yangjian.agent.core.log.IConverter;
 import com.yametech.yangjian.agent.core.log.converter.SymbolConverter;
 
 /**

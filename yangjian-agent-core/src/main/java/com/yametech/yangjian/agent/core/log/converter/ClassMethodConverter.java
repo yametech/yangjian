@@ -31,29 +31,27 @@ public class ClassMethodConverter implements IConverter<LogEvent> {
         StackTraceElement found = null;
         for (int i = 0, len = stackTraceElements.length; i < len; i++) {
             StackTraceElement ele = stackTraceElements[i];
-            System.out.println(ele.getClassName() + "." + ele.getMethodName());
-        }
-        for (int i = 0, len = stackTraceElements.length; i < len; i++) {
-            StackTraceElement ele = stackTraceElements[i];
             if (ele.getClassName().endsWith(event.getTargetClass())) {
                 found = ele;
                 break;
             }
         }
 
+        // 以下是固定调用方法栈
         //java.lang.Thread.getStackTrace
+        //com.yametech.yangjian.agent.core.log.converter.ClassMethodConverter.convert
         //com.yametech.yangjian.agent.core.log.converter.ClassMethodConverter.convert
         //com.yametech.yangjian.agent.core.log.impl.PatternLogger.log
         //com.yametech.yangjian.agent.core.log.impl.PatternLogger.logIfEnabled
         //com.yametech.yangjian.agent.core.log.impl.PatternLogger.info
         //sourceclass.method
         //...
-        if (found == null) {
-            found = stackTraceElements[5];
+        if (found == null && stackTraceElements.length >= 7) {
+            found = stackTraceElements[6];
         }
 
-        return new StringBuilder()
-                .append(cutClassName(found.getClassName()))
+        return found == null ? event.getTargetClass() : new StringBuilder()
+                .append(found == null ? event.getTargetClass() : cutClassName(found.getClassName()))
                 .append(found.getMethodName())
                 .append("(").append(found.getLineNumber()).append(")")
                 .toString();
