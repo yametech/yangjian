@@ -16,28 +16,39 @@
 
 package com.yametech.yangjian.agent.core.log.converter;
 
-import com.yametech.yangjian.agent.core.log.Converter;
+import com.yametech.yangjian.agent.core.log.IConverter;
 import com.yametech.yangjian.agent.core.log.LogEvent;
 
 /**
  * @author zcn
  * @date: 2019-10-14
  **/
-public class ClassMethodConverter implements Converter {
+public class ClassMethodConverter implements IConverter<LogEvent> {
+
     @Override
     public String convert(LogEvent event) {
         StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-
         StackTraceElement found = null;
-        for(int i = 0, len = stackTraceElements.length; i < len - 1; i++){
+        for (int i = 0, len = stackTraceElements.length; i < len; i++) {
             StackTraceElement ele = stackTraceElements[i];
-            if(ele.getClassName().endsWith(event.getTargetClass())){
+            System.out.println(ele.getClassName() + "." + ele.getMethodName());
+        }
+        for (int i = 0, len = stackTraceElements.length; i < len; i++) {
+            StackTraceElement ele = stackTraceElements[i];
+            if (ele.getClassName().endsWith(event.getTargetClass())) {
                 found = ele;
                 break;
             }
         }
 
-        if(found == null){
+        //java.lang.Thread.getStackTrace
+        //com.yametech.yangjian.agent.core.log.converter.ClassMethodConverter.convert
+        //com.yametech.yangjian.agent.core.log.impl.PatternLogger.log
+        //com.yametech.yangjian.agent.core.log.impl.PatternLogger.logIfEnabled
+        //com.yametech.yangjian.agent.core.log.impl.PatternLogger.info
+        //sourceclass.method
+        //...
+        if (found == null) {
             found = stackTraceElements[5];
         }
 
@@ -48,15 +59,14 @@ public class ClassMethodConverter implements Converter {
                 .toString();
     }
 
-    private static String cutClassName(String className){
+    private static String cutClassName(String className) {
         String[] classes = className.split("\\.");
 
         StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < classes.length; i++){
+        for (int i = 0; i < classes.length; i++) {
             String c = classes[i];
             sb.append(i < classes.length - 1 ? c.charAt(0) : c).append(".");
         }
         return sb.toString();
     }
-
 }

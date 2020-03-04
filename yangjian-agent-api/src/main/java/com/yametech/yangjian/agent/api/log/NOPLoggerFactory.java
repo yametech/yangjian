@@ -22,7 +22,7 @@ package com.yametech.yangjian.agent.api.log;
 public class NOPLoggerFactory implements ILoggerFactory {
 
     @Override
-    public ILogger getLogger(Class<?> clazz) {
+    public ILogger getLogger(String clazz) {
         return NOPLogger.NOP_LOGGER;
     }
 }

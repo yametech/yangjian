@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-package com.yametech.yangjian.agent.core.log.impl;
-
-import com.yametech.yangjian.agent.core.log.Appender;
-import com.yametech.yangjian.agent.core.log.LogEvent;
+package com.yametech.yangjian.agent.core.log;
 
 /**
- * @author zcn
- * @date: 2019-10-16
- **/
-public class ConsoleAppender implements Appender {
-
-    @Override
-    public void append(LogEvent event) {
-        System.out.println(event.getMessage());
-    }
+ * @author dengliming
+ * @date 2020/3/4
+ */
+public interface IConverter<T> {
+    String convert(T event);
 }

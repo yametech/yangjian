@@ -33,6 +33,7 @@ public class Constants {
 
     public static final String LOG_OUTPUT = "log.output";
     public static final String LOG_DIR = "log.dir";
+    public static final String LOG_TRACE_DIR = "log.trace.dir";
     public static final String LOG_LEVEL = "log.level";
     public static final String LOG_MAX_FILE_SIZE = "log.max_file_size";
     public static final String LOG_MAX_FILE_NUM = "log.max_file_num";

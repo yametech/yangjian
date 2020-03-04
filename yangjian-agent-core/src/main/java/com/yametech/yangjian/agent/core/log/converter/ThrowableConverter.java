@@ -20,29 +20,30 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import com.yametech.yangjian.agent.core.log.Converter;
+import com.yametech.yangjian.agent.core.log.IConverter;
 import com.yametech.yangjian.agent.core.log.LogEvent;
 
 /**
  * @author zcn
  * @date: 2019-10-14
  **/
-public class ThrowableConverter implements Converter {
+public class ThrowableConverter implements IConverter<LogEvent> {
 
     private static String SEPARATOR = System.getProperty("line.separator", "\n");
+
     @Override
     public String convert(LogEvent event) {
         return event.getThrowable() == null ? "" : convert(event.getThrowable());
     }
 
-    private String convert(Throwable throwable){
+    private String convert(Throwable throwable) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         String traces = "";
         try {
             throwable.printStackTrace(new PrintWriter(output, true));
             traces = output.toString();
             output.close();
-        }catch (IOException e){
+        } catch (IOException e) {
 //            e.printStackTrace();// 此处不要打印log，导致死循环
         }
         return SEPARATOR + traces;

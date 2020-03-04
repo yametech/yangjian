@@ -22,15 +22,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.core.log.*;
 import com.yametech.yangjian.agent.core.config.Config;
-import com.yametech.yangjian.agent.core.log.Appender;
-import com.yametech.yangjian.agent.core.log.AppenderFactory;
-import com.yametech.yangjian.agent.core.log.Converter;
 import com.yametech.yangjian.agent.api.log.ILogger;
-import com.yametech.yangjian.agent.core.log.LogEvent;
-import com.yametech.yangjian.agent.core.log.LogLevel;
-import com.yametech.yangjian.agent.core.log.LoggerFactory;
-import com.yametech.yangjian.agent.core.log.PatternParser;
 import com.yametech.yangjian.agent.core.log.converter.ClassMethodConverter;
 import com.yametech.yangjian.agent.core.log.converter.LevelConverter;
 import com.yametech.yangjian.agent.core.log.converter.MessageConverter;
@@ -45,13 +39,13 @@ import com.yametech.yangjian.agent.core.log.converter.TimestampConverter;
  **/
 public class PatternLogger implements ILogger {
 
-    private static Map<String, Class<? extends Converter>> CONVERTER_MAP;
+    private static Map<String, Class<? extends IConverter>> CONVERTER_MAP;
 
     private String pattern;
     private String clazz;
-    private Appender appender;
+    private IAppender appender;
     private LogLevel level;
-    private List<Converter> converters;
+    private List<IConverter> converters;
 
     static {
         CONVERTER_MAP = new HashMap<>();
@@ -63,15 +57,15 @@ public class PatternLogger implements ILogger {
         CONVERTER_MAP.put("class.method", ClassMethodConverter.class);
     }
 
-    public PatternLogger(String pattern, String clazz){
+    public PatternLogger(String pattern, String clazz) {
         this.pattern = pattern;
         this.clazz = clazz;
-        this.appender = AppenderFactory.buildAppender();
+        this.appender = AppenderFactory.buildAppender(clazz);
         this.level = LogLevel.valueOf(Config.getKv(Constants.LOG_LEVEL, LoggerFactory.DEFAULT_LEVEL.name()));
         this.converters = new PatternParser(CONVERTER_MAP).parse(this.pattern);
     }
 
-    public PatternLogger(String pattern, Class<?> clazz){
+    public PatternLogger(String pattern, Class<?> clazz) {
         this(pattern, clazz.getCanonicalName());
     }
 
@@ -79,21 +73,21 @@ public class PatternLogger implements ILogger {
         return logLevel.compareTo(level) >= 0;
     }
 
-    private void logIfEnabled(LogLevel logLevel, String format){
-        if(isLevelEnable(logLevel)){
+    private void logIfEnabled(LogLevel logLevel, String format) {
+        if (isLevelEnable(logLevel)) {
             log(new LogEvent(logLevel, format, null, clazz));
         }
     }
 
-    private void logIfEnabled(LogLevel logLevel, String format, Throwable throwable, Object... arguments){
-        if(isLevelEnable(logLevel)){
+    private void logIfEnabled(LogLevel logLevel, String format, Throwable throwable, Object... arguments) {
+        if (isLevelEnable(logLevel)) {
             log(new LogEvent(logLevel, replaceParam(format, arguments), throwable, clazz));
         }
     }
 
-    private void log(LogEvent logEvent){
+    private void log(LogEvent logEvent) {
         StringBuilder sb = new StringBuilder();
-        for(Converter converter : converters){
+        for (IConverter converter : converters) {
             sb.append(converter.convert(logEvent));
         }
         logEvent.setMessage(sb.toString());

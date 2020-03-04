@@ -16,14 +16,14 @@
 
 package com.yametech.yangjian.agent.core.log.converter;
 
-import com.yametech.yangjian.agent.core.log.Converter;
+import com.yametech.yangjian.agent.core.log.IConverter;
 import com.yametech.yangjian.agent.core.log.LogEvent;
 
 /**
  * @author zcn
  * @date: 2019-10-14
  **/
-public class MessageConverter implements Converter {
+public class MessageConverter implements IConverter<LogEvent> {
     @Override
     public String convert(LogEvent event) {
         return event.getMessage();
