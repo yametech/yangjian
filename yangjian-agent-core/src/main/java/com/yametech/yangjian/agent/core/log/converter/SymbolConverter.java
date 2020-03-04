@@ -16,14 +16,14 @@
 
 package com.yametech.yangjian.agent.core.log.converter;
 
-import com.yametech.yangjian.agent.core.log.Converter;
+import com.yametech.yangjian.agent.core.log.IConverter;
 import com.yametech.yangjian.agent.core.log.LogEvent;
 
 /**
  * @author zcn
  * @date: 2019-10-15
  **/
-public class SymbolConverter implements Converter {
+public class SymbolConverter implements IConverter<LogEvent> {
 
     private String symbol;
 

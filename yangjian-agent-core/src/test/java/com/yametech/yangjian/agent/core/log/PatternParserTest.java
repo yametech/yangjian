@@ -16,12 +16,11 @@
 
 package com.yametech.yangjian.agent.core.log;
 
+import com.yametech.yangjian.agent.core.log.IConverter;
 import com.yametech.yangjian.agent.core.log.converter.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.yametech.yangjian.agent.core.log.converter.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +32,7 @@ import java.util.Map;
  **/
 public class PatternParserTest {
 
-    private static Map<String, Class<? extends Converter>> CONVERTER_MAP;
+    private static Map<String, Class<? extends IConverter>> CONVERTER_MAP;
 
     @Before
     public void before(){
@@ -51,7 +50,7 @@ public class PatternParserTest {
         PatternParser patternParser = new PatternParser(CONVERTER_MAP);
         LogEvent logEvent = new LogEvent(LogLevel.INFO, "message", new NullPointerException(), PatternParserTest.class.getCanonicalName());
 
-        List<Converter> coverters = patternParser.parse("%timestamp [%level]-[%thread]-[%class.method]: %msg %throwable");
+        List<IConverter> coverters = patternParser.parse("%timestamp [%level]-[%thread]-[%class.method]: %msg %throwable");
 
         StringBuilder sb = new StringBuilder();
         coverters.forEach( converter -> sb.append(converter.convert(logEvent)) );

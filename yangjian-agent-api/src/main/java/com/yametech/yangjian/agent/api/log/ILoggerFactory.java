@@ -21,5 +21,5 @@ package com.yametech.yangjian.agent.api.log;
  */
 public interface ILoggerFactory {
 
-    ILogger getLogger(Class<?> clazz);
+    ILogger getLogger(String name);
 }

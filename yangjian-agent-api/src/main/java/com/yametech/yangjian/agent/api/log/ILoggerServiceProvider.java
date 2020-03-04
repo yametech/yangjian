@@ -21,7 +21,7 @@ package com.yametech.yangjian.agent.api.log;
  */
 public interface ILoggerServiceProvider {
 
-    public ILoggerFactory getLoggerFactory();
+    ILoggerFactory getLoggerFactory();
 
-    public void initialize();
+    void initialize();
 }

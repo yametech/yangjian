@@ -28,10 +28,14 @@ public final class LoggerFactory {
     static volatile ILoggerServiceProvider PROVIDER;
 
     public static ILogger getLogger(Class<?> clazz) {
-        return getILoggerFactory().getLogger(clazz);
+        return getLogger(clazz.getCanonicalName());
     }
 
-    public static ILoggerFactory getILoggerFactory() {
+    public static ILogger getLogger(String name) {
+        return getILoggerFactory().getLogger(name);
+    }
+
+    private static ILoggerFactory getILoggerFactory() {
         return getProvider().getLoggerFactory();
     }
 
@@ -44,7 +48,7 @@ public final class LoggerFactory {
      *
      * @return
      */
-    static ILoggerServiceProvider getProvider() {
+    private static ILoggerServiceProvider getProvider() {
         if (PROVIDER == null) {
             synchronized (LoggerFactory.class) {
                 if (PROVIDER == null) {
