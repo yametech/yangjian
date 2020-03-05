@@ -16,8 +16,8 @@
 
 package com.yametech.yangjian.agent.core.util;
 
-import com.yametech.yangjian.agent.core.log.ILogger;
-import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 
 /**
  * @author dengliming

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.yametech.yangjian.agent.core.log;
+package com.yametech.yangjian.agent.api.log;
 
 /**
  * @author zcn

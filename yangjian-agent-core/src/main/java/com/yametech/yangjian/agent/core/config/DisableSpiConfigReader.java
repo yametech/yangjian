@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 import com.yametech.yangjian.agent.api.IConfigLoader;
 import com.yametech.yangjian.agent.api.base.SPI;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
-import com.yametech.yangjian.agent.core.log.ILogger;
-import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 
 /**
  * 晚于其他配置加载

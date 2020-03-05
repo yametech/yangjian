@@ -31,8 +31,9 @@ import com.yametech.yangjian.agent.core.aop.base.ConvertMethodAOP;
 import com.yametech.yangjian.agent.core.aop.base.ConvertStatisticMethodAOP;
 import com.yametech.yangjian.agent.core.aop.base.MetricEventBus;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
-import com.yametech.yangjian.agent.core.log.ILogger;
-import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.util.Util;
 import com.yametech.yangjian.agent.core.util.Value;
 
@@ -70,7 +71,7 @@ public class MetricMatcherProxy implements IInterceptorInit, InterceptorMatcher 
 			}
 			((BaseConvertAOP) obj).init(convertInstance, metricEventBus, metricMatcher.type());
 		} catch (Exception e) {
-			log.warn(e, "加载convert异常：{}，\nclassLoader={}，\nmetricMatcher classLoader：{},\nconvertInstance classLoader：{}", 
+			log.warn(e, "加载convert异常：{}，\nclassLoader={}，\nmetricMatcher classLoader：{},\nconvertInstance classLoader：{}",
 					convertClass, classLoader,
 					Util.join(" > ", Util.listClassLoaders(metricMatcher.getClass())),
 					Util.join(" > ", Util.listClassLoaders(convertInstance == null ? null : convertInstance.getClass())));
@@ -95,11 +96,11 @@ public class MetricMatcherProxy implements IInterceptorInit, InterceptorMatcher 
 //			convertCls = typeClass.get(type).getName();
 //		}
 		if(MethodType.STATIC.equals(type)) {
-			convertCls = 
+			convertCls =
 					ConvertStatisticMethodAOP.class.getName();
 //					"com.yametech.yangjian.agent.core.aop.base.ConvertStatisticMethodAOP";// TODO 此处使用getClass试试会不会有类加载问题，如果可行，就换成类加载，避免类换路径时此处不自动更换，也无法通过类依赖查询
 		} else if(MethodType.INSTANCE.equals(type)) {
-			convertCls = 
+			convertCls =
 					ConvertMethodAOP.class.getName();
 //					"com.yametech.yangjian.agent.core.aop.base.ConvertMethodAOP";
 		}

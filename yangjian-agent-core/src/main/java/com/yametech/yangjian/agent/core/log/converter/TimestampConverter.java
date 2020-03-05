@@ -16,17 +16,18 @@
 
 package com.yametech.yangjian.agent.core.log.converter;
 
+import com.yametech.yangjian.agent.core.log.IConverter;
+import com.yametech.yangjian.agent.core.log.LogEvent;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.yametech.yangjian.agent.core.log.Converter;
-import com.yametech.yangjian.agent.core.log.LogEvent;
-
-/**2019-10-24 22:20:39.707[INFO]-[main]-[c.z.h.HikariDataSource.<init>(80)]: HikariPool-1 - Starting...
+/**
+ * 2019-10-24 22:20:39.707[INFO]-[main]-[c.z.h.HikariDataSource.<init>(80)]: HikariPool-1 - Starting...
  * @author zcn
  * @date: 2019-10-14
- **/
-public class TimestampConverter implements Converter {
+ */
+public class TimestampConverter implements IConverter<LogEvent> {
 
     @Override
     public String convert(LogEvent event) {

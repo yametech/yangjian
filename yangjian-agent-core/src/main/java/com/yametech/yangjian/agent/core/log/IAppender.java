@@ -17,9 +17,9 @@
 package com.yametech.yangjian.agent.core.log;
 
 /**
- * @author zcn
- * @date: 2019-10-14
- **/
-public interface Appender {
-    void append(LogEvent event);
+ * @author dengliming
+ * @date 2020/3/4
+ */
+public interface IAppender<T> {
+    void append(T event);
 }

@@ -18,17 +18,15 @@ package com.yametech.yangjian.agent.core.log;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.core.config.Config;
-import com.yametech.yangjian.agent.core.log.impl.ConsoleAppender;
+import com.yametech.yangjian.agent.core.log.appender.ConsoleAppender;
 
 /**
  * @author zcn
  * @date: 2019-10-15
  **/
 public class ConsoleAppenderTest {
-
     @BeforeClass
     public static void beforeClass(){
         Config.setConfig(Constants.LOG_DIR, "../tmp");
@@ -40,7 +38,7 @@ public class ConsoleAppenderTest {
 
     @Test
     public void testWrite(){
-        Appender appender = new ConsoleAppender();
+        IAppender appender = new ConsoleAppender();
         LogEvent logEvent = new LogEvent(LogLevel.INFO, "ttt", null, ConsoleAppenderTest.class.getCanonicalName());
 
         for(int i = 0; i < 20; i++){
@@ -53,5 +51,4 @@ public class ConsoleAppenderTest {
             e.printStackTrace();
         }
     }
-
 }

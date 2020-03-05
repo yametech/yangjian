@@ -24,8 +24,8 @@ import com.yametech.yangjian.agent.api.IDataSourceMonitor;
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
-import com.yametech.yangjian.agent.core.log.ILogger;
-import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.report.ReportManage;
 
 /**

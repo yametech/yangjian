@@ -19,7 +19,6 @@ package com.yametech.yangjian.agent.core.log;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import com.yametech.yangjian.agent.core.log.converter.SymbolConverter;
 
 /**
@@ -29,25 +28,25 @@ import com.yametech.yangjian.agent.core.log.converter.SymbolConverter;
  **/
 public class PatternParser {
 
-    private Map<String, Class<? extends Converter>> allConverters;
-    private char[] escapes = new char[]{ '[', ']', '-', ' ', '%' };
+    private Map<String, Class<? extends IConverter>> allConverters;
+    private char[] escapes = new char[]{'[', ']', '-', ' ', '%'};
 
-    public PatternParser(Map<String, Class<? extends Converter>> converters){
+    public PatternParser(Map<String, Class<? extends IConverter>> converters) {
         this.allConverters = converters;
     }
 
-    private boolean isEscape(char c){
-        for(int i = 0; i < escapes.length; i++){
-            if(escapes[i] == c){
+    private boolean isEscape(char c) {
+        for (int i = 0; i < escapes.length; i++) {
+            if (escapes[i] == c) {
                 return true;
             }
         }
         return false;
     }
 
-    private Converter createConverter(String symbol){
-        Class<? extends Converter> clazz = allConverters.get(symbol);
-        if(clazz == null){
+    private IConverter createConverter(String symbol) {
+        Class<? extends IConverter> clazz = allConverters.get(symbol);
+        if (clazz == null) {
             throw new IllegalStateException("Converter Can't be  found. Class: " + symbol);
         }
 
@@ -58,26 +57,26 @@ public class PatternParser {
         }
     }
 
-    private Converter createEscapeConverter(String escape){
+    private IConverter createEscapeConverter(String escape) {
         return new SymbolConverter(escape);
     }
 
-    public List<Converter> parse(String pattern){
-        if(pattern.isEmpty() || pattern.trim().isEmpty()){
+    public List<IConverter> parse(String pattern) {
+        if (pattern.isEmpty() || pattern.trim().isEmpty()) {
             throw new IllegalArgumentException("log pattern can not be null!");
         }
 
-        List<Converter> converters = new ArrayList<>();
+        List<IConverter> converters = new ArrayList<>();
         int len = pattern.length();
-        for(int i = 0; i < len; i++){
+        for (int i = 0; i < len; i++) {
             char cur = pattern.charAt(i);
-            if(cur == '%'){
+            if (cur == '%') {
                 int start = ++i;
-                while(i < len && !isEscape(pattern.charAt(i))){
+                while (i < len && !isEscape(pattern.charAt(i))) {
                     i++;
                 }
                 converters.add(createConverter(pattern.substring(start, i--)));
-            }else{
+            } else {
                 converters.add(createEscapeConverter(new String(new char[]{cur})));
             }
         }

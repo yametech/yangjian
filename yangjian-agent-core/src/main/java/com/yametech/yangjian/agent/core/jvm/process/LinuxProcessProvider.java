@@ -20,8 +20,8 @@ import com.yametech.yangjian.agent.core.jvm.collector.CPUCollector;
 import com.yametech.yangjian.agent.core.jvm.command.CommandExecutor;
 import com.yametech.yangjian.agent.core.jvm.command.CommandResult;
 import com.yametech.yangjian.agent.core.jvm.metrics.ProcessMetrics;
-import com.yametech.yangjian.agent.core.log.ILogger;
-import com.yametech.yangjian.agent.core.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;

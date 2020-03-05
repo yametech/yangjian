@@ -23,7 +23,7 @@ import org.junit.Test;
 
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.core.config.Config;
-import com.yametech.yangjian.agent.core.log.impl.RollingFileAppender;
+import com.yametech.yangjian.agent.core.log.appender.RollingFileAppender;
 
 /**
  * @author zcn
