@@ -53,6 +53,7 @@
         <maven-jar-plugin.version>2.6</maven-jar-plugin.version>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <!-- 		<additionalparam>-Xdoclint:none</additionalparam> -->
+<!--         <aggregate.report.dir>tests/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir> -->
     </properties>
 
     <dependencies>
@@ -65,6 +66,20 @@
     </dependencies>
 
     <build>
+    	<pluginManagement>
+	      <plugins>
+	        <plugin>
+	          <groupId>org.sonarsource.scanner.maven</groupId>
+	          <artifactId>sonar-maven-plugin</artifactId>
+	          <version>3.6.0.1398</version>
+	        </plugin>
+<!-- 	        <plugin> -->
+<!-- 	          <groupId>org.jacoco</groupId> -->
+<!-- 	          <artifactId>jacoco-maven-plugin</artifactId> -->
+<!-- 	          <version>0.8.4</version> -->
+<!-- 	        </plugin> -->
+	      </plugins>
+	    </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -147,5 +162,29 @@
             </plugin>
         </plugins>
     </build>
-
+	
+<!-- 	<profiles> -->
+<!-- 	    <profile> -->
+<!-- 	      <id>coverage</id> -->
+<!-- 	      <activation> -->
+<!-- 	        <activeByDefault>true</activeByDefault> -->
+<!-- 	      </activation> -->
+<!-- 	      <build> -->
+<!-- 	        <plugins> -->
+<!-- 	          <plugin> -->
+<!-- 	            <groupId>org.jacoco</groupId> -->
+<!-- 	            <artifactId>jacoco-maven-plugin</artifactId> -->
+<!-- 	            <executions> -->
+<!-- 	              <execution> -->
+<!-- 	                <id>prepare-agent</id> -->
+<!-- 	                <goals> -->
+<!-- 	                  <goal>prepare-agent</goal> -->
+<!-- 	                </goals> -->
+<!-- 	              </execution> -->
+<!-- 	            </executions> -->
+<!-- 	          </plugin> -->
+<!-- 	        </plugins> -->
+<!-- 	      </build> -->
+<!-- 	    </profile> -->
+<!-- 	</profiles> -->
 </project>

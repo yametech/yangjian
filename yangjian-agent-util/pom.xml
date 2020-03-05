@@ -21,6 +21,7 @@
 		<log4j-core.version>2.11.0</log4j-core.version>
 		<reactor-core.version>3.2.6.RELEASE</reactor-core.version>
 		<fastjson.version>1.2.61</fastjson.version>
+<!--     	<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths> -->
 	</properties>
 
 	<dependencies>
