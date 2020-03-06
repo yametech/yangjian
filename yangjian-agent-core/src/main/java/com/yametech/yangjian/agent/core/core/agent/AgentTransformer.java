@@ -130,7 +130,7 @@ public class AgentTransformer implements AgentBuilder.Transformer {
 							throw new IllegalStateException("不能实现SPI接口");
 						}
 						if(obj instanceof IAOPConfig) {
-							((IAOPConfig)obj).setAOPConfig(matcher.convertConfig());
+							((IAOPConfig)obj).setAOPConfig(matcher.getConfig());
 						}
 //						log.info("{}:map load", inDefinedShape);
 						if(matcher instanceof IInterceptorInit) {

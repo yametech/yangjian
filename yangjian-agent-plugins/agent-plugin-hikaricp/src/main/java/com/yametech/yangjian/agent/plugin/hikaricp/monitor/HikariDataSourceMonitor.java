@@ -16,10 +16,10 @@
 
 package com.yametech.yangjian.agent.plugin.hikaricp.monitor;
 
-import com.yametech.yangjian.agent.api.IDataSourceMonitor;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.pool.IPoolMonitor;
 
 import java.lang.reflect.Method;
 
@@ -27,13 +27,14 @@ import java.lang.reflect.Method;
  * @author dengliming
  * @date 2019/12/22
  */
-public class HikariDataSourceMonitor implements IDataSourceMonitor {
+public class HikariDataSourceMonitor implements IPoolMonitor {
 
     private static final ILogger LOGGER = LoggerFactory.getLogger(HikariDataSourceMonitor.class);
     private final String jdbcUrl;
     private final Object hikariPool;
     private final Method getActiveConnectionsMethod;
     private final Method getTotalConnectionsMethod;
+    private boolean isActive = true;
 
     public HikariDataSourceMonitor(Object hikariPool, String jdbcUrl) {
         this.hikariPool = hikariPool;
@@ -102,7 +103,18 @@ public class HikariDataSourceMonitor implements IDataSourceMonitor {
     }
 
     @Override
-    public String getJdbcUrl() {
+    public String getIdentify() {
         return jdbcUrl;
     }
+    
+    
+    @Override
+    public boolean isActive() {
+    	return isActive;
+    }
+    
+    public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+    
 }

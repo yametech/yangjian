@@ -4,5 +4,5 @@ com.yametech.yangjian.agent.core.config.DisableSpiConfigReader
 com.yametech.yangjian.agent.core.jvm.JVMMetricsSchedule
 com.yametech.yangjian.agent.core.aop.consume.RTEventListener
 com.yametech.yangjian.agent.core.aop.base.MetricEventBus
-com.yametech.yangjian.agent.core.datasource.DataSourceMetricsSchedule
+com.yametech.yangjian.agent.core.pool.PoolMonitorSchedule
 com.yametech.yangjian.agent.core.report.LogReport

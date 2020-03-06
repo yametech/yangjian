@@ -16,17 +16,18 @@
 
 package com.yametech.yangjian.agent.plugin.druid.monitor;
 
-import com.yametech.yangjian.agent.api.IDataSourceMonitor;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.pool.IPoolMonitor;
 import com.alibaba.druid.pool.DruidDataSource;
 
 /**
  * @author dengliming
  * @date 2019/12/21
  */
-public class DruidDataSourceMonitor implements IDataSourceMonitor {
+public class DruidDataSourceMonitor implements IPoolMonitor {
 
     private final DruidDataSource dataSource;
+    private boolean isActive = true;
 
     public DruidDataSourceMonitor(DruidDataSource dataSource) {
         this.dataSource = dataSource;
@@ -48,7 +49,17 @@ public class DruidDataSourceMonitor implements IDataSourceMonitor {
     }
 
     @Override
-    public String getJdbcUrl() {
-        return dataSource == null ? "Unknown" : dataSource.getUrl();
+    public String getIdentify() {
+    	return dataSource == null ? "Unknown" : dataSource.getUrl();
     }
+    
+    @Override
+    public boolean isActive() {
+    	return isActive;
+    }
+    
+    public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+    
 }

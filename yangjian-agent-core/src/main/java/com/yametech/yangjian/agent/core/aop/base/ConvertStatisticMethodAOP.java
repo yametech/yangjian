@@ -32,7 +32,6 @@ import com.yametech.yangjian.agent.api.interceptor.IStaticMethodAOP;
 import com.yametech.yangjian.agent.core.aop.BaseConvertAOP;
 
 /**
- * 注意：该类不要修改路径及类名，其他地方有类字符串引用
  * @Description 
  * 
  * @author liuzhao

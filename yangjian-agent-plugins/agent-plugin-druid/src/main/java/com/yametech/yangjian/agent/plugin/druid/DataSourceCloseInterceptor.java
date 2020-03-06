@@ -16,23 +16,20 @@
 
 package com.yametech.yangjian.agent.plugin.druid;
 
+import java.lang.reflect.Method;
+import java.util.Map;
+
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.interceptor.IMethodAOP;
-import com.yametech.yangjian.agent.core.datasource.DataSourceMonitorRegistry;
 import com.yametech.yangjian.agent.plugin.druid.context.ContextConstants;
 import com.yametech.yangjian.agent.plugin.druid.monitor.DruidDataSourceMonitor;
-
-import java.lang.reflect.Method;
-import java.util.Map;
 
 /**
  * @author dengliming
  * @date 2019/12/21
  */
 public class DataSourceCloseInterceptor implements IMethodAOP {
-
-    private final DataSourceMonitorRegistry dataSourceMonitorRegistry = DataSourceMonitorRegistry.INSTANCE;
 
     @Override
     public BeforeResult before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
@@ -46,7 +43,7 @@ public class DataSourceCloseInterceptor implements IMethodAOP {
             return ret;
         }
         DruidDataSourceMonitor druidDataSourceMonitor = (DruidDataSourceMonitor) ((IContext) thisObj)._getAgentContext(ContextConstants.DATA_SOURCE_CONTEXT_FIELD);
-        dataSourceMonitorRegistry.unregister(druidDataSourceMonitor);
+        druidDataSourceMonitor.setActive(false);
         return ret;
 
     }

@@ -14,30 +14,15 @@
  * limitations under the License.
  */
 
-package com.yametech.yangjian.agent.api;
+package com.yametech.yangjian.agent.api.pool;
+
+import com.yametech.yangjian.agent.api.InterceptorMatcher;
 
 /**
- * @author dengliming
+ * 
+ * @Description 匹配创建池监控需要拦截的类
+ * 
  */
-public interface IDataSourceMonitor {
-
-    String getType();
-
-    /**
-     * 活跃连接数
-     *
-     * @return	int
-     */
-    int getActiveCount();
-
-    /**
-     * 最大连接数
-     *
-     * @return	int
-     */
-    int getMaxTotalConnectionCount();
-
-    default String getJdbcUrl() {
-        return "Unknown";
-    }
+public interface IPoolMonitorMatcher extends InterceptorMatcher {
+	
 }

@@ -90,7 +90,7 @@ public class JedisMatcher implements IMetricMatcher, IConfigReader {
     }
 
     @Override
-    public Object convertConfig() {
+    public Object getConfig() {
     	return keyRules;
     }
     

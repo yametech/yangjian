@@ -16,6 +16,8 @@
 
 package com.yametech.yangjian.agent.plugin.druid;
 
+import java.util.Arrays;
+
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
@@ -23,9 +25,6 @@ import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
 import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodNameMatch;
-import com.yametech.yangjian.agent.core.datasource.DataSourceMonitorRegistry;
-
-import java.util.Arrays;
 
 /**
  * @author dengliming

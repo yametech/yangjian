@@ -36,7 +36,7 @@ public interface InterceptorMatcher extends IMatch, IWeight, SPI {
      * 
      * @return	返回对应Interceptor需要的配置数据，返回的Object不要使用plugin中定义的，会导致重复类加载
      */
-    default Object convertConfig() {
+    default Object getConfig() {
     	return null;
     }
 }

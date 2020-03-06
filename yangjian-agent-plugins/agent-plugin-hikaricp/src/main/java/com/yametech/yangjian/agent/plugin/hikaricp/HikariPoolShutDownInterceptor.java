@@ -16,15 +16,14 @@
 
 package com.yametech.yangjian.agent.plugin.hikaricp;
 
+import java.lang.reflect.Method;
+import java.util.Map;
+
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.interceptor.IMethodAOP;
-import com.yametech.yangjian.agent.core.datasource.DataSourceMonitorRegistry;
 import com.yametech.yangjian.agent.plugin.hikaricp.context.ContextConstants;
 import com.yametech.yangjian.agent.plugin.hikaricp.monitor.HikariDataSourceMonitor;
-
-import java.lang.reflect.Method;
-import java.util.Map;
 
 /**
  * 拦截连接池关闭方法
@@ -33,8 +32,6 @@ import java.util.Map;
  * @date 2019/12/21
  */
 public class HikariPoolShutDownInterceptor implements IMethodAOP {
-
-    private final DataSourceMonitorRegistry dataSourceMonitorRegistry = DataSourceMonitorRegistry.INSTANCE;
 
     @Override
     public BeforeResult before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
@@ -48,7 +45,7 @@ public class HikariPoolShutDownInterceptor implements IMethodAOP {
             return ret;
         }
         HikariDataSourceMonitor hikariDataSourceMonitor = (HikariDataSourceMonitor) ((IContext) thisObj)._getAgentContext(ContextConstants.DATA_SOURCE_CONTEXT_FIELD);
-        dataSourceMonitorRegistry.unregister(hikariDataSourceMonitor);
+        hikariDataSourceMonitor.setActive(false);
         return ret;
     }
 }

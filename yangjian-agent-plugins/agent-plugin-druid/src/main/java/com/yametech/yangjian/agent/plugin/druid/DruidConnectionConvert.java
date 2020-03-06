@@ -43,7 +43,7 @@ public class DruidConnectionConvert implements IMethodConvert {
         }
         DruidDataSourceMonitor druidDataSourceMonitor = (DruidDataSourceMonitor) ((IContext) thisObj)._getAgentContext(ContextConstants.DATA_SOURCE_CONTEXT_FIELD);
         TimeEvent event = get(startTime);
-        event.setIdentify(Utils.parseJdbcUrl(druidDataSourceMonitor.getJdbcUrl()) + Constants.IDENTIFY_SEPARATOR + Constants.DbOperation.GET_CONNECTION);
+        event.setIdentify(Utils.parseJdbcUrl(druidDataSourceMonitor.getIdentify()) + Constants.IDENTIFY_SEPARATOR + Constants.DbOperation.GET_CONNECTION);
         return Arrays.asList(event);
     }
 }

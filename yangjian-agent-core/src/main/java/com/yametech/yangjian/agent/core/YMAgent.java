@@ -40,6 +40,9 @@ import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodRegexMatch;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.pool.IPoolMonitorMatcher;
 import com.yametech.yangjian.agent.core.aop.MetricMatcherProxy;
 import com.yametech.yangjian.agent.core.aop.base.MetricEventBus;
 import com.yametech.yangjian.agent.core.config.Config;
@@ -48,8 +51,7 @@ import com.yametech.yangjian.agent.core.core.agent.AgentListener;
 import com.yametech.yangjian.agent.core.core.agent.AgentTransformer;
 import com.yametech.yangjian.agent.core.core.classloader.AgentClassLoader;
 import com.yametech.yangjian.agent.core.core.elementmatch.ClassElementMatcher;
-import com.yametech.yangjian.agent.api.log.ILogger;
-import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.pool.PoolMonitorMatcherProxy;
 import com.yametech.yangjian.agent.core.report.ReportManage;
 import com.yametech.yangjian.agent.core.util.CustomThreadFactory;
 import com.yametech.yangjian.agent.core.util.OSUtil;
@@ -103,9 +105,7 @@ public class YMAgent {
     	List<InterceptorMatcher> interceptorMatchers = InstanceManage.listSpiInstance(InterceptorMatcher.class).stream().collect(Collectors.toList());
     	List<IConfigMatch> matches = interceptorMatchers.stream().filter(aop -> aop.match() != null)
     			.map(InterceptorMatcher::match).collect(Collectors.toList());
-    	interceptorMatchers = interceptorMatchers.stream().map(matcher -> matcher instanceof IMetricMatcher ?
-    			new MetricMatcherProxy((IMetricMatcher) matcher, InstanceManage.getSpiInstance(MetricEventBus.class)) : matcher
-    			).collect(Collectors.toList());// 转换IMetricMatcher为MetricMatcherProxy
+    	interceptorMatchers = interceptorMatchers.stream().map(YMAgent::convertMatcher).collect(Collectors.toList());// 转换IMetricMatcher为MetricMatcherProxy
     	List<IEnhanceClassMatch> classMatches = InstanceManage.listSpiInstance(IEnhanceClassMatch.class);
     	matches.addAll(classMatches.stream().filter(aop -> aop.classMatch() != null).map(IEnhanceClassMatch::classMatch).collect(Collectors.toList()));
     	log.info("match class:{}", matches);
@@ -124,6 +124,16 @@ public class YMAgent {
 //                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)// 使用后会异常
                 .with(new AgentListener())
                 .installOn(instrumentation);
+    }
+    
+    private static InterceptorMatcher convertMatcher(InterceptorMatcher matcher) {
+    	if(matcher instanceof IMetricMatcher) {
+    		return new MetricMatcherProxy((IMetricMatcher) matcher, InstanceManage.getSpiInstance(MetricEventBus.class));
+    	} else if (matcher instanceof IPoolMonitorMatcher) {
+    		return new PoolMonitorMatcherProxy((IPoolMonitorMatcher) matcher);
+    	} else {
+    		return matcher;
+    	}
     }
 
     private static IConfigMatch getOrRegexMatch(Set<String> configs, String... extra) {

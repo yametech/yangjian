@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-package com.yametech.yangjian.agent.core.datasource;
+package com.yametech.yangjian.agent.core.pool;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.yametech.yangjian.agent.api.IDataSourceMonitor;
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.pool.IPoolMonitor;
 import com.yametech.yangjian.agent.core.report.ReportManage;
 
 /**
  * @author dengliming
  * @date 2019/12/21
  */
-public class DataSourceMetricsSchedule implements ISchedule {
-    private static final ILogger LOGGER = LoggerFactory.getLogger(DataSourceMetricsSchedule.class);
+public class PoolMonitorSchedule implements ISchedule {
+    private static final ILogger LOGGER = LoggerFactory.getLogger(PoolMonitorSchedule.class);
     private IReportData report = InstanceManage.loadInstance(ReportManage.class, 
     		new Class[] {Class.class}, new Object[] {this.getClass()});
     
@@ -45,15 +46,21 @@ public class DataSourceMetricsSchedule implements ISchedule {
     @Override
     public void execute() {
         try {
-            List<IDataSourceMonitor> dataSourceMonitors = DataSourceMonitorRegistry.INSTANCE.getDataSourceMonitors();
-            for (IDataSourceMonitor monitor : dataSourceMonitors) {
+            List<IPoolMonitor> poolMonitors = PoolMonitorRegistry.INSTANCE.getPoolMonitors();
+            List<IPoolMonitor> inactives = new ArrayList<>();
+            for (IPoolMonitor monitor : poolMonitors) {
+            	if(!monitor.isActive()) {
+            		inactives.add(monitor);
+            		continue;
+            	}
             	Map<String, Object> params = new HashMap<>();
             	params.put(monitor.getType() + "_active_count", monitor.getActiveCount());
             	params.put(monitor.getType() + "_max_total", monitor.getMaxTotalConnectionCount());
             	report.report("statistic/" + monitor.getType() + "/connectionPool", null, params);
             }
+            inactives.forEach(PoolMonitorRegistry.INSTANCE::unregister);
         } catch (Exception e) {
-            LOGGER.error(e, "DataSourceMetricsScheduler execute error.");
+            LOGGER.error(e, "execute error.");
         }
     }
 }

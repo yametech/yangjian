@@ -16,24 +16,26 @@
 
 package com.yametech.yangjian.agent.plugin.druid.context;
 
-import com.yametech.yangjian.agent.api.base.IContext;
-import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
-import com.yametech.yangjian.agent.core.datasource.DataSourceMonitorRegistry;
-import com.yametech.yangjian.agent.plugin.druid.monitor.DruidDataSourceMonitor;
+import java.lang.reflect.Method;
+import java.util.Map;
+
 import com.alibaba.druid.pool.DruidDataSource;
+import com.yametech.yangjian.agent.api.base.IContext;
+import com.yametech.yangjian.agent.api.pool.IPoolMonitor;
+import com.yametech.yangjian.agent.api.pool.IPoolMonitorCreater;
+import com.yametech.yangjian.agent.plugin.druid.monitor.DruidDataSourceMonitor;
 
 /**
  * @author dengliming
  * @date 2019/12/21
  */
-public class DataSourceConstructorInterceptor implements IConstructorListener {
+public class DataSourceConstructorInterceptor implements IPoolMonitorCreater {
 
-    private final DataSourceMonitorRegistry dataSourceMonitorRegistry = DataSourceMonitorRegistry.INSTANCE;
-
-    @Override
-    public void constructor(Object thisObj, Object[] allArguments) {
-        DruidDataSourceMonitor druidDataSourceMonitor = new DruidDataSourceMonitor((DruidDataSource) thisObj);
-        ((IContext) thisObj)._setAgentContext(ContextConstants.DATA_SOURCE_CONTEXT_FIELD, druidDataSourceMonitor);
-        dataSourceMonitorRegistry.register(druidDataSourceMonitor);
-    }
+	@Override
+	public IPoolMonitor create(Object thisObj, Object[] allArguments, Method method, Object ret, Throwable t,
+			Map<Class<?>, Object> globalVar) {
+		IPoolMonitor poolMonitor = new DruidDataSourceMonitor((DruidDataSource) thisObj);
+        ((IContext) thisObj)._setAgentContext(ContextConstants.DATA_SOURCE_CONTEXT_FIELD, poolMonitor);
+		return poolMonitor;
+	}
 }

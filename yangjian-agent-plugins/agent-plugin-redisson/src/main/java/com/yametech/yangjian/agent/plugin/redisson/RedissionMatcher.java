@@ -81,7 +81,7 @@ public class RedissionMatcher implements IMetricMatcher, IConfigReader {
     }
 
     @Override
-    public Object convertConfig() {
+    public Object getConfig() {
     	return keyRules;
     }
     

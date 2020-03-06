@@ -66,7 +66,7 @@ public class MetricMatcherProxy implements IInterceptorInit, InterceptorMatcher 
 		try {
 			convertInstance = InterceptorInstanceLoader.load(convertClass.getKey(), convertClass.getCls(), classLoader);
 			if(convertInstance instanceof IAOPConfig) {
-				((IAOPConfig)convertInstance).setAOPConfig(metricMatcher.convertConfig());
+				((IAOPConfig)convertInstance).setAOPConfig(metricMatcher.getConfig());
 			}
 			((BaseConvertAOP) obj).init(convertInstance, metricEventBus, metricMatcher.type());
 		} catch (Exception e) {
