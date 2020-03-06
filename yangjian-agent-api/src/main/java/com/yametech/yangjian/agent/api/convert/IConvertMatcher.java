@@ -17,14 +17,9 @@
 package com.yametech.yangjian.agent.api.convert;
 
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
+import com.yametech.yangjian.agent.api.interceptor.IAOPConfig;
 
-public interface IConvertMatcher {
-	
-	/**
-	 * 初始化convert需要的配置
-	 * @param config convert需要的配置对象，不要使用自定义的对象，尽量使用jdk自带的类携带配置，避免类加载失败问题
-	 */
-	default void setConvertConfig(Object config) {}
+public interface IConvertMatcher extends IAOPConfig {
 	
 	/**
 	 * @param startTime	开始事件

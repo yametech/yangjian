@@ -26,14 +26,13 @@ import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.IInterceptorInit;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
-import com.yametech.yangjian.agent.api.convert.IConvertMatcher;
+import com.yametech.yangjian.agent.api.interceptor.IAOPConfig;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.aop.base.ConvertMethodAOP;
 import com.yametech.yangjian.agent.core.aop.base.ConvertStatisticMethodAOP;
 import com.yametech.yangjian.agent.core.aop.base.MetricEventBus;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
-import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
-import com.yametech.yangjian.agent.api.log.ILogger;
-import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.util.Util;
 import com.yametech.yangjian.agent.core.util.Value;
 
@@ -66,8 +65,8 @@ public class MetricMatcherProxy implements IInterceptorInit, InterceptorMatcher 
 		Object convertInstance = null;
 		try {
 			convertInstance = InterceptorInstanceLoader.load(convertClass.getKey(), convertClass.getCls(), classLoader);
-			if(convertInstance instanceof IConvertMatcher) {
-				((IConvertMatcher)convertInstance).setConvertConfig(metricMatcher.convertConfig());
+			if(convertInstance instanceof IAOPConfig) {
+				((IAOPConfig)convertInstance).setAOPConfig(metricMatcher.convertConfig());
 			}
 			((BaseConvertAOP) obj).init(convertInstance, metricEventBus, metricMatcher.type());
 		} catch (Exception e) {

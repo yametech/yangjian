@@ -27,7 +27,7 @@ import com.yametech.yangjian.agent.api.bean.BeforeResult;
  * 
  * @author liuzhao
  */
-public interface IMethodAOP<T> {
+public interface IMethodAOP<T> extends IAOPConfig {
 
     /**
      *增强方法调用之前执行

@@ -31,9 +31,12 @@ import com.yametech.yangjian.agent.api.base.SPI;
 import com.yametech.yangjian.agent.api.bean.ClassDefined;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
+import com.yametech.yangjian.agent.api.interceptor.IAOPConfig;
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
 import com.yametech.yangjian.agent.api.interceptor.IMethodAOP;
 import com.yametech.yangjian.agent.api.interceptor.IStaticMethodAOP;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.aop.MetricMatcherProxy;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
@@ -43,8 +46,6 @@ import com.yametech.yangjian.agent.core.core.interceptor.ContextInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmInstanceConstructorInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmInstanceInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmStaticInterceptor;
-import com.yametech.yangjian.agent.api.log.ILogger;
-import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.util.Util;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -127,6 +128,9 @@ public class AgentTransformer implements AgentBuilder.Transformer {
 //						Object obj = InterceptorInstanceLoader.load(loadClass.getKey(), loadClass.getCls(), classLoader);
 						if(obj instanceof SPI) {
 							throw new IllegalStateException("不能实现SPI接口");
+						}
+						if(obj instanceof IAOPConfig) {
+							((IAOPConfig)obj).setAOPConfig(matcher.convertConfig());
 						}
 //						log.info("{}:map load", inDefinedShape);
 						if(matcher instanceof IInterceptorInit) {

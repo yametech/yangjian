@@ -95,8 +95,7 @@ public class YmInstanceInterceptor {
 					}
 				}
 			} catch (Throwable t) {
-				log.warn(t, "interceptor before");// 业务异常，不打印
-				// before异常，不再执行after和exception，通过index控制O
+				log.warn(t, "interceptor before");// before异常，不再执行after和exception，通过index控制
 			}
 		}
 
@@ -105,7 +104,7 @@ public class YmInstanceInterceptor {
 			try {
 				ret = callable.call();
 			} catch (Throwable t) {
-//				log.warn(t, "interceptor call");// TODO 增加打印速率限制(每秒N条)，不需要打印业务异常日志
+//				log.warn(t, "interceptor call");// 增加打印速率限制(每秒N条)，不需要打印业务异常日志
 				methodThrowable = t;
 			}
 		}

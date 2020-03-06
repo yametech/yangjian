@@ -41,7 +41,7 @@ public class JedisConvert implements IMethodAsyncConvert {
     
     @SuppressWarnings("unchecked")
 	@Override
-    public void setConvertConfig(Object config) {
+    public void setAOPConfig(Object config) {
     	keyRules = (List<String>) config;
     }
 	
