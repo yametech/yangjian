@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.yametech.yangjian.agent.core.util;
+package com.yametech.yangjian.agent.util;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

@@ -22,6 +22,7 @@
         <module>agent-plugin-spring</module>
         <module>agent-plugin-druid</module>
         <module>agent-plugin-hikaricp</module>
+        <module>agent-plugin-reporter</module>
     </modules>
 
     <properties>
@@ -59,6 +60,8 @@
                             	<copy todir="${project.basedir}/../../${agent.package.name}/plugins" overwrite="true" > 
 		                            <fileset dir="${project.build.directory}" erroronmissingdir="false">
 		                                <include name="agent-plugin-*-SNAPSHOT.jar"/>
+                                        <!--可选的-->
+                                        <exclude name="agent-plugin-reporter-*.jar"/>
 		                            </fileset>
 		                        </copy>
                             </tasks>

@@ -16,20 +16,6 @@
 
 package com.yametech.yangjian.agent.core;
 
-import java.io.File;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.base.IContext;
@@ -39,16 +25,25 @@ import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.core.agent.AgentTransformer;
 import com.yametech.yangjian.agent.core.core.agent.IContextField;
 import com.yametech.yangjian.agent.core.core.interceptor.ContextInterceptor;
-import com.yametech.yangjian.agent.core.util.AgentPath;
-import com.yametech.yangjian.agent.core.util.LogRateLimiter;
-import com.yametech.yangjian.agent.core.util.RateLimiterHolder;
-import com.yametech.yangjian.agent.core.util.SemaphoreLimiter;
 import com.yametech.yangjian.agent.core.old.MethodEvent;
+import com.yametech.yangjian.agent.core.util.AgentPath;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatchers;
+
+import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeoutException;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Test {
 	
@@ -211,62 +206,5 @@ public class Test {
 	public void method(String arg1, int arg2) throws TimeoutException  {
 		throw new TimeoutException("测试异常");
 	}
-
-	@org.junit.Test
-	public void testLimiter() throws Exception {
-		int threadCount = 1000;
-		//List<Long> a = new ArrayList<>(threadCount);
-		CountDownLatch countDownLatch = new CountDownLatch(threadCount);
-		//SemaphoreLimiter logLimiter = new SemaphoreLimiter(100, TimeUnit.SECONDS);
-		RateLimiterHolder.register(RateLimiterHolder.LOG_RATE_LIMIT_KEY, new SemaphoreLimiter(2, TimeUnit.SECONDS));
-		long s = System.currentTimeMillis();
-		for (int i = 0; i < threadCount; i++) {
-			new Thread(() -> {
-				try {
-					boolean tryAcquire = RateLimiterHolder.tryAcquire(RateLimiterHolder.LOG_RATE_LIMIT_KEY);
-					countDownLatch.countDown();
-					//a.add(System.currentTimeMillis() - s);
-                    if (tryAcquire) {
-                        System.out.println(Thread.currentThread().getName() + ",获取了成功，执行服务...");
-                    } else {
-                        System.out.println(Thread.currentThread().getName() + ",令牌没有了，待会再来吧...");
-                    }
-				} finally {
-				}
-			}).start();
-		}
-
-		countDownLatch.await();
-		System.out.println("use:" + (System.currentTimeMillis() - s));
-	}
-
-	@org.junit.Test
-	public void testLimiter2() throws Exception {
-		int threadCount = 10;
-		//List<Long> a = new ArrayList<>(threadCount);
-		CountDownLatch countDownLatch = new CountDownLatch(threadCount);
-		LogRateLimiter logLimiter = new LogRateLimiter(100);
-		long s = System.currentTimeMillis();
-		for (int i = 0; i < threadCount; i++) {
-			new Thread(() -> {
-				boolean tryAcquire = false;
-				try {
-					tryAcquire = logLimiter.tryAcquire();
-					//a.add(System.currentTimeMillis() - s);
-					if (tryAcquire) {
-						//System.out.println(Thread.currentThread().getName() + ",获取了成功，执行服务...");
-					} else {
-						// System.out.println(Thread.currentThread().getName() + ",令牌没有了，待会再来吧...");
-					}
-					countDownLatch.countDown();
-				} finally {
-				}
-			}).start();
-		}
-
-		countDownLatch.await();
-		System.out.println("use:" + (System.currentTimeMillis() - s));
-	}
-
 
 }

@@ -16,12 +16,9 @@
 
 package com.yametech.yangjian.agent.core.jvm.command;
 
+import com.yametech.yangjian.agent.util.OSUtil;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.yametech.yangjian.agent.core.jvm.command.CommandExecutor;
-import com.yametech.yangjian.agent.core.jvm.command.CommandResult;
-import com.yametech.yangjian.agent.core.util.OSUtil;
 
 /**
  * @author zcn

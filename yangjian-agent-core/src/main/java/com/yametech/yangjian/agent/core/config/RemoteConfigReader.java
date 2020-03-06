@@ -22,7 +22,8 @@ import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
-import com.yametech.yangjian.agent.core.util.HttpUtil;
+import com.yametech.yangjian.agent.util.HttpClient;
+import com.yametech.yangjian.agent.util.HttpRequest;
 import com.yametech.yangjian.agent.util.json.JSONUtils;
 
 import java.io.*;
@@ -155,7 +156,7 @@ public class RemoteConfigReader implements IConfigLoader, ISchedule {
             Map<String, Object> responseMap = null;
             // 允许重试多次
             try {
-                response = HttpUtil.doGet(url);
+                response = HttpClient.doHttpRequest(new HttpRequest(url, HttpRequest.HttpMethod.GET));
                 if (StringUtil.notEmpty(response)) {
                     responseMap = (Map<String, Object>) JSONUtils.parse(response);
                     code = Integer.parseInt(responseMap.getOrDefault("code", -99).toString());

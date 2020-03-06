@@ -51,8 +51,8 @@ import com.yametech.yangjian.agent.core.core.elementmatch.ClassElementMatcher;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.report.ReportManage;
-import com.yametech.yangjian.agent.core.util.CustomThreadFactory;
-import com.yametech.yangjian.agent.core.util.OSUtil;
+import com.yametech.yangjian.agent.util.CustomThreadFactory;
+import com.yametech.yangjian.agent.util.OSUtil;
 import com.yametech.yangjian.agent.core.util.Util;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
