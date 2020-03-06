@@ -26,7 +26,7 @@ import com.yametech.yangjian.agent.api.log.ILoggerFactory;
 import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.log.impl.PatternLogger;
 import com.yametech.yangjian.agent.core.util.AgentPath;
-import com.yametech.yangjian.agent.core.util.OSUtil;
+import com.yametech.yangjian.agent.util.OSUtil;
 
 /**
  * @author zcn

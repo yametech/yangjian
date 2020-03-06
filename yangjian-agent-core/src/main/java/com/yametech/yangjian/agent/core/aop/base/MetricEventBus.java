@@ -35,7 +35,7 @@ import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.report.ReportManage;
-import com.yametech.yangjian.agent.core.util.CustomThreadFactory;
+import com.yametech.yangjian.agent.util.CustomThreadFactory;
 import com.yametech.yangjian.agent.util.eventbus.EventBusBuilder;
 import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
 import com.yametech.yangjian.agent.util.eventbus.process.EventBus;
