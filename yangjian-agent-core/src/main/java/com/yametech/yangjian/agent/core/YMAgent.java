@@ -53,8 +53,8 @@ import com.yametech.yangjian.agent.core.metric.MetricMatcherProxy;
 import com.yametech.yangjian.agent.core.metric.base.MetricEventBus;
 import com.yametech.yangjian.agent.core.pool.PoolMonitorMatcherProxy;
 import com.yametech.yangjian.agent.core.report.ReportManage;
-import com.yametech.yangjian.agent.core.util.CustomThreadFactory;
-import com.yametech.yangjian.agent.core.util.OSUtil;
+import com.yametech.yangjian.agent.util.CustomThreadFactory;
+import com.yametech.yangjian.agent.util.OSUtil;
 import com.yametech.yangjian.agent.core.util.Util;
 
 import net.bytebuddy.agent.builder.AgentBuilder;

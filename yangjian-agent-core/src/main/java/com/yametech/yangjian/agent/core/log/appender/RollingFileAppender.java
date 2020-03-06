@@ -26,7 +26,7 @@ import com.yametech.yangjian.agent.core.log.IAppender;
 import com.yametech.yangjian.agent.core.log.LogEvent;
 import com.yametech.yangjian.agent.core.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.log.impl.LogMessageHolder;
-import com.yametech.yangjian.agent.core.util.CustomThreadFactory;
+import com.yametech.yangjian.agent.util.CustomThreadFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
