@@ -42,7 +42,7 @@ public class HikariPoolConstructorInterceptor implements IPoolMonitorCreater {
         }
         HikariConfig hikariConfig = (HikariConfig) allArguments[0];
         String jdbcUrl = hikariConfig.getJdbcUrl();
-        if (StringUtil.notEmpty(jdbcUrl)) {
+        if (StringUtil.isEmpty(jdbcUrl)) {
         	return null;
         }
         // 为了兼容不同版本该方法有可能被多次执行，所以先判断下当前类上下文是否已经存在该连接池避免重复设置

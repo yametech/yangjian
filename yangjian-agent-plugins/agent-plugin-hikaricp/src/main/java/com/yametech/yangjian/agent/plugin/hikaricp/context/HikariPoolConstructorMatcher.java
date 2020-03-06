@@ -16,20 +16,20 @@
 
 package com.yametech.yangjian.agent.plugin.hikaricp.context;
 
+import java.util.Arrays;
+
 import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
-import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.configmatch.MethodArgumentIndexMatch;
-
-import java.util.Arrays;
+import com.yametech.yangjian.agent.api.pool.IPoolMonitorMatcher;
 
 /**
  * @author dengliming
  * @date 2019/12/21
  */
-public class HikariPoolConstructorMatcher implements InterceptorMatcher, IEnhanceClassMatch {
+public class HikariPoolConstructorMatcher implements IPoolMonitorMatcher, IEnhanceClassMatch {
 
     @Override
     public IConfigMatch classMatch() {

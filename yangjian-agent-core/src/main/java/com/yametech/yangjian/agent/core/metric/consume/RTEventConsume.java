@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.yametech.yangjian.agent.core.aop.consume;
+package com.yametech.yangjian.agent.core.metric.consume;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -29,9 +29,9 @@ import com.yametech.yangjian.agent.api.bean.TimeEvent;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.convert.statistic.StatisticType;
 import com.yametech.yangjian.agent.api.convert.statistic.impl.BaseStatistic;
-import com.yametech.yangjian.agent.core.aop.base.ConvertTimeEvent;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.metric.base.ConvertTimeEvent;
 import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
 
 public class RTEventConsume implements BaseConsume<ConvertTimeEvent> {

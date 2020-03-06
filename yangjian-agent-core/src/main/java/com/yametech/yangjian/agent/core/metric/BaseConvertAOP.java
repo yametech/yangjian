@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.yametech.yangjian.agent.core.aop;
+package com.yametech.yangjian.agent.core.metric;
 
-import com.yametech.yangjian.agent.core.aop.base.MetricEventBus;
+import com.yametech.yangjian.agent.core.metric.base.MetricEventBus;
 
 public class BaseConvertAOP {
 	protected Object convert;
