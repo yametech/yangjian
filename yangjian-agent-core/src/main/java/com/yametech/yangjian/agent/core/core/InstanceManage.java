@@ -20,8 +20,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,19 +30,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.base.IWeight;
 import com.yametech.yangjian.agent.api.base.SPI;
-import com.yametech.yangjian.agent.core.config.Config;
-import com.yametech.yangjian.agent.core.core.classloader.AgentClassLoader;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.config.Config;
+import com.yametech.yangjian.agent.core.core.classloader.AgentClassLoader;
 
 public class InstanceManage {
-	// 已加载的spi实例
 	private static ILogger log = LoggerFactory.getLogger(InstanceManage.class);
-    private static List<SPI> spis = new ArrayList<>();
+    private static List<Object> spis = new ArrayList<>();// 已加载的spi实例
     private static final String SPI_PATH = "META-INF/services/com.yametech.yangjian.agent.api.base.SPI";
 
 	/**
@@ -70,39 +68,12 @@ public class InstanceManage {
 //					log.info("disable SPI：{}", cls.getName());
 //					return;
 //				}
-				spis.add((SPI) cls.newInstance());
+				spis.add(cls.newInstance());
 			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 				log.warn(e, "load spi error");
 			}
 		});
     }
-	
-	/**
-	 * 使用InstanceManage托管实例，以便于更方便获取实例，并且包含配置变更通知
-	 * 	注意：调用时间需在配置通知前
-	 * @param cls	需要创建的实例class
-	 * @param paramsCls	创建实例使用的参数类型
-	 * @param args	创建实例使用的参数
-	 * @throws NoSuchMethodException
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T extends SPI> T loadInstance(Class<?> cls, Class<?>[] paramsCls, Object[] args) {
-		if(cls == null || !SPI.class.isAssignableFrom(cls)) {
-			throw new IllegalArgumentException("cls必须实现SPI");
-		}
-		Constructor<?> constructor;
-		try {
-			constructor = cls.getConstructor(paramsCls);
-			SPI spi = (SPI) constructor.newInstance(args);
-			spis.add(spi);
-			return (T) spi;
-		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			throw new RuntimeException(e);
-		}
-	}
 	
 	private static List<String> getSPIClass() {
         List<String> spiClasses = new ArrayList<>();
@@ -131,6 +102,11 @@ public class InstanceManage {
         return null;
     }
 	
+	/**
+	 * 按照Class获取对应Class单个实例
+	 * @param cls
+	 * @return
+	 */
 	public static <T> T getSpiInstance(Class<T> cls) {
 		List<T> instances = listSpiInstance(cls);
 		if(!instances.isEmpty()) {
@@ -139,10 +115,15 @@ public class InstanceManage {
 		return null;
 	}
 	
+	/**
+	 * 按照Class获取对应Class实例列表
+	 * @param cls
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> List<T> listSpiInstance(Class<T> cls) {
 		List<T> instances = new ArrayList<>();
-		for(SPI api : spis) {
+		for(Object api : spis) {
 			if(cls.isAssignableFrom(api.getClass())) {
 				instances.add((T) api);
 			}
@@ -153,34 +134,67 @@ public class InstanceManage {
 		return instances;
 	}
 	
+	/**
+	 * 获取所有实现SPI的实例
+	 * @return
+	 */
 	public static List<SPI> getSpis() {
-		return spis;
+		return spis.stream().filter(instance -> instance instanceof SPI)
+				.map(instance -> (SPI)instance)
+				.collect(Collectors.toList());
 	}
 
 
 	/**
+	 * 注册IConfigReader实例，并执行一次配置通知
+	 * @param configReader
+	 */
+	public static void registryConfigReaderInstance(IConfigReader configReader) {
+		registryConfigReaderInstance(configReader, true);
+	}
+	/**
+	 * 注册IConfigReader实例，根据needNotify确认是否执行通知
+	 * @param configReader
+	 * @param needNotifyConfig	true：注册时执行一次配置通知（用于在全局通知(InstanceManage.notifyReaders)之后调用该方法）；false：不执行配置通知（用于在全局通知之前调用该方法）；
+	 */
+	public static void registryConfigReaderInstance(IConfigReader configReader, boolean needNotifyConfig) {
+		spis.add(configReader);
+		if(needNotifyConfig) {
+			notifyReader(configReader);
+		}
+	}
+	
+	/**
 	 * 下发配置给各个插件，不管配置有没变化都全量通知订阅的key（这个逻辑不要改，会影响订阅者）
 	 */
 	public static void notifyReader() {
-		for (IConfigReader spi : listSpiInstance(IConfigReader.class)) {
-			Set<String> keys = spi.configKey();
-			if (keys == null) {
-				keys = new HashSet<>();
-			}
-			if (keys.isEmpty()) {// 不存在配置时，使用IConfigReader实现类类名作为key前缀查找
-				String defaultConfigKeyPrefix = spi.getClass().getSimpleName();
-				keys.add(defaultConfigKeyPrefix);
-				keys.add(defaultConfigKeyPrefix + "\\..*");
-			}
-			Map<String, String> kvs = new HashMap<>();
-			for (String key : Config.configKeys()) {
-				boolean match = keys.stream().anyMatch(keyRegex -> Pattern.matches(keyRegex, key));
-				if (match) {
-					kvs.put(key, Config.getKv(key));
-				}
-
-			}
-			spi.configKeyValue(kvs);
+		for (IConfigReader configReader : listSpiInstance(IConfigReader.class)) {
+			notifyReader(configReader);
 		}
+	}
+	
+	/**
+	 * 单个IConfigReader实例下发（刷新）配置
+	 * @param configReader
+	 */
+	private static void notifyReader(IConfigReader configReader) {
+		Set<String> keys = configReader.configKey();
+		if (keys == null) {
+			keys = new HashSet<>();
+		}
+		if (keys.isEmpty()) {// 不存在配置时，使用IConfigReader实现类类名作为key前缀查找
+			String defaultConfigKeyPrefix = configReader.getClass().getSimpleName();
+			keys.add(defaultConfigKeyPrefix);
+			keys.add(defaultConfigKeyPrefix + "\\..*");
+		}
+		Map<String, String> kvs = new HashMap<>();
+		for (String key : Config.configKeys()) {
+			boolean match = keys.stream().anyMatch(keyRegex -> Pattern.matches(keyRegex, key));
+			if (match) {
+				kvs.put(key, Config.getKv(key));
+			}
+
+		}
+		configReader.configKeyValue(kvs);
 	}
 }

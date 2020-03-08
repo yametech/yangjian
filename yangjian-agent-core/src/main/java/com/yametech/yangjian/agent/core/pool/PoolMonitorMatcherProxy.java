@@ -16,16 +16,17 @@
 
 package com.yametech.yangjian.agent.core.pool;
 
+import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.IInterceptorInit;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
-import com.yametech.yangjian.agent.api.interceptor.IAOPConfig;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.api.pool.IPoolMonitorCreater;
 import com.yametech.yangjian.agent.api.pool.IPoolMonitorMatcher;
+import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
 import com.yametech.yangjian.agent.core.util.Util;
 
@@ -53,12 +54,13 @@ public class PoolMonitorMatcherProxy implements IInterceptorInit, InterceptorMat
 		Object instance = null;
 		try {
 			instance = InterceptorInstanceLoader.load(loadClassKey.getKey(), loadClassKey.getCls(), classLoader);
-			if(instance instanceof IAOPConfig) {
-				((IAOPConfig)instance).setAOPConfig(matcher.getConfig());
+			if(!(instance instanceof IPoolMonitorCreater)) {
+				throw new RuntimeException("poolMonitorMatcher配置的loadClass错误，必须为IPoolMonitorCreater的子类");
 			}
-			if(instance instanceof IPoolMonitorCreater) {
-				((PoolMonitorCreaterProxy) obj).init((IPoolMonitorCreater)instance);
+			if(instance instanceof IConfigReader) {
+				InstanceManage.registryConfigReaderInstance((IConfigReader)instance);
 			}
+			((PoolMonitorCreaterProxy) obj).init((IPoolMonitorCreater)instance);
 		} catch (Exception e) {
 			log.warn(e, "加载异常：{}，\nclassLoader={}，\nmetricMatcher classLoader：{},\ninstance classLoader：{}",
 					loadClassKey, classLoader,

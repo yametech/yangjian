@@ -20,15 +20,17 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.IMetricMatcher;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.IInterceptorInit;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
-import com.yametech.yangjian.agent.api.interceptor.IAOPConfig;
+import com.yametech.yangjian.agent.api.convert.IConvertBase;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
 import com.yametech.yangjian.agent.core.metric.base.ConvertMethodAOP;
 import com.yametech.yangjian.agent.core.metric.base.ConvertStatisticMethodAOP;
@@ -62,18 +64,21 @@ public class MetricMatcherProxy implements IInterceptorInit, InterceptorMatcher 
 		if(convertClass == null) {
 			return;
 		}
-		Object convertInstance = null;
+		Object instance = null;
 		try {
-			convertInstance = InterceptorInstanceLoader.load(convertClass.getKey(), convertClass.getCls(), classLoader);
-			if(convertInstance instanceof IAOPConfig) {
-				((IAOPConfig)convertInstance).setAOPConfig(metricMatcher.getConfig());
+			instance = InterceptorInstanceLoader.load(convertClass.getKey(), convertClass.getCls(), classLoader);
+			if(!(instance instanceof IConvertBase)) {
+				throw new RuntimeException("metricMatcher配置的loadClass错误，必须为IConvertBase的子类");
 			}
-			((BaseConvertAOP) obj).init(convertInstance, metricEventBus, metricMatcher.type());
+			if(instance instanceof IConfigReader) {
+				InstanceManage.registryConfigReaderInstance((IConfigReader)instance);
+			}
+			((BaseConvertAOP) obj).init(instance, metricEventBus, metricMatcher.type());
 		} catch (Exception e) {
 			log.warn(e, "加载convert异常：{}，\nclassLoader={}，\nmetricMatcher classLoader：{},\nconvertInstance classLoader：{}",
 					convertClass, classLoader,
 					Util.join(" > ", Util.listClassLoaders(metricMatcher.getClass())),
-					Util.join(" > ", Util.listClassLoaders(convertInstance == null ? null : convertInstance.getClass())));
+					Util.join(" > ", Util.listClassLoaders(instance == null ? null : instance.getClass())));
 			throw new RuntimeException(e);
 		}
 	}

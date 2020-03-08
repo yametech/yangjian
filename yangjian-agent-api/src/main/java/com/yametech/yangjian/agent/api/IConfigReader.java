@@ -19,10 +19,7 @@ package com.yametech.yangjian.agent.api;
 import java.util.Map;
 import java.util.Set;
 
-import com.yametech.yangjian.agent.api.base.IWeight;
-import com.yametech.yangjian.agent.api.base.SPI;
-
-public interface IConfigReader extends IWeight, SPI {
+public interface IConfigReader {
 	
 	/**
 	 * 申明需要哪些key的正则

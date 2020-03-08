@@ -17,9 +17,8 @@
 package com.yametech.yangjian.agent.api.convert;
 
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
-import com.yametech.yangjian.agent.api.interceptor.IAOPConfig;
 
-public interface IConvertMatcher extends IAOPConfig {
+public interface IConvertBase {
 	
 	/**
 	 * @param startTime	开始事件

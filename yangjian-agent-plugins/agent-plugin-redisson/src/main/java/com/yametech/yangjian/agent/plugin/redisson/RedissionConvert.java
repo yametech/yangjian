@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 import org.redisson.client.protocol.CommandData;
 import org.redisson.client.protocol.CommandsData;
 
+import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.convert.IMethodAsyncConvert;
@@ -42,14 +44,8 @@ import io.netty.buffer.ByteBuf;
  * @author dengliming
  * @date 2019/12/5
  */
-public class RedissionConvert implements IMethodAsyncConvert {
+public class RedissionConvert implements IMethodAsyncConvert, IConfigReader {
     private List<String> keyRules = new CopyOnWriteArrayList<>();
-    
-    @SuppressWarnings("unchecked")
-	@Override
-    public void setAOPConfig(Object config) {
-    	keyRules = (List<String>) config;
-    }
     
     @Override
     public List<Object> convert(Object thisObj, long startTime, Object[] allArguments, Method method, Object ret,
@@ -146,4 +142,24 @@ public class RedissionConvert implements IMethodAsyncConvert {
     public boolean isEvalScript(String command) {
         return command.equalsIgnoreCase("EVAL");
     }
+    
+    @Override
+    public Set<String> configKey() {
+        return new HashSet<>(Arrays.asList("redis.key.rule", "redis.key.rule\\..*"));
+    }
+
+    /**
+     * 覆盖更新
+     *
+     * @param kv 配置数据
+     */
+    @Override
+    public void configKeyValue(Map<String, String> kv) {
+        if (kv == null) {
+            return;
+        }
+        keyRules.clear();// 此处没有原子的方法可以直接替换其中的元素，所以在有更新时可能导致短暂的无配置数据
+        keyRules.addAll(kv.values());
+    }
+    
 }

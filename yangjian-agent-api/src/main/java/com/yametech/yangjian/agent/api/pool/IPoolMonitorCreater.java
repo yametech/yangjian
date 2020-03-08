@@ -19,14 +19,12 @@ package com.yametech.yangjian.agent.api.pool;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import com.yametech.yangjian.agent.api.interceptor.IAOPConfig;
-
 /**
  * 
  * @Description 实现类用于完成池监控实例创建
  * 
  */
-public interface IPoolMonitorCreater extends IAOPConfig {
+public interface IPoolMonitorCreater {
 	
 	/**
 	 * 

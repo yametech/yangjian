@@ -26,7 +26,7 @@ import com.yametech.yangjian.agent.api.bean.TimeEvent;
  * 
  * @author liuzhao
  */
-public interface IStatisticMethodBeforeConvert extends IConvertMatcher {
+public interface IStatisticMethodBeforeConvert extends IConvertBase {
 	
 	/**
 	 * 实例方法在调用前使用参数同步转换为TimeEvent对象，如果转换过程比较耗时，则使用IMethodBeforeAsyncConvert

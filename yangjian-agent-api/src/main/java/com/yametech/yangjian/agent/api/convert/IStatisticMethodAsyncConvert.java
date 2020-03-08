@@ -25,7 +25,7 @@ import java.util.Map;
  * 
  * @author liuzhao
  */
-public interface IStatisticMethodAsyncConvert extends IAsyncConvert, IConvertMatcher {
+public interface IStatisticMethodAsyncConvert extends IAsyncConvert, IConvertBase {
 	
 	/**
 	 * 实例方法在调用结束后使用参数同步转换为临时对象

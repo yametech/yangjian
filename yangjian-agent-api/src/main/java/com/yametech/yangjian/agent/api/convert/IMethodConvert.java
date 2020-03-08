@@ -27,7 +27,7 @@ import com.yametech.yangjian.agent.api.bean.TimeEvent;
  * 
  * @author liuzhao
  */
-public interface IMethodConvert extends IConvertMatcher {
+public interface IMethodConvert extends IConvertBase {
 	
 	/**
 	 * 实例方法在调用结束后使用参数同步转换为TimeEvent对象，如果转换过程比较耗时，则使用IMethodAsyncConvert

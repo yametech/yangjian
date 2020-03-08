@@ -42,6 +42,26 @@ public class ReportManage implements IReportData, IConfigReader {
 		this.configKeys = new HashSet<>(Arrays.asList(defaultKey, myKey));
 	}
 	
+	/**
+	 * 根据Class获取上报实例，并注册配置通知
+	 * @param cls	一般为调用的类Class，用于读取配置
+	 * @return
+	 */
+    public static IReportData getReport(Class<?> cls) {
+    	return getReport(cls, false);
+    }
+    /**
+     * 	根据Class获取上报实例，根据needNotify确认是否执行通知
+     * @param cls
+     * @param needNotifyConfig	true：注册时执行一次配置通知（用于在全局通知(InstanceManage.notifyReaders)之后调用该方法）；false：不执行配置通知（用于在全局通知之前调用该方法）；
+     * @return
+     */
+	public static IReportData getReport(Class<?> cls, boolean needNotifyConfig) {
+    	ReportManage report = new ReportManage(cls);
+    	InstanceManage.registryConfigReaderInstance(report, needNotifyConfig);
+    	return report;
+    }
+	
 	@Override
 	public boolean report(String dataType, Long second, Map<String, Object> params) {
 		List<IReport> useReports = reports;

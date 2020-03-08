@@ -48,8 +48,7 @@ public class MetricEventBus implements IAppStatusListener, ISchedule {
     private static final ILogger log = LoggerFactory.getLogger(MetricEventBus.class);
     private static final int MIN_BUFFER_SIZE = 1 << 6;
     private EventBus<ConvertTimeEvent> eventBus;
-    private IReportData report = InstanceManage.loadInstance(ReportManage.class, 
-    		new Class[] {Class.class}, new Object[] {this.getClass()});
+    private IReportData report = ReportManage.getReport(this.getClass());
     
     @Override
     public void beforeRun() {

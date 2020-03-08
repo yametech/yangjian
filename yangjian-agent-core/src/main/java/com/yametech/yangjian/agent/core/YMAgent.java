@@ -63,8 +63,7 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 public class YMAgent {
 	private static ILogger log = LoggerFactory.getLogger(YMAgent.class);
-	private static IReportData report = InstanceManage.loadInstance(ReportManage.class, 
-			new Class[] {Class.class}, new Object[] {YMAgent.class});;
+	private static IReportData report = ReportManage.getReport(YMAgent.class);
 	private static ScheduledExecutorService service;
 	private static final String[] IGNORE_CLASS_CONFIG = new String[] {"^net\\.bytebuddy\\.", "^org\\.slf4j\\.", // ".*\\$auxiliary\\$.*", 
 			"^org\\.apache\\.logging\\.", "^org\\.groovy\\.", "^sun\\.reflect\\.", // ".*javassist.*", ".*\\.asm\\..*", 这两个会有误拦截：com.alibaba.dubbo.rpc.proxy.javassist.JavassistProxyFactory

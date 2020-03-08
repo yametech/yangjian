@@ -24,7 +24,7 @@ import java.util.List;
  * 
  * @author liuzhao
  */
-public interface IMethodBeforeAsyncConvert extends IAsyncConvert, IConvertMatcher {
+public interface IMethodBeforeAsyncConvert extends IAsyncConvert, IConvertBase {
 	
 	/**
 	 * 实例方法在调用前使用参数同步转换为临时对象

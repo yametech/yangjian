@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
@@ -31,7 +32,6 @@ import com.yametech.yangjian.agent.api.base.SPI;
 import com.yametech.yangjian.agent.api.bean.ClassDefined;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
-import com.yametech.yangjian.agent.api.interceptor.IAOPConfig;
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
 import com.yametech.yangjian.agent.api.interceptor.IMethodAOP;
 import com.yametech.yangjian.agent.api.interceptor.IStaticMethodAOP;
@@ -129,8 +129,8 @@ public class AgentTransformer implements AgentBuilder.Transformer {
 						if(obj instanceof SPI) {
 							throw new IllegalStateException("不能实现SPI接口");
 						}
-						if(obj instanceof IAOPConfig) {
-							((IAOPConfig)obj).setAOPConfig(matcher.getConfig());
+						if(obj instanceof IConfigReader) {
+							InstanceManage.registryConfigReaderInstance((IConfigReader)obj);
 						}
 //						log.info("{}:map load", inDefinedShape);
 						if(matcher instanceof IInterceptorInit) {

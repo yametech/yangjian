@@ -24,7 +24,8 @@ import java.util.Map;
 import com.yametech.yangjian.agent.api.IAppStatusListener;
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.base.IReportData;
-import com.yametech.yangjian.agent.core.core.InstanceManage;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.jvm.collector.BufferPoolCollector;
 import com.yametech.yangjian.agent.core.jvm.collector.ClassCollector;
 import com.yametech.yangjian.agent.core.jvm.collector.GcCollector;
@@ -39,8 +40,6 @@ import com.yametech.yangjian.agent.core.jvm.metrics.MemoryMetrics;
 import com.yametech.yangjian.agent.core.jvm.metrics.MemoryPoolMetrics;
 import com.yametech.yangjian.agent.core.jvm.metrics.ProcessMetrics;
 import com.yametech.yangjian.agent.core.jvm.metrics.ThreadMetrics;
-import com.yametech.yangjian.agent.api.log.ILogger;
-import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.report.ReportManage;
 
 /**
@@ -50,8 +49,7 @@ import com.yametech.yangjian.agent.core.report.ReportManage;
 public class JVMMetricsSchedule implements IAppStatusListener, ISchedule {
     private static final ILogger logger = LoggerFactory.getLogger(JVMMetricsSchedule.class);
     
-    private IReportData report = InstanceManage.loadInstance(ReportManage.class, 
-    		new Class[] {Class.class}, new Object[] {this.getClass()});
+    private IReportData report = ReportManage.getReport(this.getClass());
     private BufferPoolCollector bufferPoolCollector;
     private GcCollector gcCollector;
     private ThreadCollector threadCollector;

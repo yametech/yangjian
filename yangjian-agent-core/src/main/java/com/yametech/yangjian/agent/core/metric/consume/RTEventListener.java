@@ -27,10 +27,9 @@ import com.yametech.yangjian.agent.api.IAppStatusListener;
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.convert.statistic.impl.BaseStatistic;
-import com.yametech.yangjian.agent.core.core.InstanceManage;
-import com.yametech.yangjian.agent.core.metric.base.ConvertTimeEvent;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.metric.base.ConvertTimeEvent;
 import com.yametech.yangjian.agent.core.report.ReportManage;
 import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
 import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeFactory;
@@ -43,8 +42,7 @@ import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeFactory;
 public class RTEventListener implements IAppStatusListener, ConsumeFactory<ConvertTimeEvent>, ISchedule {
     private static final ILogger log = LoggerFactory.getLogger(RTEventListener.class);
     private List<RTEventConsume> consumes = new ArrayList<>();
-    private IReportData report = InstanceManage.loadInstance(ReportManage.class, 
-    		new Class[] {Class.class}, new Object[] {this.getClass()});
+    private IReportData report = ReportManage.getReport(this.getClass());
     
 //    private Map<String, String> configMatches = new HashMap<>();
 //    private List<IConfigMatch> matches = new ArrayList<>();

@@ -22,7 +22,7 @@ package com.yametech.yangjian.agent.api.interceptor;
  * 
  * @author liuzhao
  */
-public interface IConstructorListener extends IAOPConfig {
+public interface IConstructorListener {
 
     /**
      *	构造方法调用后前执行

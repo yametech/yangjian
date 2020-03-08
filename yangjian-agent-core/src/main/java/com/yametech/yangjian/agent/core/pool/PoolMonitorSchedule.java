@@ -23,7 +23,6 @@ import java.util.Map;
 
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.base.IReportData;
-import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.api.pool.IPoolMonitor;
@@ -35,8 +34,7 @@ import com.yametech.yangjian.agent.core.report.ReportManage;
  */
 public class PoolMonitorSchedule implements ISchedule {
     private static final ILogger LOGGER = LoggerFactory.getLogger(PoolMonitorSchedule.class);
-    private IReportData report = InstanceManage.loadInstance(ReportManage.class, 
-    		new Class[] {Class.class}, new Object[] {this.getClass()});
+    private IReportData report = ReportManage.getReport(this.getClass());
     
     @Override
     public int interval() {
