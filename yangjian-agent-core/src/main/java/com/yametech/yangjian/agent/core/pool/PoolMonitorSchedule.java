@@ -52,8 +52,9 @@ public class PoolMonitorSchedule implements ISchedule {
             		continue;
             	}
             	Map<String, Object> params = new HashMap<>();
-            	params.put(monitor.getType() + "_active_count", monitor.getActiveCount());
-            	params.put(monitor.getType() + "_max_total", monitor.getMaxTotalConnectionCount());
+            	params.put("active_count", monitor.getActiveCount());
+            	params.put("max_total", monitor.getMaxTotalConnectionCount());
+            	params.put("sign", monitor.getIdentify());
             	report.report("statistic/" + monitor.getType() + "/connectionPool", null, params);
             }
             inactives.forEach(PoolMonitorRegistry.INSTANCE::unregister);

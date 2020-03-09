@@ -13,6 +13,7 @@ yangjian-agent是一个基于javaagent运行的java性能监控工具，具备�
 ## 功能
 
 * 每秒调用量（QPS），已支持spring-controller、dubbo-client、dubbo-server、httpclient、okhttp、kafka、rabbitmq、mongo集合、mysql表及sql自动统计，jedis、redisson、方法配置化统计；
+
 * 每秒平均耗时（RT），已支持spring-controller、dubbo-client、dubbo-server、httpclient、okhttp、kafka、rabbitmq、mongo集合、mysql表及sql自动统计，jedis、redisson、方法配置化统计；
 * 池监控：已支持druid、hikaricp，线程池规划中；
 * 进程监控：CPU、内存占用量；
