@@ -53,9 +53,9 @@ import com.yametech.yangjian.agent.core.metric.MetricMatcherProxy;
 import com.yametech.yangjian.agent.core.metric.base.MetricEventBus;
 import com.yametech.yangjian.agent.core.pool.PoolMonitorMatcherProxy;
 import com.yametech.yangjian.agent.core.report.ReportManage;
+import com.yametech.yangjian.agent.core.util.Util;
 import com.yametech.yangjian.agent.util.CustomThreadFactory;
 import com.yametech.yangjian.agent.util.OSUtil;
-import com.yametech.yangjian.agent.core.util.Util;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
@@ -93,10 +93,10 @@ public class YMAgent {
     	loadConfig(arguments);
     	InstanceManage.notifyReader();
     	beforeRun();
-    	instrumentation(instrumentation);
-        // 埋点日志，不允许删除
     	startSchedule();
     	addShutdownHook();
+    	instrumentation(instrumentation);
+    	// 埋点日志，不允许删除
     	report.report("status/start", null, null);
     }
     
@@ -172,14 +172,24 @@ public class YMAgent {
      */
     private static void startSchedule() {
     	service = Executors.newScheduledThreadPool(Config.SCHEDULE_CORE_POOL_SIZE.getValue(), new CustomThreadFactory("schedule", true));
-    	InstanceManage.listSpiInstance(ISchedule.class).forEach(schedule -> 
+    	InstanceManage.listSpiInstance(ISchedule.class).forEach(schedule -> {
+    		if(schedule.initialDelay() == 0) {
+    			schedule.execute();
+    		}
+    	});// 执行一次定时任务，防止多线程类加载死锁
+    	InstanceManage.listSpiInstance(ISchedule.class).forEach(schedule -> {
+    		int delay = schedule.initialDelay();
+    		if(delay == 0) {
+    			delay += schedule.interval();
+    		}
     		service.scheduleAtFixedRate(() -> {
     			try {
     				schedule.execute();
     			} catch(Exception e) {
     				log.warn(e, "执行定时任务异常：{}", schedule.getClass());
     			}
-		} , schedule.initialDelay(), schedule.interval(), schedule.timeUnit()));
+    		} , delay, schedule.interval(), schedule.timeUnit());
+    	});
 	}
     
     /**

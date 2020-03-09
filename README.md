@@ -31,10 +31,20 @@ yangjian-agent是一个基于javaagent运行的java性能监控工具，具备�
 
 ### QPS/RT
 
-![convert](docs/readme-files/convert.png)
-
 > 其中蓝色部分为可扩展插件；
->
+
+metric
+![convert](docs/readme-files/metric.jpg)
+
+pool
+![convert](docs/readme-files/pool.jpg)
+
+trace
+
+TODO
+
+
+
 
 ## Benchmark
 
