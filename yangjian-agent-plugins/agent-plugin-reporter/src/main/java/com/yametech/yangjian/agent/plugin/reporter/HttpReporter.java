@@ -38,18 +38,21 @@ import java.util.Set;
 public class HttpReporter implements IReport, IConfigReader {
 
     private static final String URL_CONFIG_KEY = "report.http.url";
+    private static final String SERVICE_NAME_KEY = "service.name";
     /**
      * 上报的URL
      */
     private String url;
+    private String serviceName;
 
     @Override
     public boolean report(String dataType, Long second, Map<String, Object> params) {
-        if (params == null || params.isEmpty()) {
+        if (StringUtil.isEmpty(serviceName) || StringUtil.isEmpty(url) || params == null || params.isEmpty()) {
             return false;
         }
+        params.put("serviceName", serviceName);
         params.put("dataType", dataType);
-        params.put("second", second);
+        params.put("second", second == null ? System.currentTimeMillis() / 1000 : second);
         return StringUtil.notEmpty(HttpClient.doHttpRequest(new HttpRequest(url, HttpRequest.HttpMethod.POST)
                 .setDatas(buildRequestData(params))));
     }
@@ -61,7 +64,7 @@ public class HttpReporter implements IReport, IConfigReader {
 
     @Override
     public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList(URL_CONFIG_KEY));
+        return new HashSet<>(Arrays.asList(URL_CONFIG_KEY, SERVICE_NAME_KEY));
     }
 
     @Override
@@ -69,6 +72,7 @@ public class HttpReporter implements IReport, IConfigReader {
         if (kv.containsKey(URL_CONFIG_KEY)) {
             url = kv.get(URL_CONFIG_KEY);
         }
+        serviceName = kv.get(SERVICE_NAME_KEY);
     }
 
     private String buildRequestData(Map<String, Object> params) {

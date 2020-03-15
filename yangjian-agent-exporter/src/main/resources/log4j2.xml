@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
+        </Property>
+        <Property name="METRICS_DIR">/data/logs/metrics</Property>
+        <Property name="APP_DIR">/data/logs/app</Property>
+    </Properties>
+    <Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+
+        <RollingFile name="Metrics" fileName="${METRICS_DIR}/metrics.log"
+                     filePattern="${METRICS_DIR}/metrics.%d{yyyyMMdd}.%i.log">
+            <!--只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%msg%n"/>
+            <Policies>
+                <!--文件大小-->
+                <SizeBasedTriggeringPolicy size="30 MB"/>
+                <!--<SizeBasedTriggeringPolicy size="1 KB"/>-->
+            </Policies>
+            <!--文件数量-->
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <RollingFile name="App" fileName="${APP_DIR}/app.log"
+                     filePattern="${APP_DIR}/app.%d{yyyyMMdd}.%i.log">
+            <!--只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <!--文件大小-->
+                <SizeBasedTriggeringPolicy size="30 MB"/>
+            </Policies>
+            <!--文件数量-->
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="Metrics" level="debug" additivity="false">
+            <AppenderRef ref="Metrics"/>
+        </Logger>
+
+        <Root level="info">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="App"/>
+        </Root>
+    </Loggers>
+</Configuration>

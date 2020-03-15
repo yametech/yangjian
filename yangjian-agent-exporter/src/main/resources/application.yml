@@ -1,0 +1,11 @@
+server:
+  port: 9091
+
+metric:
+  path: /data/logs/metrics/
+  log:
+    name: metrics.log
+  fetch:
+    limit: 50
+  position:
+    path: /data/config/position.log
