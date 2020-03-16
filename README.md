@@ -24,161 +24,16 @@ yangjian-agent是一个基于javaagent运行的java性能监控工具，具备�
 
 ## 设计
 
-> 概览图（监控全视角），其中蓝色部分为该工具运行的位置，其他部分为监控系统的整体概览；
->
-
-![overview](docs/readme-files/overview.png)
-
-### QPS/RT
-
-> 其中蓝色部分为可扩展插件；
-
-metric
-![convert](docs/readme-files/metric.jpg)
-
-pool
-![convert](docs/readme-files/pool.jpg)
-
-trace
-
-TODO
-
-
-
+* [设计文档](https://github.com/yametech/yangjian/wiki/%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3 )
 
 ## Benchmark
 
 * [性能报告](https://github.com/yametech/yangjian/wiki/%E6%80%A7%E8%83%BD%E6%8A%A5%E5%91%8A )
 
-## 目录结构
 
-```
+## 快速接入
 
-├─config	//存放监控配置文件以及日志配置文件
-│      agent.properties //探针相关配置
-│      log.properties	//日志相关配置
-│      
-├─lib		//探针包
-│      yangjian-agent.jar
-│      
-├─logs		//探针输出的日志目录
-└─plugins	//插件包
-        agent-plugin-druid-1.0.0-SNAPSHOT.jar
-        agent-plugin-dubbo-1.0.0-SNAPSHOT.jar
-        agent-plugin-hikaricp-1.0.0-SNAPSHOT.jar
-        agent-plugin-httpclient-1.0.0-SNAPSHOT.jar
-        agent-plugin-jedis-1.0.0-SNAPSHOT.jar
-        agent-plugin-kafka-1.0.0-SNAPSHOT.jar
-        agent-plugin-method-1.0.0-SNAPSHOT.jar
-        agent-plugin-mongo-1.0.0-SNAPSHOT.jar
-        agent-plugin-mysql-1.0.0-SNAPSHOT.jar
-        agent-plugin-okhttp-1.0.0-SNAPSHOT.jar
-        agent-plugin-rabbitmq-1.0.0-SNAPSHOT.jar
-        agent-plugin-redisson-1.0.0-SNAPSHOT.jar
-        agent-plugin-spring-1.0.0-SNAPSHOT.jar
-	
-```
-
-* agent.properties
-
-| key                             | 是否必须 | 说明                                                         | 示例                                                         |
-| ------------------------------- | -------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| service.name                    | 否       | 当前运行的应用名称，因日志生成目录会使用该参数，所以必须有值，该值读取顺序为：读取启动参数中的MonitorAgent.service.name，不存在则读取skywalking.agent.service_name（兼容skywalking，无需重复配置），依然不存在则使用当前配置值，未配置则不增强应用（使用默认值可能导致日志被覆盖），不支持远程配置 | test-service                                                 |
-| config.remote_url               | 否       | 如果启用了远程配置，则必须配置该值，用于远程加载配置         | http://test.com/config                                       |
-| spi.SPI接口实例类名             | 否       | 用于禁用一个SPI接口实例（不配置默认为启用）                  | spi.JVMMetricsSchedule=disable                               |
-| ignore.enhance.classRegular     | 否       | 忽略增强的类正则，使用\r\n分隔多个配置                       | ^cn\\\\\.xxx\\\\.\r\n^cn\\\\.yyy\\\\.                        |
-| ignore.enhance.methodRegular    | 否       | 忽略增强的方法正则，使用\r\n分隔多个配置                     | .\*test\\\\(\\\\)$\r\n.\*ignore\\\\(\\\\)\$                  |
-| methodCallEvent.bufferSize      | 否       | 方法调用事件的缓存队列长度，必须为2的N次方，需考虑占用内存，太小可能导致事件丢弃 | 32768                                                        |
-| schedule.corePoolSize           | 否       | 定时任务调度核心线程数，只要继承ISchedule的类都使用此处的线程调度 | 5                                                            |
-| InstanceMethodMatcher.唯一标识  | 否       | 自定义实例方法RT/QPS统计，value为正则匹配                    | InstanceMethodMatcher.test=.\*cn\\\\.ecpark\\\\.tool\\\\.javaagent\\\\.TestService\\\\.add\\\\(.* |
-| StatisticMethodMatcher.唯一标识 | 否       | 自定义静态方法RT/QPS统计，value为正则匹配                    | StatisticMethodMatcher.test=.\*java\\\\.time\\\\.Duration\\\\.ofHours\\\\(.* |
-
-* log.properties
-
-| key               | 是否必须 | 说明                                                         | 示例                                                         |
-| ----------------- | -------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| log.output        | 否       | 日志输出类型，目前支持：CONSOLE, FILE，如果为CONSOLE则输出到控制台，FILE则按照下方的配置输出到对应的目录下 | FILE                                                         |
-| log.dir           | 否       | 日志目录，未配置时windows环境下使用程序目录，linux使用/data/www/logs/cus-ecpark-agent，实际日志输出的文件前会增加项目目录，避免一台机器部署多个接入探针应用时日志文件冲突 |                                                              |
-| log.level         | 否       | 日志级别，支持：DEBUG, INFO, WARN, ERROR, OFF                | INFO                                                         |
-| log.max_file_size | 否       | 单个日志文件最大大小，单位bytes                              | 31457280                                                     |
-| log.max_file_num  | 否       | 日志数量，超过数量的日志文件，按照最后编辑时间删除           | 100                                                          |
-| log.pattern       | 否       | 日志格式                                                     | %timestamp[%level]-[%thread]-[%class.method]: %msg%throwable |
-
-
-## 接入
-
-### 启动脚本
-
-#### Main启动
-
-> 接入前的启动脚本：
-
-```sh
-java -Dfile.encoding=utf-8 -Xms256m -Xmx512m -cp ../conf:../lib/* com.xxx.Application
-```
-
-> 接入后，调整为：
-
-```sh
-java -Dfile.encoding=utf-8 -Xms256m -Xmx512m -javaagent:/目录/lib/yangjian-agent.jar -DMonitorAgent.service.name=应用名称 -cp ../conf:../lib/* com.xxx.Application
-```
-
-#### jar启动
-
-> 接入前的启动脚本：
-
-```sh
-java -Dfile.encoding=utf-8 -Xms256m -Xmx512m -jar yourApp.jar
-```
-
-> 接入后，调整为：
-
-```sh
-java -Dfile.encoding=utf-8 -Xms256m -Xmx512m -javaagent:/目录/lib/yangjian-agent.jar -DMonitorAgent.service.name=应用名称 -jar yourApp.jar
-```
-
-#### tomcat项目
-
-> linux系统，在tomcat的启动文件tomcat/bin/catalina.sh第一行加：
-
-```sh
-CATALINA_OPTS="$CATALINA_OPTS -javaagent:/目录/lib/yangjian-agent.jar -DMonitorAgent.service.name=应用名称";
-export CATALINA_OPTS
-```
-
-> windows系统，在tomcat的启动文件tomcat/bin/catalina.bat第一行加：
-
-```sh
-set "CATALINA_OPTS=-javaagent:/目录/lib/yangjian-agent.jar -DMonitorAgent.service.name=应用名称"
-```
-
-### 统计日志示例
-
-```
-2020-02-05 06:24:51.744[INFO]-[schedule-8]-[c.e.t.a.c.u.LogUtil.println(71)]: ecpark-monitor/1580855091/method-event/consume?total_num=116594210&period_seconds=2&period_num=4651
-2020-02-05 06:24:51.743[INFO]-[schedule-9]-[c.e.t.a.c.u.LogUtil.println(71)]: ecpark-monitor/1580855091/resources?direct_memory=28347&mapped_cache=0&heap=2831007&non_heap=130363
-2020-02-05 06:24:51.744[INFO]-[schedule-7]-[c.e.t.a.c.u.LogUtil.println(71)]: ecpark-monitor/1580855091/method-event/product?total_num=116594210&period_seconds=2&period_num=4651&total_discard_num=0&period_discard_num=0
-2020-02-05 06:24:51.744[INFO]-[schedule-7]-[c.e.t.a.c.u.LogUtil.println(71)]: ecpark-monitor/1580855091/statistic/hikaricp/connectionPool?hikaricp_active_count=0&hikaricp_max_total=10
-2020-02-05 06:24:51.744[INFO]-[schedule-8]-[c.e.t.a.c.u.LogUtil.println(71)]: ecpark-monitor/1580855088/statistic/hikaricp/RT?sign=192.168.9.254%3A6301%2Fecpark_monitor+%7C+GetConnection&rt_max=1&rt_min=0&num=142&rt_total=2
-2020-02-05 06:24:51.744[INFO]-[schedule-8]-[c.e.t.a.c.u.LogUtil.println(71)]: ecpark-monitor/1580855088/statistic/mysql-table/RT?sign=node_log+%7C+Update&rt_max=5&rt_min=1&num=252&rt_total=623
-2020-02-05 06:24:51.744[INFO]-[schedule-8]-[c.e.t.a.c.u.LogUtil.println(71)]: ecpark-monitor/1580855090/statistic/kafka-publish/RT?sign=TOPIC-STATISTIC-UNIFIED&rt_max=0&rt_min=0&num=2&rt_total=0
-2020-02-05 06:24:51.744[INFO]-[schedule-8]-[c.e.t.a.c.u.LogUtil.println(71)]: ecpark-monitor/1580855088/statistic/mysql-sql/RT?sign=select+id%2Cname+from+app++where+name%3D%3F&rt_max=2&rt_min=0&num=15&rt_total=16
-2020-02-11 14:34:23.869[INFO]-[schedule-4]-[c.e.t.a.c.u.LogUtil.println(71)]: ecpark-monitor/1581402862/statistic/method/RT?sign=TestService.add%28int%2Cint%29&rt_max=0&rt_min=0&num=10&rt_total=0
-```
-
-### UI效果图
-
-以下截图为统计数据结合Grafana的展示效果
-
-![ui-1](docs/readme-files/ui-1.png)
-
-![ui-2](docs/readme-files/ui-2.png)
-
-![ui-3](docs/readme-files/ui-3.png)
-
-![ui-4](docs/readme-files/ui-4.png)
-
-![ui-5](docs/readme-files/ui-5.png)
+* [部署文档](https://github.com/yametech/yangjian/wiki/%E9%83%A8%E7%BD%B2%E6%96%87%E6%A1%A3 )
 
 ## 打包
 
