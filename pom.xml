@@ -160,6 +160,47 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Add license headers to all files. -->
+            <!--用于全量生成license头部-->
+            <!--<plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>3.0</version>
+                <inherited>false</inherited>
+                <configuration>
+                    <header>${project.basedir}/HEADER</header>
+                    <aggregate>true</aggregate>
+                    <failIfMissing>false</failIfMissing>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <includes>
+                        <include>**/main/java/**/*.java</include>
+                        <include>**/test/java/**/*.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/README.md</exclude>
+                        <exclude>**/agent-plugin-mysql/**/main/java/**/druid/**/*.java</exclude>
+                        <exclude>**/yangjian-agent-util/**/json/**/*.java</exclude>
+
+                        <exclude>**/AgentPackageNotFoundException.java</exclude>
+                        <exclude>**/AgentClassLoader.java</exclude>
+                        <exclude>**/InterceptorInstanceLoader.java</exclude>
+                        <exclude>**/yangjian-agent-benchmark/**/mysql/jdbc/*.java</exclude>
+                        <exclude>**/yangjian-agent-benchmark/**/redis/clients/jedis/*.java</exclude>
+                    </excludes>
+                    <strictCheck>true</strictCheck>
+                    <mapping>
+                        <java>SLASHSTAR_STYLE</java>
+                    </mapping>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>-->
         </plugins>
     </build>
 	

@@ -3,13 +3,6 @@
 
 yangjian-agent是一个基于javaagent运行的java性能监控工具，具备较强的扩展性与性能
 
-## 参考
-
-该工具开发时参考的开源项目：
-* [skywalking](https://github.com/apache/skywalking)
-* [MyPerf4J](https://github.com/LinShunKang/MyPerf4J )
-* [druid](https://github.com/alibaba/druid )
-
 ## 功能
 
 * 每秒调用量（QPS），已支持spring-controller、dubbo-client、dubbo-server、httpclient、okhttp、kafka、rabbitmq、mongo集合、mysql表及sql自动统计，jedis、redisson、方法配置化统计；
@@ -42,6 +35,13 @@ yangjian-agent是一个基于javaagent运行的java性能监控工具，具备�
 ## 扩展（接口）
 
 请查看[开发文档](https://github.com/yametech/yangjian/wiki/%E5%BC%80%E5%8F%91%E6%96%87%E6%A1%A3)
+
+## 参考项目
+
+该工具开发时参考的开源项目：
+* [skywalking](https://github.com/apache/skywalking)
+* [MyPerf4J](https://github.com/LinShunKang/MyPerf4J )
+* [druid](https://github.com/alibaba/druid )
 
 ## License
 
