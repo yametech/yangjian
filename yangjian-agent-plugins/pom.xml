@@ -23,6 +23,7 @@
         <module>agent-plugin-druid</module>
         <module>agent-plugin-hikaricp</module>
         <module>agent-plugin-reporter</module>
+        <module>agent-plugin-spring-webflux</module>
     </modules>
 
     <properties>
