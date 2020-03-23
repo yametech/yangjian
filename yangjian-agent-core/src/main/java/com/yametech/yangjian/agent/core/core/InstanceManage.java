@@ -143,6 +143,14 @@ public class InstanceManage {
 				.collect(Collectors.toList());
 	}
 
+	/**
+	 * 移除指定SPI实例
+	 *
+	 * @return
+	 */
+	public static boolean removeSpi(SPI spi) {
+		return spis.remove(spi);
+	}
 
 	/**
 	 * 注册IConfigReader实例，并执行一次配置通知
