@@ -1,8 +1,9 @@
-com.yametech.yangjian.agent.core.config.LocalConfigReader
-com.yametech.yangjian.agent.core.config.RemoteConfigReader
-com.yametech.yangjian.agent.core.config.DisableSpiConfigReader
+com.yametech.yangjian.agent.core.config.LocalConfigLoader
+com.yametech.yangjian.agent.core.config.RemoteConfigLoader
+com.yametech.yangjian.agent.core.config.DisableSpiConfigLoader
 com.yametech.yangjian.agent.core.jvm.JVMMetricsSchedule
 com.yametech.yangjian.agent.core.metric.consume.RTEventListener
 com.yametech.yangjian.agent.core.metric.base.MetricEventBus
 com.yametech.yangjian.agent.core.pool.PoolMonitorSchedule
 com.yametech.yangjian.agent.core.report.LogReport
+com.yametech.yangjian.agent.core.config.DisableSpiConfigReader

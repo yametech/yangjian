@@ -13,27 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core.config;
-
-import java.util.concurrent.TimeUnit;
+package com.yametech.yangjian.agent.core.core.interceptor;
 
 /**
  * @author dengliming
- * @date 2019/12/2
+ * @date 2020/3/23
  */
-public class RemoteConfigTest {
+public class InterceptorWrapper<T> {
 
-    public static void main(String[] args) {
-        t();
+    /**
+     * 实际拦截器
+     */
+    private T interceptor;
+    /**
+     * 用于控制是否开启
+     */
+    private boolean enable = true;
+
+    public InterceptorWrapper(T interceptor) {
+        this.interceptor = interceptor;
     }
 
-    public static void t() {
-        RemoteConfigLoader remoteConfigLoader = new RemoteConfigLoader();
-        remoteConfigLoader.load(null);
-        try {
-            TimeUnit.SECONDS.sleep(3);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public T getInterceptor() {
+        return interceptor;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 }

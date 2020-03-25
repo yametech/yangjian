@@ -15,40 +15,37 @@
  */
 package com.yametech.yangjian.agent.core.config;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.yametech.yangjian.agent.api.IConfigLoader;
+import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.base.SPI;
-import com.yametech.yangjian.agent.core.core.InstanceManage;
-import com.yametech.yangjian.agent.api.log.ILogger;
-import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.core.interceptor.InterceptorWrapper;
+import com.yametech.yangjian.agent.core.core.interceptor.InterceptorWrapperRegistry;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * 晚于其他配置加载
- * @Description 
- * 
- * @author liuzhao
- * @date 2019年10月6日 下午10:23:16
+ * @author dengliming
+ * @date 2020/3/24
  */
-public class DisableSpiConfigReader implements IConfigLoader {
-	private static ILogger log = LoggerFactory.getLogger(DisableSpiConfigReader.class);
-	
-	@Override
-	public void load(String arguments) throws Exception {
-		List<SPI> disableSpi = InstanceManage.getSpis().stream().filter(spi -> {
-			String enableConfig = Config.getKv("spi." + spi.getClass().getSimpleName());
-			return enableConfig != null && !CoreConstants.CONFIG_KEY_ENABLE.equals(enableConfig);
-		}).collect(Collectors.toList());
-		disableSpi.forEach(spi -> {
-			InstanceManage.removeSpi(spi);
-			log.info("disable SPI：{}", spi.getClass().getName());
-		});
-	}
-	
-	@Override
-	public int weight() {
-		return 0;
-	}
-	
+public class DisableSpiConfigReader implements IConfigReader, SPI {
+
+    @Override
+    public Set<String> configKey() {
+        return new HashSet<>(Arrays.asList("spi\\..*"));
+    }
+
+    @Override
+    public void configKeyValue(Map<String, String> kv) {
+        Map<String, InterceptorWrapper<?>> interceptorWrapperMap = InterceptorWrapperRegistry.INSTANCE.getInterceptorWrapperMap();
+        if (interceptorWrapperMap == null || interceptorWrapperMap.isEmpty()) {
+            return;
+        }
+        boolean disableAll = CoreConstants.CONFIG_KEY_DISABLE.equals(kv.getOrDefault(CoreConstants.SPI_PLUGIN_KEY, CoreConstants.CONFIG_KEY_ENABLE));
+        interceptorWrapperMap.values().forEach(interceptorWrapper -> {
+            String enableConfig = kv.get("spi." + interceptorWrapper.getInterceptor().getClass().getSimpleName());
+            interceptorWrapper.setEnable((disableAll && CoreConstants.CONFIG_KEY_ENABLE.equals(enableConfig))
+                    || (!disableAll && !CoreConstants.CONFIG_KEY_DISABLE.equals(enableConfig)));
+        });
+    }
 }

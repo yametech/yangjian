@@ -32,8 +32,8 @@ import com.yametech.yangjian.agent.core.util.AgentPath;
  * @author liuzhao
  * @date 2019年10月6日 下午10:23:16
  */
-public class LocalConfigReader implements IConfigLoader {
-	private static ILogger log = LoggerFactory.getLogger(LocalConfigReader.class);
+public class LocalConfigLoader implements IConfigLoader {
+	private static ILogger log = LoggerFactory.getLogger(LocalConfigLoader.class);
 	private static final String DEFAULT_CONFIG_FILE = "agent.properties";
 //	private static final String DEFAULT_CONFIG_PATH = "config" + File.separator + DEFAULT_CONFIG_FILE;// 默认本地配置路径
 	

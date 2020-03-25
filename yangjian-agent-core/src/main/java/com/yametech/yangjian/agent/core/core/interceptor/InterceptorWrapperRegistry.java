@@ -13,27 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core.config;
+package com.yametech.yangjian.agent.core.core.interceptor;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author dengliming
- * @date 2019/12/2
+ * @date 2020/3/23
  */
-public class RemoteConfigTest {
+public enum InterceptorWrapperRegistry {
+    INSTANCE;
 
-    public static void main(String[] args) {
-        t();
+    private final Map<String, InterceptorWrapper<?>> interceptorWrapperMap = new ConcurrentHashMap<>();
+
+    public <T> InterceptorWrapper getOrCreate(String key, T t) {
+        if (t == null) {
+            return null;
+        }
+        return interceptorWrapperMap.computeIfAbsent(key, k -> new InterceptorWrapper<T>(t));
     }
 
-    public static void t() {
-        RemoteConfigLoader remoteConfigLoader = new RemoteConfigLoader();
-        remoteConfigLoader.load(null);
-        try {
-            TimeUnit.SECONDS.sleep(3);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public Map<String, InterceptorWrapper<?>> getInterceptorWrapperMap() {
+        return interceptorWrapperMap;
     }
 }

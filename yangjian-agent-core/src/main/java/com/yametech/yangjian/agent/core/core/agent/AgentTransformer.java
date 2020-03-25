@@ -44,6 +44,8 @@ import com.yametech.yangjian.agent.core.core.interceptor.ContextInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmInstanceConstructorInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmInstanceInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmStaticInterceptor;
+import com.yametech.yangjian.agent.core.core.interceptor.InterceptorWrapper;
+import com.yametech.yangjian.agent.core.core.interceptor.InterceptorWrapperRegistry;
 import com.yametech.yangjian.agent.core.metric.MetricMatcherProxy;
 import com.yametech.yangjian.agent.core.util.Util;
 
@@ -137,18 +139,18 @@ public class AgentTransformer implements AgentBuilder.Transformer {
 						}
 //						log.info("{}:map init", inDefinedShape);
 						log.debug("loadInstance:{}	{}	{}	{}", obj, classLoader, loadClass, inDefinedShape);
-						return obj;
+						return InterceptorWrapperRegistry.INSTANCE.getOrCreate(loadClass.getKey(), obj);
 					} catch (Exception e) {
 						log.warn(e, "加载实例异常{},\n{}", loadClass, Util.join(" > ", Util.listClassLoaders(classLoader)));
 						return null;
 					}
-				}).filter(interceptor -> {
-    				return interceptor != null && (
-        						(inDefinedShape.isStatic() && interceptor instanceof IStaticMethodAOP) || 
-        						(inDefinedShape.isConstructor() && interceptor instanceof IConstructorListener) || 
-        						(inDefinedShape.isMethod() && interceptor instanceof IMethodAOP)
+				}).filter(interceptorWrapper -> {
+    				return interceptorWrapper != null && (
+        						(inDefinedShape.isStatic() && interceptorWrapper.getInterceptor() instanceof IStaticMethodAOP) ||
+        						(inDefinedShape.isConstructor() && interceptorWrapper.getInterceptor() instanceof IConstructorListener) ||
+        						(inDefinedShape.isMethod() && interceptorWrapper.getInterceptor() instanceof IMethodAOP)
     						);
-    				
+
     			}).collect(Collectors.toList());
     		if(interceptors == null || interceptors.isEmpty()) {
     			continue;
@@ -158,17 +160,17 @@ public class AgentTransformer implements AgentBuilder.Transformer {
             if(inDefinedShape.isStatic()) {// 静态方法
         		builder = builder.method(getMethodMatch(inDefinedShape))
         				.intercept(MethodDelegation.withDefaultConfiguration()
-        						.to(new YmStaticInterceptor(interceptors.stream().toArray(IStaticMethodAOP[]::new))));
+        						.to(new YmStaticInterceptor(interceptors.stream().toArray(InterceptorWrapper[]::new))));
 //        						.to(new YmStaticInterceptor(interceptors, classLoader, inDefinedShape)));
             } else if(inDefinedShape.isConstructor()) {// 构造方法
         		builder = builder.constructor(getMethodMatch(inDefinedShape))
         				.intercept(SuperMethodCall.INSTANCE.andThen(MethodDelegation.withDefaultConfiguration()
-            					.to(new YmInstanceConstructorInterceptor(interceptors.stream().toArray(IConstructorListener[]::new)))));
+            					.to(new YmInstanceConstructorInterceptor(interceptors.stream().toArray(InterceptorWrapper[]::new)))));
 //        						.to(new YmInstanceConstructorInterceptor(interceptors, classLoader, inDefinedShape))));
             } else if(inDefinedShape.isMethod()) {// 实例方法
         		builder = builder.method(getMethodMatch(inDefinedShape))
         				.intercept(MethodDelegation.withDefaultConfiguration()
-        						.to(new YmInstanceInterceptor(interceptors.stream().toArray(IMethodAOP[]::new))));
+        						.to(new YmInstanceInterceptor(interceptors.stream().toArray(InterceptorWrapper[]::new))));
 //        						.to(new YmInstanceInterceptor(interceptors, classLoader, inDefinedShape)));
             }
 //            log.info("{}:for done", inDefinedShape);
