@@ -24,15 +24,26 @@ public class MethodDefined {
 	private String methodName;// 方法名
 	private String[] params;// 方法参数类型
 	private String methodRet;// 方法返回值类型
+	private boolean staticMethod = false;// 是否为静态方法
+	private boolean constructorMethod = false;// 是否为构造方法
+	private boolean instanceMethod = false;// 是否为实例方法
 
+	public MethodDefined(ClassDefined classDefined) {
+		this.classDefined = classDefined;
+	}
+	
 	public MethodDefined(ClassDefined classDefined, Set<String> methodAnnotations, 
-			String methodDes, String methodName, String[] params, String methodRet) {
+			String methodDes, String methodName, String[] params, String methodRet, 
+			boolean staticMethod, boolean constructorMethod, boolean instanceMethod) {
 		this.classDefined = classDefined;
 		this.methodDes = methodDes;
 		this.methodAnnotations = methodAnnotations;
 		this.methodName = methodName;
 		this.params = params;
 		this.methodRet = methodRet;
+		this.staticMethod = staticMethod;
+		this.constructorMethod = constructorMethod;
+		this.instanceMethod = instanceMethod;
 	}
 
 	public ClassDefined getClassDefined() {
@@ -57,6 +68,18 @@ public class MethodDefined {
 
 	public String getMethodRet() {
 		return methodRet;
+	}
+	
+	public boolean isConstructorMethod() {
+		return constructorMethod;
+	}
+	
+	public boolean isInstanceMethod() {
+		return instanceMethod;
+	}
+	
+	public boolean isStaticMethod() {
+		return staticMethod;
 	}
 	
 	@Override

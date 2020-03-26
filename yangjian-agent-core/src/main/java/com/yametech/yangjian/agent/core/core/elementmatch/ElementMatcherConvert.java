@@ -42,7 +42,8 @@ public class ElementMatcherConvert {
     	}
 //    	String methodName = inDefinedShape.isMethod() ? inDefinedShape.getInternalName() : inDefinedShape.getDeclaringType().asErasure().getName();
     	return new MethodDefined(convert(thisClass), getMethodAnnotation(inDefinedShape), inDefinedShape.toString(), 
-    			methodName, getParams(inDefinedShape), inDefinedShape.getReturnType().asErasure().getActualName());
+    			methodName, getParams(inDefinedShape), inDefinedShape.getReturnType().asErasure().getActualName(), 
+    			inDefinedShape.isStatic(), inDefinedShape.isConstructor(), inDefinedShape.isMethod());
     	
 //    	System.out.println("class=" + thisClass.getActualName());
 //    	System.out.println("SuperClass=" + getSuperClass(thisClass));

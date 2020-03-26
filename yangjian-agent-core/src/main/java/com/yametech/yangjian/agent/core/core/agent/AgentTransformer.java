@@ -205,7 +205,7 @@ public class AgentTransformer implements AgentBuilder.Transformer {
     	}
 //    	log.info("{}:Defined", typeDescription);
     	ClassDefined classDefined = ElementMatcherConvert.convert(typeDescription);
-    	MethodDefined methodDefined = new MethodDefined(classDefined, null, null, null, null, null);
+    	MethodDefined methodDefined = new MethodDefined(classDefined);
     	boolean match = classMatches.stream().anyMatch(aop -> aop.classMatch() != null && aop.classMatch().isMatch(methodDefined));
     	if(!match) {
     		return builder;

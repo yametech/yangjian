@@ -30,10 +30,15 @@ public enum PoolMonitorRegistry {
     INSTANCE;
 
     private static final ILogger LOGGER = LoggerFactory.getLogger(PoolMonitorRegistry.class);
+    private static final int POOL_INSTANCE_MAX = 50;
     private final List<IPoolMonitor> poolMonitors = new CopyOnWriteArrayList<>();
 
-    boolean register(IPoolMonitor poolMonitor) {
+	boolean register(IPoolMonitor poolMonitor) {
     	if(poolMonitor == null) {
+    		return false;
+    	}
+    	if(poolMonitors.size() > POOL_INSTANCE_MAX) {
+    		LOGGER.warn("初始化过多的池实例：{}", POOL_INSTANCE_MAX);
     		return false;
     	}
     	synchronized (poolMonitors) {
