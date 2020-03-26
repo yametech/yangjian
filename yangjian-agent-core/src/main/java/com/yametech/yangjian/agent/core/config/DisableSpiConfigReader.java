@@ -41,7 +41,7 @@ public class DisableSpiConfigReader implements IConfigLoader {
 			return enableConfig != null && !CoreConstants.CONFIG_KEY_ENABLE.equals(enableConfig);
 		}).collect(Collectors.toList());
 		disableSpi.forEach(spi -> {
-			InstanceManage.getSpis().remove(spi);
+			InstanceManage.removeSpi(spi);
 			log.info("disable SPI：{}", spi.getClass().getName());
 		});
 	}
