@@ -21,6 +21,8 @@ import com.yametech.yangjian.agent.api.InterceptorMatcher;
  * 
  * @Description 匹配创建池监控需要拦截的类
  * 
+ * 注意：配置的matcher一定要区分方法是静态方法、构造方法、实例方法，否则可能导致重复拦截
+ * 
  */
 public interface IPoolMonitorMatcher extends InterceptorMatcher {
 	

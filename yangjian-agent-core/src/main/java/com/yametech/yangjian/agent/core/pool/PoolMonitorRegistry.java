@@ -38,7 +38,7 @@ public enum PoolMonitorRegistry {
     		return false;
     	}
     	if(poolMonitors.size() > POOL_INSTANCE_MAX) {
-    		LOGGER.warn("初始化过多的池实例：{}", POOL_INSTANCE_MAX);
+    		LOGGER.warn("Init too many pool instance：{}", POOL_INSTANCE_MAX);
     		return false;
     	}
     	synchronized (poolMonitors) {
