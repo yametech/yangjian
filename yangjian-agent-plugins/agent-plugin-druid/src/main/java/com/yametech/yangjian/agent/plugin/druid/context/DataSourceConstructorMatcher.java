@@ -23,9 +23,9 @@ import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
 import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
-import com.yametech.yangjian.agent.api.configmatch.MethodArgumentIndexMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodConstructorMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodArgumentNumMatch;
-import com.yametech.yangjian.agent.api.configmatch.MethodNameMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodArgumentIndexMatch;
 import com.yametech.yangjian.agent.api.pool.IPoolMonitorMatcher;
 
 /**
@@ -43,7 +43,8 @@ public class DataSourceConstructorMatcher implements IPoolMonitorMatcher, IEnhan
     public IConfigMatch match() {
         return new CombineAndMatch(Arrays.asList(
                 classMatch(),
-                new MethodNameMatch("DruidDataSource"),
+                new MethodConstructorMatch(),
+                //new MethodNameMatch("DruidDataSource"),
                 new MethodArgumentNumMatch(1),
                 new MethodArgumentIndexMatch(0, "boolean")
         ));

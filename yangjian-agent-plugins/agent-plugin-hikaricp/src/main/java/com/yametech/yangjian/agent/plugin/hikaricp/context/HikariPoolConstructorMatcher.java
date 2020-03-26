@@ -16,12 +16,16 @@
 package com.yametech.yangjian.agent.plugin.hikaricp.context;
 
 import java.util.Arrays;
-
 import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
+import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
+import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodConstructorMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodArgumentIndexMatch;
+import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodArgumentNumMatch;
 import com.yametech.yangjian.agent.api.pool.IPoolMonitorMatcher;
 
 /**
@@ -32,24 +36,23 @@ public class HikariPoolConstructorMatcher implements IPoolMonitorMatcher, IEnhan
 
     @Override
     public IConfigMatch classMatch() {
-        return new com.yametech.yangjian.agent.api.configmatch.ClassMatch("com.zaxxer.hikari.pool.HikariPool");
+        return new ClassMatch("com.zaxxer.hikari.pool.HikariPool");
     }
 
     @Override
     public IConfigMatch match() {
-        return new com.yametech.yangjian.agent.api.configmatch.CombineAndMatch(Arrays.asList(
+        return new CombineAndMatch(Arrays.asList(
                 classMatch(),
-                new com.yametech.yangjian.agent.api.configmatch.MethodArgumentIndexMatch(0, "com.zaxxer.hikari.HikariConfig"),
-                new com.yametech.yangjian.agent.api.configmatch.CombineOrMatch(
-                        Arrays.asList(
-                                // 2.3.4~
-                                new com.yametech.yangjian.agent.api.configmatch.CombineAndMatch(Arrays.asList(
-                                        new com.yametech.yangjian.agent.api.configmatch.MethodArgumentNumMatch(1))),
-                                // 2.3.4
-                                new com.yametech.yangjian.agent.api.configmatch.CombineAndMatch(Arrays.asList(
-                                        new com.yametech.yangjian.agent.api.configmatch.MethodArgumentIndexMatch(1, "java.lang.String"),
-                                        new MethodArgumentIndexMatch(2, "java.lang.String"),
-                                        new com.yametech.yangjian.agent.api.configmatch.MethodArgumentNumMatch(3))))
+                new MethodConstructorMatch(),
+                new MethodArgumentIndexMatch(0, "com.zaxxer.hikari.HikariConfig"),
+                new CombineOrMatch(Arrays.asList(
+                        // 2.3.4~
+                        new CombineAndMatch(Arrays.asList(new MethodArgumentNumMatch(1))),
+                        // 2.3.4
+                        new CombineAndMatch(Arrays.asList(
+                                new MethodArgumentIndexMatch(1, "java.lang.String"),
+                                new MethodArgumentIndexMatch(2, "java.lang.String"),
+                                new MethodArgumentNumMatch(3))))
                 )
         ));
     }

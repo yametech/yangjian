@@ -19,6 +19,7 @@ import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.api.pool.IPoolMonitor;
+import com.yametech.yangjian.agent.util.Utils;
 
 import java.lang.reflect.Method;
 
@@ -37,7 +38,7 @@ public class HikariDataSourceMonitor implements IPoolMonitor {
 
     public HikariDataSourceMonitor(Object hikariPool, String jdbcUrl) {
         this.hikariPool = hikariPool;
-        this.jdbcUrl = jdbcUrl;
+        this.jdbcUrl = Utils.parseJdbcUrl(jdbcUrl);
         try {
             this.getActiveConnectionsMethod = getActiveConnectionsMethod(hikariPool);
             this.getTotalConnectionsMethod = getTotalConnectionsMethod(hikariPool);

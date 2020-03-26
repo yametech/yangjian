@@ -73,8 +73,8 @@ public class Utils {
 	/**
 	 * 解析JDBC连接URL
 	 *
-	 * jdbc:mysql://host1:port1/database[?k1=v1[&k2=v2]...] returns "host1:port1/database"
-	 * jdbc:mysql:loadbalance://host1:port1,host2:port2/database[?k1=v1[&k2=v2]...] returns host1:port1,host2:port2/database
+	 * jdbc:mysql://host1:port1/database[?k1=v1[&k2=v2]...] returns "jdbc:mysql://host1:port1/database"
+	 * jdbc:mysql:loadbalance://host1:port1,host2:port2/database[?k1=v1[&k2=v2]...] returns jdbc:mysql:loadbalance://host1:port1,host2:port2/database
 	 * @param jdbcUrl
 	 * @return
 	 */
@@ -86,14 +86,10 @@ public class Utils {
 			return jdbcUrl;
 		}
 
-		int begin = jdbcUrl.indexOf("//");
-		if (begin < 0) {
-			return jdbcUrl;
-		}
 		int end = jdbcUrl.indexOf("?");
-		if (end > 0 && begin < end) {
-			return jdbcUrl.substring(begin + 2, jdbcUrl.indexOf("?"));
+		if (end > 0) {
+			return jdbcUrl.substring(0, end);
 		}
-		return jdbcUrl.substring(begin + 2);
+		return jdbcUrl;
 	}
 }

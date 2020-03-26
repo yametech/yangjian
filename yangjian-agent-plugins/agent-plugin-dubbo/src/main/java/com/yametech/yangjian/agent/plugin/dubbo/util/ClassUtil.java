@@ -16,6 +16,9 @@
 package com.yametech.yangjian.agent.plugin.dubbo.util;
 
 import org.springframework.aop.TargetClassAware;
+import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.target.SingletonTargetSource;
 
 /**
  * @author dengliming
@@ -46,8 +49,9 @@ public class ClassUtil {
         // JDK代理
         else if (clazz.getName().contains(JDK_PROXY_CLASS_PREFIX)) {
             try {
-                if (proxy instanceof TargetClassAware) {
-                    return ((TargetClassAware) proxy).getTargetClass();
+                Class<?> result = getJDKTargetClass(proxy);
+                if (result != null) {
+                    return result;
                 }
             } catch (Exception e) {
                 // ignore
@@ -55,5 +59,28 @@ public class ClassUtil {
         }
 
         return clazz;
+    }
+
+    /**
+     * 参考spring-aop
+     *
+     * @param candidate
+     * @return
+     */
+    public static Class<?> getJDKTargetClass(Object candidate) {
+        Object current = candidate;
+        Class<?> result = null;
+        while (current instanceof TargetClassAware) {
+            result = ((TargetClassAware) current).getTargetClass();
+            Object nested = null;
+            if (current instanceof Advised) {
+                TargetSource targetSource = ((Advised) current).getTargetSource();
+                if (targetSource instanceof SingletonTargetSource) {
+                    nested = ((SingletonTargetSource) targetSource).getTarget();
+                }
+            }
+            current = nested;
+        }
+        return result;
     }
 }

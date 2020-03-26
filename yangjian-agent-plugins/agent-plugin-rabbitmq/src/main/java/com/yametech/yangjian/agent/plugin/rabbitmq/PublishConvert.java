@@ -22,9 +22,12 @@ import java.util.Map;
 
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
+import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.convert.IMethodConvert;
 import com.yametech.yangjian.agent.plugin.rabbitmq.bean.MqInfo;
 import com.yametech.yangjian.agent.plugin.rabbitmq.context.ContextConstants;
+
+import static com.yametech.yangjian.agent.api.common.Constants.RABBITMQ_DEFAULT_EXCHANGE;
 
 /**
  *
@@ -33,10 +36,10 @@ import com.yametech.yangjian.agent.plugin.rabbitmq.context.ContextConstants;
  * @date 2019年11月6日 下午8:07:04
  */
 public class PublishConvert implements IMethodConvert {
-	
-	@Override
-	public List<TimeEvent> convert(Object thisObj, long startTime, Object[] allArguments, Method method, Object ret,
-			Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
+
+    @Override
+    public List<TimeEvent> convert(Object thisObj, long startTime, Object[] allArguments, Method method,
+                                   Object ret, Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
         if (!(thisObj instanceof IContext)) {
             return null;
         }
@@ -49,8 +52,8 @@ public class PublishConvert implements IMethodConvert {
             topic = (String) allArguments[0];
         }
         TimeEvent event = get(startTime);
-		event.setIdentify(topic);
-		return Arrays.asList(event);
+        event.setIdentify(StringUtil.isEmpty(topic) ? RABBITMQ_DEFAULT_EXCHANGE : topic);
+        return Arrays.asList(event);
     }
 
 

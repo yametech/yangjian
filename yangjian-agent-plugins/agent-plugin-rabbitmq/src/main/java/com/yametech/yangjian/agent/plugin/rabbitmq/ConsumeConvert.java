@@ -29,6 +29,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static com.yametech.yangjian.agent.api.common.Constants.RABBITMQ_DEFAULT_EXCHANGE;
+
 /**
  * 输出kafka Qps数量
  *
@@ -37,10 +39,10 @@ import java.util.Map;
  * @date 2019年11月6日 下午8:07:04
  */
 public class ConsumeConvert implements IMethodConvert {
-	
-	@Override
-	public List<TimeEvent> convert(Object thisObj, long startTime, Object[] allArguments, Method method, Object ret,
-			Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
+
+    @Override
+    public List<TimeEvent> convert(Object thisObj, long startTime, Object[] allArguments, Method method,
+                                   Object ret, Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
         if (!(thisObj instanceof IContext)) {
             return null;
         }
@@ -53,15 +55,20 @@ public class ConsumeConvert implements IMethodConvert {
             mqInfo.setTopic(getExchange(allArguments[1]));
         }
 
+        // 如果还是为空直接设置默认Exchange
+        if (StringUtil.isEmpty(mqInfo.getTopic())) {
+            mqInfo.setTopic(RABBITMQ_DEFAULT_EXCHANGE);
+        }
+
         TimeEvent event = get(startTime);
-		event.setIdentify(mqInfo.getTopic() + Constants.IDENTIFY_SEPARATOR + mqInfo.getConsumeGroup());
-		return Arrays.asList(event);
+        event.setIdentify(mqInfo.getTopic() + Constants.IDENTIFY_SEPARATOR + mqInfo.getConsumeGroup());
+        return Arrays.asList(event);
     }
 
     private String getExchange(Object object) {
-	    if (object instanceof Envelope) {
-	        return ((Envelope) object).getExchange();
+        if (object instanceof Envelope) {
+            return ((Envelope) object).getExchange();
         }
-	    return null;
+        return null;
     }
 }

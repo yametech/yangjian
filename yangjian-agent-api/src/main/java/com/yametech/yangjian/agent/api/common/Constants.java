@@ -39,6 +39,7 @@ public class Constants {
     public static final String LOG_PATTERN = "log.pattern";
 
     public static final String IDENTIFY_SEPARATOR = " | ";
+    public static final String RABBITMQ_DEFAULT_EXCHANGE = "Default";
 
     public static class EventType {
         public static final String MYSQL = "mysql";

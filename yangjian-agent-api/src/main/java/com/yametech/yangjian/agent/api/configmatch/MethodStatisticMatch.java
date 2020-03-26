@@ -19,7 +19,7 @@ import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
 
 /**
- * 方法返回值匹配
+ * 静态方法匹配
  * 
  * @author liuzhao
  */
