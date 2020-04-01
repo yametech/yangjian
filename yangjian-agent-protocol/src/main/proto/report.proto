@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.yametech.yangjian.agent.protocol";
+option java_outer_classname = "ReportProto";
+
+
+//
+service ReportService {
+    rpc report (ReportRequest) returns (ReportResponse) {
+    }
+}
+
+// 响应实体类
+message ReportResponse {
+    string msg = 1;
+}
+
+// 上报请求实体类
+message ReportRequest {
+    repeated ReportEntity reportEntity = 1;
+}
+
+// 上报信息实体类
+message ReportEntity {
+    string serviceName = 1;
+    string instance = 2;
+    int64 timestamp = 3;
+    map<string, string> params = 4;
+}

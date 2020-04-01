@@ -52,6 +52,13 @@
         <maven-resources-plugin.version>2.6</maven-resources-plugin.version>
         <maven-jar-plugin.version>2.6</maven-jar-plugin.version>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
+        <grpc.version>1.27.1</grpc.version>
+        <os-maven-plugin.version>1.6.2</os-maven-plugin.version>
+        <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
+        <com.google.protobuf.protoc.version>3.11.0</com.google.protobuf.protoc.version>
+        <protoc-gen-grpc-java.version>1.27.1</protoc-gen-grpc-java.version>
+        <netty-tcnative-boringssl-static.version>2.0.25.Final</netty-tcnative-boringssl-static.version>
+        <shade.package>com.yametech.yangjian.agent.thirdparty</shade.package>
         <!-- 		<additionalparam>-Xdoclint:none</additionalparam> -->
 <!--         <aggregate.report.dir>tests/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir> -->
     </properties>

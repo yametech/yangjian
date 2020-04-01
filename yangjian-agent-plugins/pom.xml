@@ -24,6 +24,7 @@
         <module>agent-plugin-hikaricp</module>
         <module>agent-plugin-reporter-http</module>
         <module>agent-plugin-spring-webflux</module>
+        <module>agent-plugin-reporter-grpc</module>
     </modules>
 
     <properties>
@@ -48,6 +49,29 @@
 <!--         <finalName>${project.artifactId}</finalName> -->
 		<plugins>
             <plugin>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>false</shadedArtifactAttached>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                            <createSourcesJar>true</createSourcesJar>
+                            <shadeSourcesContent>true</shadeSourcesContent>
+                            <relocations>
+                                <relocation>
+                                    <pattern>io.grpc</pattern>
+                                    <shadedPattern>${shade.package}.io.grpc</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
@@ -62,7 +86,7 @@
 		                            <fileset dir="${project.build.directory}" erroronmissingdir="false">
 		                                <include name="agent-plugin-*-SNAPSHOT.jar"/>
                                         <!--可选的-->
-                                        <exclude name="agent-plugin-reporter-*.jar"/>
+                                        <!--<exclude name="agent-plugin-reporter-*.jar"/>-->
 		                            </fileset>
 		                        </copy>
                             </tasks>

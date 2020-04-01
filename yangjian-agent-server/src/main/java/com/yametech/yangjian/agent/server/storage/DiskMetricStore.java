@@ -154,7 +154,7 @@ public class DiskMetricStore {
         } catch (IOException e) {
             LOGGER.error("read(path:{},startLine:{},limit:{}) error", path, startLine, limit, e);
         }
-        LOGGER.info("read({}|{}|{}) done in {}ms", path, startLine, limit, System.currentTimeMillis() - s);
+        LOGGER.info("read({}|{}|{} actually:{}) done in {}ms", path, startLine, limit, lines == null ? 0 : lines.size(), System.currentTimeMillis() - s);
         return lines;
     }
 
