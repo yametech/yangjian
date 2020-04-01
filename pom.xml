@@ -33,6 +33,7 @@
         <module>yangjian-agent-util</module>
         <module>yangjian-agent-core</module>
         <module>yangjian-agent-plugins</module>
+        <module>yangjian-agent-protocol</module>
         <!--         <module>yangjian-agent-benchmark</module> -->
     </modules>
 
