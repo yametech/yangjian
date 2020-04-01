@@ -32,6 +32,8 @@ import org.springframework.stereotype.Component;
 import java.net.SocketAddress;
 
 /**
+ * 拦截器（目的为了获取GRPC客户端的IP地址）
+ *
  * @author dengliming
  * @date 2020/3/31
  */
@@ -50,7 +52,7 @@ public class RemoteAddressInterceptor implements ServerInterceptor {
             if (socketAddress != null) {
                 String host = socketAddress.toString().split(":")[0];
                 if (host.startsWith("/")) {
-                    host = host.substring(1, host.length());
+                    host = host.substring(1);
                 }
 
                 context = context.withValue(REMOTE_ADDRESS, host);

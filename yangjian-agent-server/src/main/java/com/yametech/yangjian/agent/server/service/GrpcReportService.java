@@ -56,7 +56,7 @@ public class GrpcReportService extends ReportServiceGrpc.ReportServiceImplBase {
                     StringBuilder builder = new StringBuilder();
                     builder.append("serviceName=").append(reportEntity.getServiceName()).append('&');
                     builder.append("second=").append(reportEntity.getTimestamp()).append('&');
-                    builder.append("ip=").append(remoteAddress);
+                    builder.append("ip=").append(remoteAddress).append('&');
                     for (Map.Entry<String, String> param : params.entrySet()) {
                         builder.append(param.getKey()).append('=').append(param.getValue()).append('&');
                     }
