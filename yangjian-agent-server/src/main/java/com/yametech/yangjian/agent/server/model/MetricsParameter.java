@@ -47,4 +47,9 @@ public class MetricsParameter {
      * 完整指标参数
      */
     private Map<String, Object> params;
+
+    public static final String PARAM_SECOND_KEY = "second";
+    public static final String PARAM_IP_KEY = "ip";
+    public static final String PARAM_SERVICE_NAME_KEY = "serviceName";
+    public static final String PARAM_DATA_TYPE_KEY = "dataType";
 }
