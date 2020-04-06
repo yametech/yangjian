@@ -32,7 +32,7 @@ import com.yametech.yangjian.agent.api.pool.IPoolMonitorCreater;
  * @author liuzhao
  * @date 2020年3月6日 下午3:14:14
  */
-public class PoolMonitorCreaterProxy implements IMethodAOP<Long>, IConstructorListener, IStaticMethodAOP<Long>  {
+public class PoolMonitorCreater implements IMethodAOP<Long>, IConstructorListener, IStaticMethodAOP<Long>  {
 	protected IPoolMonitorCreater convert;
 	
 	void init(IPoolMonitorCreater convert) {

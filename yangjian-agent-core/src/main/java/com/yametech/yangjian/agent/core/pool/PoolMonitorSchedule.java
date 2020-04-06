@@ -25,6 +25,7 @@ import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.api.pool.IPoolMonitor;
+import com.yametech.yangjian.agent.core.metric.MetricData;
 import com.yametech.yangjian.agent.core.report.ReportManage;
 
 /**
@@ -33,7 +34,7 @@ import com.yametech.yangjian.agent.core.report.ReportManage;
  */
 public class PoolMonitorSchedule implements ISchedule {
     private static final ILogger LOGGER = LoggerFactory.getLogger(PoolMonitorSchedule.class);
-    private IReportData report = ReportManage.getReport(this.getClass());
+    private IReportData report = ReportManage.getReport(PoolMonitorSchedule.class.getSimpleName());
     
     @Override
     public int interval() {
@@ -54,7 +55,7 @@ public class PoolMonitorSchedule implements ISchedule {
             	params.put("active_count", monitor.getActiveCount());
             	params.put("max_total", monitor.getMaxTotalConnectionCount());
             	params.put("sign", monitor.getIdentify());
-            	report.report("statistic/" + monitor.getType() + "/connectionPool", null, params);
+            	report.report(MetricData.get(null, "statistic/" + monitor.getType() + "/connectionPool", params));
             }
             inactives.forEach(PoolMonitorRegistry.INSTANCE::unregister);
         } catch (Exception e) {

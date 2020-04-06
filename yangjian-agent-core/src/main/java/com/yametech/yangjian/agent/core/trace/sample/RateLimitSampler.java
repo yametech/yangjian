@@ -13,14 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core;
+package com.yametech.yangjian.agent.core.trace.sample;
 
-import com.yametech.yangjian.agent.core.util.Util;
+import com.yametech.yangjian.agent.api.trace.ISpanSample;
+import com.yametech.yangjian.agent.core.util.RateLimit;
 
-public class TraceTest {
+import brave.Tracer;
+
+public class RateLimitSampler implements ISpanSample {
+	private RateLimit limiter;
 	
-	@org.junit.Test
-	public void test() {
-		
+	public RateLimitSampler(int qps) {
+		limiter = RateLimit.create(qps);
 	}
+	
+	@Override
+	public boolean sample(Tracer tracer) {
+		return limiter.tryAcquire();
+	}
+
 }

@@ -24,7 +24,7 @@ import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.IContext;
-import com.yametech.yangjian.agent.api.base.IInterceptorInit;
+import com.yametech.yangjian.agent.api.base.IMatcherProxy;
 import com.yametech.yangjian.agent.api.base.IMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.base.SPI;
@@ -111,7 +111,8 @@ public class AgentTransformer implements AgentBuilder.Transformer {
             MethodType type = getMethodType(inDefinedShape);
 //            log.info("{}:for begin", inDefinedShape);
 //    		List<InterceptorMatcher> interceptors = interceptorMatchers.stream()
-            List<Object> interceptors = interceptorMatchers.stream()
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+			List<Object> interceptors = interceptorMatchers.stream()
     			.filter(aop -> aop.match() != null && aop.match().isMatch(methodDefined))
     			.map(matcher -> {
 //    				log.info("{}:map enter", inDefinedShape);
@@ -132,8 +133,8 @@ public class AgentTransformer implements AgentBuilder.Transformer {
 							InstanceManage.registryConfigReaderInstance((IConfigReader)obj);
 						}
 //						log.info("{}:map load", inDefinedShape);
-						if(matcher instanceof IInterceptorInit) {
-							((IInterceptorInit)matcher).init(obj, classLoader, type);
+						if(matcher instanceof IMatcherProxy) {
+							((IMatcherProxy)matcher).init(obj, classLoader, type);
 						}
 //						log.info("{}:map init", inDefinedShape);
 						log.debug("loadInstance:{}	{}	{}	{}", obj, classLoader, loadClass, inDefinedShape);

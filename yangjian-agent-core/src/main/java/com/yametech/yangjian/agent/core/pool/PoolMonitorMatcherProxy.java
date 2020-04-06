@@ -18,7 +18,7 @@ package com.yametech.yangjian.agent.core.pool;
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
-import com.yametech.yangjian.agent.api.base.IInterceptorInit;
+import com.yametech.yangjian.agent.api.base.IMatcherProxy;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.log.ILogger;
@@ -36,7 +36,7 @@ import com.yametech.yangjian.agent.core.util.Util;
  * @author liuzhao
  * @date 2020年3月6日 下午3:14:22
  */
-public class PoolMonitorMatcherProxy implements IInterceptorInit, InterceptorMatcher {
+public class PoolMonitorMatcherProxy implements IMatcherProxy<PoolMonitorCreater, IPoolMonitorMatcher>, InterceptorMatcher {
 	private static ILogger log = LoggerFactory.getLogger(PoolMonitorMatcherProxy.class);
 	private IPoolMonitorMatcher matcher;
 	
@@ -45,7 +45,7 @@ public class PoolMonitorMatcherProxy implements IInterceptorInit, InterceptorMat
 	}
 	
 	@Override
-	public void init(Object obj, ClassLoader classLoader, MethodType type) {
+	public void init(PoolMonitorCreater obj, ClassLoader classLoader, MethodType type) {
 		LoadClassKey loadClassKey = matcher.loadClass(type);
 		if(loadClassKey == null) {
 			return;
@@ -59,7 +59,7 @@ public class PoolMonitorMatcherProxy implements IInterceptorInit, InterceptorMat
 			if(instance instanceof IConfigReader) {
 				InstanceManage.registryConfigReaderInstance((IConfigReader)instance);
 			}
-			((PoolMonitorCreaterProxy) obj).init((IPoolMonitorCreater)instance);
+			obj.init((IPoolMonitorCreater)instance);
 		} catch (Exception e) {
 			log.warn(e, "加载异常：{}，\nclassLoader={}，\nmetricMatcher classLoader：{},\ninstance classLoader：{}",
 					loadClassKey, classLoader,
@@ -80,7 +80,7 @@ public class PoolMonitorMatcherProxy implements IInterceptorInit, InterceptorMat
 		if(loadClassKey == null) {
 			return null;
 		}
-		return new LoadClassKey(PoolMonitorCreaterProxy.class.getName(), "PoolMonitor:" + loadClassKey.getCls());
+		return new LoadClassKey(PoolMonitorCreater.class.getName(), "PoolMonitor:" + loadClassKey.getCls());
 	}
 	
 }

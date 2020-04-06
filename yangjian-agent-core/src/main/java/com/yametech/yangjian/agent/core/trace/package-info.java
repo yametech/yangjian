@@ -13,21 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.api.base;
-
 /**
- * 将实例对象转换为interception对象
- * 
+ * <pre>
+ * 实现链路跟踪相关代码
+ * </pre>
  * @author liuzhao
- * 2019年12月21日 下午10:21:04
+ * @since 2020-04-01 10:57
  */
-public interface IInterceptorInit {
-	
-	/**
-	 * 初始化Interceptor
-	 * @param obj	返回值必须实现IConstructorListener、IMethodAOP、IStaticMethodAOP中的一个
-	 * @param classLoader	类加载器
-	 * @param type 方法类型
-	 */
-	void init(Object obj, ClassLoader classLoader, MethodType type);
-}
+package com.yametech.yangjian.agent.core.trace;

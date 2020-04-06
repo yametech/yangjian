@@ -13,14 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core;
+package com.yametech.yangjian.agent.api.trace;
 
-import com.yametech.yangjian.agent.core.util.Util;
+import brave.Tracer;
 
-public class TraceTest {
+/**
+ * 链路Span采样及tag定制
+ * 
+ * @author liuzhao
+ */
+@FunctionalInterface
+public interface ISpanSample {
 	
-	@org.junit.Test
-	public void test() {
-		
-	}
+	/**
+	 * 
+	 * @param context	其他可能扩展的数据
+	 * @return	true：生成Span，false：不生产span
+	 */
+	boolean sample(Tracer tracer);
+	
 }

@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.api;
+package com.yametech.yangjian.agent.api.trace.custom;
 
-public class Test {
-	
-	public void test() throws Exception {
-		
-	}
+import com.yametech.yangjian.agent.api.trace.ISpanCustom;
+
+public interface IDubboCustom extends ISpanCustom<Object[]> {
+
 }

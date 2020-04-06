@@ -13,14 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core;
+package com.yametech.yangjian.agent.api.trace;
 
-import com.yametech.yangjian.agent.core.util.Util;
+import java.util.Map;
 
-public class TraceTest {
+/**
+ * 链路Span采样及tag定制
+ * 
+ * @author liuzhao
+ */
+public interface ISpanCustom<T> {
 	
-	@org.junit.Test
-	public void test() {
-		
-	}
+	/**
+	 * 
+	 * @param obj	业务数据对象
+	 * @return	true：采样，false：不采样
+	 */
+	boolean sample(T obj);
+	
+	/**
+	 * 
+	 * @param obj	业务数据对象
+	 * @return	trace tag数据
+	 */
+	Map<String, String> tags(T obj);
+	
 }

@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core;
+package com.yametech.yangjian.agent.api.trace;
 
-import com.yametech.yangjian.agent.core.util.Util;
-
-public class TraceTest {
+public interface ICustomLoad<T extends ISpanCustom<?>> {
 	
-	@org.junit.Test
-	public void test() {
-		
-	}
+	Class<T> load();
+	
+	void instance(T instance);
+	
 }

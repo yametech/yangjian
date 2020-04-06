@@ -15,6 +15,8 @@
  */
 package com.yametech.yangjian.agent.core.util;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,6 +68,50 @@ public class Util {
 			str.delete(str.length() - delimiter.length(), str.length());
 		}
 		return str.toString();
+	}
+	
+	/**
+	 * 获取父类泛型类型
+	 * @param clazz	类类型
+	 * @param index	泛型index
+	 * @return
+	 */
+	public static Class<?> superClassGeneric(Class<?> clazz, int index) {
+		Type t = clazz.getGenericSuperclass();
+		if (t instanceof ParameterizedType) {
+			Type[] args = ((ParameterizedType) t).getActualTypeArguments();
+			if(args.length > index && args[index] instanceof Class) {
+				return (Class<?>) args[index];
+			}
+		}
+		throw new RuntimeException("无法获取泛型类型");
+	}
+	
+	/**
+	 * 获取接口泛型类型
+	 * @param clazz	类类型
+	 * @param inter	接口类型
+	 * @param index	泛型index
+	 * @return
+	 */
+	public static Class<?> interfacesGeneric(Class<?> clazz, Class<?> inter, int index) {
+		Type[] types = clazz.getGenericInterfaces();
+		if(types == null) {
+			throw new RuntimeException("无法获取泛型类型");
+		}
+		for(Type type : types) {
+			if(!(type instanceof ParameterizedType)) {
+				continue;
+			}
+			ParameterizedType parameterized = (ParameterizedType) type;
+			if(!parameterized.getRawType().getTypeName().equals(inter.getName())) {
+				continue;
+			}
+			if(parameterized.getActualTypeArguments() != null && parameterized.getActualTypeArguments().length > index) {
+				return (Class<?>) parameterized.getActualTypeArguments()[index];
+			}
+		}
+		throw new RuntimeException("无法获取泛型类型");
 	}
 	
 }

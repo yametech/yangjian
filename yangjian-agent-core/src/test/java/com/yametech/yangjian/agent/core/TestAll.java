@@ -45,7 +45,7 @@ import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatchers;
 
-public class Test {
+public class TestAll {
 	
 	@org.junit.Test
 	public void testByteBuddy() throws InstantiationException, IllegalAccessException {
@@ -59,7 +59,7 @@ public class Test {
                 .intercept(MethodDelegation.to(ContextInterceptor.class))
 //                .intercept(MethodDelegation.to(ContextMapInterceptor.class))
                 .make()
-                .load(Test.class.getClassLoader())
+                .load(TestAll.class.getClassLoader())
                 .getLoaded();
 
 		// ContextMapInterceptor	17189	不创建Map：1370	1180	1396	1188

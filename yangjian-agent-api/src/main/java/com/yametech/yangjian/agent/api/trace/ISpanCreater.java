@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core;
+package com.yametech.yangjian.agent.api.trace;
 
-import com.yametech.yangjian.agent.core.util.Util;
+import java.lang.reflect.Method;
 
-public class TraceTest {
+import com.yametech.yangjian.agent.api.bean.BeforeResult;
+
+import brave.Tracer;
+
+public interface ISpanCreater {
 	
-	@org.junit.Test
-	public void test() {
-		
-	}
+	BeforeResult<Object> before(Tracer tracer, ISpanSample spanSample, Object thisObj, Object[] allArguments, Method method) throws Throwable;
+
+	void after(Tracer tracer, ISpanSample spanSample, Object thisObj, Object[] allArguments, Method method, Object ret, Throwable t, BeforeResult<Object> beforeResult);
 }

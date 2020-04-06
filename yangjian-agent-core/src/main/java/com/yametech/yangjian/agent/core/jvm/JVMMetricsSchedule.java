@@ -23,6 +23,7 @@ import java.util.Map;
 import com.yametech.yangjian.agent.api.IAppStatusListener;
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.base.IReportData;
+import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.jvm.collector.BufferPoolCollector;
@@ -39,6 +40,7 @@ import com.yametech.yangjian.agent.core.jvm.metrics.MemoryMetrics;
 import com.yametech.yangjian.agent.core.jvm.metrics.MemoryPoolMetrics;
 import com.yametech.yangjian.agent.core.jvm.metrics.ProcessMetrics;
 import com.yametech.yangjian.agent.core.jvm.metrics.ThreadMetrics;
+import com.yametech.yangjian.agent.core.metric.MetricData;
 import com.yametech.yangjian.agent.core.report.ReportManage;
 
 /**
@@ -48,7 +50,7 @@ import com.yametech.yangjian.agent.core.report.ReportManage;
 public class JVMMetricsSchedule implements IAppStatusListener, ISchedule {
     private static final ILogger logger = LoggerFactory.getLogger(JVMMetricsSchedule.class);
     
-    private IReportData report = ReportManage.getReport(this.getClass());
+    private IReportData report = ReportManage.getReport("JVMMetricsSchedule");
     private BufferPoolCollector bufferPoolCollector;
     private GcCollector gcCollector;
     private ThreadCollector threadCollector;
@@ -104,7 +106,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule {
         params.put("non_heap", memoryMetrics.getNonHeapUsed());
         params.put("cpu", processMetrics.getCpuUsagePercent());
         params.put("memory_total", processMetrics.getMemoryUsage());
-    	report.report("resources", null, params);
+    	report.report(MetricData.get(null, "status/" + Constants.Status.RESOURCES, params));
     }
 
     private void processBufferPoolMetrics() {
@@ -115,7 +117,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule {
             params.put(bufferPoolMetrics.getName() + "_buffer_pool_memory_used", bufferPoolMetrics.getMemoryUsed());
             params.put(bufferPoolMetrics.getName() + "_buffer_pool_memory_capacity", bufferPoolMetrics.getMemoryCapacity());
         }
-        report.report("resources", null, params);
+        report.report(MetricData.get(null, "status/" + Constants.Status.RESOURCES, params));
     }
 
     private void processJVMMetrics() {
@@ -130,7 +132,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule {
         params.put("class_total", classMetrics.getTotal());
         params.put("class_loaded", classMetrics.getLoaded());
         params.put("class_unloaded", classMetrics.getUnloaded());
-        report.report("resources", null, params);
+        report.report(MetricData.get(null, "status/" + Constants.Status.RESOURCES, params));
     }
 
     private void processThreadMetrics() {
@@ -146,6 +148,6 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule {
         params.put("thread_terminated", threadMetrics.getTerminated());
         params.put("thread_peak", threadMetrics.getPeak());
         params.put("thread_news", threadMetrics.getNews());
-        report.report("resources", null, params);
+        report.report(MetricData.get(null, "status/" + Constants.Status.RESOURCES, params));
     }
 }

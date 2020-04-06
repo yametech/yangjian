@@ -18,10 +18,14 @@ package com.yametech.yangjian.agent.core;
 import static net.bytebuddy.matcher.ElementMatchers.isInterface;
 
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -30,28 +34,30 @@ import java.util.stream.Collectors;
 
 import com.yametech.yangjian.agent.api.IAppStatusListener;
 import com.yametech.yangjian.agent.api.IConfigLoader;
+import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
-import com.yametech.yangjian.agent.api.IMetricMatcher;
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
+import com.yametech.yangjian.agent.api.base.IMatcherProxy;
 import com.yametech.yangjian.agent.api.base.IReportData;
+import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodRegexMatch;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
-import com.yametech.yangjian.agent.api.pool.IPoolMonitorMatcher;
 import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.core.agent.AgentListener;
 import com.yametech.yangjian.agent.core.core.agent.AgentTransformer;
 import com.yametech.yangjian.agent.core.core.classloader.AgentClassLoader;
 import com.yametech.yangjian.agent.core.core.elementmatch.ClassElementMatcher;
+import com.yametech.yangjian.agent.core.metric.MetricData;
 import com.yametech.yangjian.agent.core.metric.MetricMatcherProxy;
-import com.yametech.yangjian.agent.core.metric.base.MetricEventBus;
 import com.yametech.yangjian.agent.core.pool.PoolMonitorMatcherProxy;
 import com.yametech.yangjian.agent.core.report.ReportManage;
+import com.yametech.yangjian.agent.core.trace.TraceMatcherProxy;
 import com.yametech.yangjian.agent.core.util.Util;
 import com.yametech.yangjian.agent.util.CustomThreadFactory;
 import com.yametech.yangjian.agent.util.OSUtil;
@@ -62,14 +68,21 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 public class YMAgent {
 	private static ILogger log = LoggerFactory.getLogger(YMAgent.class);
-	private static IReportData report = ReportManage.getReport(YMAgent.class);
+	private static IReportData report = ReportManage.getReport("YMAgent");
 	private static ScheduledExecutorService service;
 	private static final String[] IGNORE_CLASS_CONFIG = new String[] {"^net\\.bytebuddy\\.", "^org\\.slf4j\\.", // ".*\\$auxiliary\\$.*", 
 			"^org\\.apache\\.logging\\.", "^org\\.groovy\\.", "^sun\\.reflect\\.", // ".*javassist.*", ".*\\.asm\\..*", 这两个会有误拦截：com.alibaba.dubbo.rpc.proxy.javassist.JavassistProxyFactory
 			"^org\\.apache\\.skywalking\\.", "^com\\.yametech\\.yangjian\\.agent\\."};
 	private static final String[] IGNORE_METHOD_CONFIG = new String[] {".*toString\\(\\)$", ".*equals\\(java.lang.Object\\)$",
             ".*hashCode\\(\\)$", ".*clone\\(\\).*"};
+	private static final Map<Class<?>, Class<?>> MATCHER_PROXY_CLASS;
 	
+	static {
+		MATCHER_PROXY_CLASS = new HashMap<>();
+		for(Class<?> matcher : Arrays.asList(MetricMatcherProxy.class, PoolMonitorMatcherProxy.class, TraceMatcherProxy.class)) {// 此处手动维护，后续自动发现
+			MATCHER_PROXY_CLASS.put(Util.interfacesGeneric(matcher, IMatcherProxy.class, 1), matcher);
+		}
+	}
 	
 	/**
 	 * -javaagent:E:\eclipse-workspace\tool-ecpark-monitor\ecpark-agent\dist\ecpark-agent\ecpark-agent.jar=args -Dskywalking.agent.service_name=testlog
@@ -84,11 +97,10 @@ public class YMAgent {
     		log.warn("未配置应用名称，跳过代理");
     		return;
     	}
+    	System.setProperty(Constants.SYSTEM_PROPERTIES_PREFIX + Constants.SERVICE_NAME, Config.SERVICE_NAME.getValue());
     	AgentClassLoader.initDefaultLoader();
     	InstanceManage.loadSpi();
-    	InstanceManage.getSpis().forEach(spi -> {
-    		log.debug("spiClassLoader:{}, {}", spi, Util.join(" > ", Util.listClassLoaders(spi.getClass())));
-    	});
+    	InstanceManage.getSpis().forEach(spi -> log.debug("spiClassLoader:{}, {}", spi, Util.join(" > ", Util.listClassLoaders(spi.getClass()))));
     	loadConfig(arguments);
     	InstanceManage.notifyReader();
     	beforeRun();
@@ -96,14 +108,14 @@ public class YMAgent {
     	addShutdownHook();
     	instrumentation(instrumentation);
     	// 埋点日志，不允许删除
-    	report.report("status/start", null, null);
+    	report.report(MetricData.get("status/" + Constants.Status.STARTING));
     }
     
     private static void instrumentation(Instrumentation instrumentation) {
     	List<InterceptorMatcher> interceptorMatchers = InstanceManage.listSpiInstance(InterceptorMatcher.class).stream().collect(Collectors.toList());
     	List<IConfigMatch> matches = interceptorMatchers.stream().filter(aop -> aop.match() != null)
     			.map(InterceptorMatcher::match).collect(Collectors.toList());
-    	interceptorMatchers = interceptorMatchers.stream().map(YMAgent::convertMatcher).collect(Collectors.toList());// 转换IMetricMatcher为MetricMatcherProxy
+    	interceptorMatchers = interceptorMatchers.stream().map(YMAgent::getMatcherProxy).collect(Collectors.toList());// 转换IMetricMatcher为MetricMatcherProxy
     	List<IEnhanceClassMatch> classMatches = InstanceManage.listSpiInstance(IEnhanceClassMatch.class);
     	matches.addAll(classMatches.stream().filter(aop -> aop.classMatch() != null).map(IEnhanceClassMatch::classMatch).collect(Collectors.toList()));
     	log.info("match class:{}", matches);
@@ -124,14 +136,21 @@ public class YMAgent {
                 .installOn(instrumentation);
     }
     
-    private static InterceptorMatcher convertMatcher(InterceptorMatcher matcher) {
-    	if(matcher instanceof IMetricMatcher) {
-    		return new MetricMatcherProxy((IMetricMatcher) matcher, InstanceManage.getSpiInstance(MetricEventBus.class));
-    	} else if (matcher instanceof IPoolMonitorMatcher) {
-    		return new PoolMonitorMatcherProxy((IPoolMonitorMatcher) matcher);
-    	} else {
+    private static InterceptorMatcher getMatcherProxy(InterceptorMatcher matcher) {
+    	Class<?> proxy = MATCHER_PROXY_CLASS.get(matcher.getClass());
+    	if(proxy == null) {
     		return matcher;
     	}
+    	try {
+    		InterceptorMatcher proxyMatcher = (InterceptorMatcher) proxy.getConstructor(matcher.getClass()).newInstance(matcher);
+    		if(proxyMatcher instanceof IConfigReader) {
+    			InstanceManage.registryConfigReaderInstance((IConfigReader)proxyMatcher);
+    		}
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			log.warn(e, "转换proxy异常：{}", matcher.getClass());
+		}
+    	return matcher;
     }
 
     private static IConfigMatch getOrRegexMatch(Set<String> configs, String... extra) {
@@ -199,7 +218,7 @@ public class YMAgent {
             @Override
     		public void run() {
             	// 埋点日志，不允许删除
-            	report.report("status/shutdown", null, null);
+            	report.report(MetricData.get("status/" + Constants.Status.CLOSING));
             	List<IAppStatusListener> shutdowns = InstanceManage.listSpiInstance(IAppStatusListener.class);
             	Collections.reverse(shutdowns);// 启动时顺序init，关闭时倒序showdown
             	try {
@@ -212,7 +231,7 @@ public class YMAgent {
 					log.warn(e, "关闭服务异常，可能丢失数据");
 				}
             	// 埋点日志，不允许删除
-            	report.report("status/closed", null, null);
+            	report.report(MetricData.get("status/" + Constants.Status.CLOSED));
             }
         });
     }

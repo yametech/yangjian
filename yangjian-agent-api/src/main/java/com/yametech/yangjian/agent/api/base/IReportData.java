@@ -15,17 +15,22 @@
  */
 package com.yametech.yangjian.agent.api.base;
 
-import java.util.Map;
+import java.util.List;
 
 public interface IReportData {
 	
 	/**
-	 * 
-	 * 上报数据
-	 * @param dataType	上报的数据类型，多个组合时使用/，不包含？
-	 * @param second	发生时间的秒数，如果为null，则使用当前时间
-	 * @param params	上报的参数，可为null
+	 * 单条上报
+	 * @param data	一条上报的数据
 	 * @return	是否上报成功
 	 */
-	boolean report(String dataType, Long second, Map<String, Object> params);
+	boolean report(Object data);
+	
+	/**
+	 * 
+	 * 批量上报数据
+	 * @param datas	需要上报的数据
+	 * @return	是否上报成功
+	 */
+	boolean batchReport(List<Object> datas);
 }

@@ -17,6 +17,14 @@
     </properties>
 
     <dependencies>
+    	<!-- https://mvnrepository.com/artifact/io.zipkin.brave/brave -->
+		<dependency>
+		    <groupId>io.zipkin.brave</groupId>
+		    <artifactId>brave</artifactId>
+		    <version>5.10.2</version>
+		    <scope>provided</scope>
+		</dependency>
+    	
     </dependencies>
     
     <build>

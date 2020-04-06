@@ -13,14 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core;
+package com.yametech.yangjian.agent.core.trace.sample;
 
-import com.yametech.yangjian.agent.core.util.Util;
+import brave.Tracer;
 
-public class TraceTest {
+public class FollowerRateLimitSampler extends RateLimitSampler {
 	
-	@org.junit.Test
-	public void test() {
-		
+	public FollowerRateLimitSampler(int qps) {
+		super(qps);
 	}
+	
+	@Override
+	public boolean sample(Tracer tracer) {
+		if(tracer.currentSpan() != null) {
+			return true;
+		}
+		return super.sample(tracer);
+	}
+	
 }

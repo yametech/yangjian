@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core;
+package com.yametech.yangjian.agent.core.trace.sample;
 
-import com.yametech.yangjian.agent.core.util.Util;
+import com.yametech.yangjian.agent.api.trace.ISpanSample;
 
-public class TraceTest {
-	
-	@org.junit.Test
-	public void test() {
-		
-	}
+public class SampleFactory {
+	public static final ISpanSample NONE = (tracer) -> false;
+	public static final ISpanSample ALWAYS = (tracer) -> true;
+	public static final ISpanSample FOLLOWER = (tracer) -> tracer.currentSpan() != null;
 }

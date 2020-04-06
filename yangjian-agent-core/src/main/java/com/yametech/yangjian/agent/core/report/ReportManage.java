@@ -33,11 +33,11 @@ public class ReportManage implements IReportData, IConfigReader {
 	private String myKey;
 	private List<IReport> reports;
 	
-	public ReportManage(Class<?> useClass) {
-		if(useClass == null) {
-			throw new IllegalArgumentException("useClass不能为null");
+	public ReportManage(String reportConfigKey) {
+		if(reportConfigKey == null) {
+			throw new IllegalArgumentException("reportConfigKey不能为null");
 		}
-		this.myKey = defaultKey + "." + useClass.getSimpleName();
+		this.myKey = defaultKey + "." + reportConfigKey;
 		this.configKeys = new HashSet<>(Arrays.asList(defaultKey, myKey));
 	}
 	
@@ -46,8 +46,8 @@ public class ReportManage implements IReportData, IConfigReader {
 	 * @param cls	一般为调用的类Class，用于读取配置
 	 * @return
 	 */
-    public static IReportData getReport(Class<?> cls) {
-    	return getReport(cls, false);
+    public static IReportData getReport(String reportConfigKey) {
+    	return getReport(reportConfigKey, false);
     }
     /**
      * 	根据Class获取上报实例，根据needNotify确认是否执行通知
@@ -55,17 +55,30 @@ public class ReportManage implements IReportData, IConfigReader {
      * @param needNotifyConfig	true：注册时执行一次配置通知（用于在全局通知(InstanceManage.notifyReaders)之后调用该方法）；false：不执行配置通知（用于在全局通知之前调用该方法）；
      * @return
      */
-	public static IReportData getReport(Class<?> cls, boolean needNotifyConfig) {
-    	ReportManage report = new ReportManage(cls);
+	private static IReportData getReport(String reportConfigKey, boolean needNotifyConfig) {
+    	ReportManage report = new ReportManage(reportConfigKey);
     	InstanceManage.registryConfigReaderInstance(report, needNotifyConfig);
     	return report;
     }
 	
 	@Override
-	public boolean report(String dataType, Long second, Map<String, Object> params) {
+	public boolean report(Object data) {
 		List<IReport> useReports = reports;
 		for(IReport report : useReports) {
-			report.report(dataType, second, params);
+			if(!report.report(data)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	@Override
+	public boolean batchReport(List<Object> datas) {
+		List<IReport> useReports = reports;
+		for(IReport report : useReports) {
+			if(!report.batchReport(datas)) {
+				return false;
+			}
 		}
 		return true;
 	}

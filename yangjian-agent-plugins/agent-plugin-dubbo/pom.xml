@@ -29,6 +29,13 @@
             <version>5.0.8.RELEASE</version>
             <scope>provided</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/io.zipkin.brave/brave -->
+		<dependency>
+		    <groupId>io.zipkin.brave</groupId>
+		    <artifactId>brave</artifactId>
+		    <version>5.10.2</version>
+		    <scope>provided</scope>
+		</dependency>
 
         <dependency>
             <groupId>com.github.sgroschupf</groupId>

@@ -15,16 +15,17 @@
  */
 package com.yametech.yangjian.agent.plugin.reporter.http;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.IReport;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.util.HttpClient;
 import com.yametech.yangjian.agent.util.HttpRequest;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * HTTP上报
@@ -35,27 +36,31 @@ import java.util.Set;
  * @date 2020/3/5
  */
 public class HttpReporter implements IReport, IConfigReader {
-
     private static final String URL_CONFIG_KEY = "report.http.url";
-    private static final String SERVICE_NAME_KEY = "service.name";
     /**
      * 上报的URL
      */
     private String url;
-    private String serviceName;
 
     @Override
-    public boolean report(String dataType, Long second, Map<String, Object> params) {
-        if (StringUtil.isEmpty(serviceName) || StringUtil.isEmpty(url) || params == null || params.isEmpty()) {
+    public boolean report(Object data) {
+        if (StringUtil.isEmpty(url) || data == null) {
             return false;
         }
-        params.put("serviceName", serviceName);
-        params.put("dataType", dataType);
-        params.put("second", second == null ? System.currentTimeMillis() / 1000 : second);
         return StringUtil.notEmpty(HttpClient.doHttpRequest(new HttpRequest(url, HttpRequest.HttpMethod.POST)
-                .setDatas(buildRequestData(params))));
+                .setDatas(data.toString())));
     }
 
+    @Override
+    public boolean batchReport(List<Object> datas) {
+    	for(Object obj : datas) {
+			if(!report(obj)) {
+				return false;
+			}
+		}
+		return true;
+    }
+    
     @Override
     public String type() {
         return "http";
@@ -63,7 +68,7 @@ public class HttpReporter implements IReport, IConfigReader {
 
     @Override
     public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList(URL_CONFIG_KEY, SERVICE_NAME_KEY));
+        return new HashSet<>(Arrays.asList(URL_CONFIG_KEY));
     }
 
     @Override
@@ -71,23 +76,6 @@ public class HttpReporter implements IReport, IConfigReader {
         if (kv.containsKey(URL_CONFIG_KEY)) {
             url = kv.get(URL_CONFIG_KEY);
         }
-        serviceName = kv.get(SERVICE_NAME_KEY);
     }
 
-    private String buildRequestData(Map<String, Object> params) {
-        StringBuilder result = new StringBuilder();
-        boolean first = true;
-        for (Map.Entry<String, Object> entry : params.entrySet()) {
-            if (first) {
-                first = false;
-            } else {
-                result.append("&");
-            }
-            result.append(StringUtil.encode(entry.getKey()));
-            result.append("=");
-            result.append(StringUtil.encode(entry.getValue().toString()));
-        }
-
-        return result.toString();
-    }
 }

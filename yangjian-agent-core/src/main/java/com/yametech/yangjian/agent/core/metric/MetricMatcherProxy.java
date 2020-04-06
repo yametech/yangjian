@@ -23,7 +23,7 @@ import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.IMetricMatcher;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
-import com.yametech.yangjian.agent.api.base.IInterceptorInit;
+import com.yametech.yangjian.agent.api.base.IMatcherProxy;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.convert.IConvertBase;
@@ -37,7 +37,7 @@ import com.yametech.yangjian.agent.core.metric.base.MetricEventBus;
 import com.yametech.yangjian.agent.core.util.Util;
 import com.yametech.yangjian.agent.core.util.Value;
 
-public class MetricMatcherProxy implements IInterceptorInit, InterceptorMatcher {
+public class MetricMatcherProxy implements IMatcherProxy<BaseConvertAOP, IMetricMatcher>, InterceptorMatcher {
 	private static ILogger log = LoggerFactory.getLogger(MetricMatcherProxy.class);
 	private static Map<MethodType, Class<?>> typeClass = new EnumMap<>(MethodType.class);
 	private static Map<String, Object> convertAopInstance = new ConcurrentHashMap<>();
@@ -49,16 +49,13 @@ public class MetricMatcherProxy implements IInterceptorInit, InterceptorMatcher 
 		typeClass.put(MethodType.INSTANCE, ConvertMethodAOP.class);
 	}
 	
-	public MetricMatcherProxy(IMetricMatcher metricMatcher, MetricEventBus metricEventBus) {
+	public MetricMatcherProxy(IMetricMatcher metricMatcher) {
 		this.metricMatcher = metricMatcher;
-		this.metricEventBus = metricEventBus;
+		this.metricEventBus = InstanceManage.getSpiInstance(MetricEventBus.class);
 	}
 	
 	@Override
-	public void init(Object obj, ClassLoader classLoader, MethodType type) {
-		if(!(obj instanceof BaseConvertAOP)) {
-			return;
-		}
+	public void init(BaseConvertAOP obj, ClassLoader classLoader, MethodType type) {
 		LoadClassKey convertClass = metricMatcher.loadClass(type);
 		if(convertClass == null) {
 			return;
@@ -72,7 +69,7 @@ public class MetricMatcherProxy implements IInterceptorInit, InterceptorMatcher 
 			if(instance instanceof IConfigReader) {
 				InstanceManage.registryConfigReaderInstance((IConfigReader)instance);
 			}
-			((BaseConvertAOP) obj).init(instance, metricEventBus, metricMatcher.type());
+			obj.init(instance, metricEventBus, metricMatcher.type());
 		} catch (Exception e) {
 			log.warn(e, "加载convert异常：{}，\nclassLoader={}，\nmetricMatcher classLoader：{},\nconvertInstance classLoader：{}",
 					convertClass, classLoader,

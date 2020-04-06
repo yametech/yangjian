@@ -13,14 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core;
+package com.yametech.yangjian.agent.api.trace;
 
-import com.yametech.yangjian.agent.core.util.Util;
+import com.yametech.yangjian.agent.api.InterceptorMatcher;
 
-public class TraceTest {
-	
-	@org.junit.Test
-	public void test() {
-		
-	}
+/**
+ * 	用于匹配需要创建Span的方法
+ * 
+ * @author liuzhao
+ */
+public interface ITraceMatcher extends InterceptorMatcher {
+
+	/**
+	 * 
+	 * @return	当前实例链路类型，目前用于配置
+	 */
+	TraceType type();
 }

@@ -23,7 +23,7 @@ public class Constants {
     public static final String PATH_SEPARATOR = System.getProperty("file.separator", "/");
     public static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
     public static final String SYSTEM_PROPERTIES_PREFIX = "MonitorAgent.";
-//    public static String SERVICE_NAME = "service.name";
+    public static final String SERVICE_NAME = "service.name";
 
     public static final String CONFIG_PATH = "config.path";
     public static final String CONFIG_REMOTE_URL = "config.remote_url";
@@ -41,6 +41,14 @@ public class Constants {
     public static final String IDENTIFY_SEPARATOR = " | ";
     public static final String RABBITMQ_DEFAULT_EXCHANGE = "Default";
 
+    public static class Status {
+    	public static final String STARTING = "starting";// 服务启动中
+    	public static final String STARTED = "started";// 服务已启动
+    	public static final String CLOSING = "closing";// 服务关闭中
+    	public static final String CLOSED = "closed";// 服务已关闭
+    	public static final String RESOURCES = "resources";// 资源状态：jvm...
+    }
+    
     public static class EventType {
         public static final String MYSQL = "mysql";
         public static final String DUBBO_CLIENT = "dubbo-client";
@@ -59,12 +67,21 @@ public class Constants {
         public static final String MYSQL_TABLE = "mysql-table";
         public static final String MYSQL_SQL = "mysql-sql";
     }
-
+    
+    public static class ProductConsume {
+    	public static final String METRIC = "metric";// metric数据生产/消费量
+    	public static final String TRACE = "trace";// trace数据生产/消费量
+    }
+    
     public static class DbOperation {
         public static final String INSERT = "Insert";
         public static final String DELETE = "Delete";
         public static final String UPDATE = "Update";
         public static final String SELECT = "Select";
         public static final String GET_CONNECTION = "GetConnection";
+    }
+    
+    public static String serviceName() {
+    	return System.getProperty(SYSTEM_PROPERTIES_PREFIX + SERVICE_NAME);
     }
 }

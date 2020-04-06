@@ -42,7 +42,7 @@ import com.yametech.yangjian.agent.core.core.classloader.AgentClassLoader;
 public class InstanceManage {
 	private static ILogger log = LoggerFactory.getLogger(InstanceManage.class);
     private static List<Object> spis = new ArrayList<>();// 已加载的spi实例
-    private static final String SPI_PATH = "META-INF/services/com.yametech.yangjian.agent.api.base.SPI";
+    private static final String SPI_BASE_PATH = "META-INF/services/";
 
 	/**
 	 * 加载所有的spi
@@ -51,7 +51,7 @@ public class InstanceManage {
 //		ServiceLoader<SPI> starterLoader = ServiceLoader.load(SPI.class, AgentClassLoader.getDefault());
 //		starterLoader.forEach(spis::add);
 		
-		List<String> spiClasses = getSPIClass();
+		List<String> spiClasses = getSPIClass(SPI.class);
 		if(spiClasses == null) {
 			return;
 		}
@@ -74,10 +74,10 @@ public class InstanceManage {
 		});
     }
 	
-	private static List<String> getSPIClass() {
+	public static List<String> getSPIClass(Class<?> cls) {
         List<String> spiClasses = new ArrayList<>();
         try {
-        	Enumeration<URL> urls = AgentClassLoader.getDefault().getResources(SPI_PATH);
+        	Enumeration<URL> urls = AgentClassLoader.getDefault().getResources(SPI_BASE_PATH + cls.getName());
             while (urls.hasMoreElements()) {
             	URL url = urls.nextElement();
             	if("file".equals(url.getProtocol())) {// 开发环境，在ecpark-agent调试时会重复加载，所以使用protocol过滤
