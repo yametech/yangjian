@@ -13,20 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.api.trace;
+package com.yametech.yangjian.agent.api.trace.custom;
+
+import com.yametech.yangjian.agent.api.trace.ISpanCustom;
 
 /**
  * 
- * 定制Span属性接口，此处通过泛型或许需要加载的接口实例类型，通过instance回调并带上泛型对应的实例，如果有多个匹配则仅使用第一个
- * 注意：一定要指定泛型，否则无法获取接口实例，通过该方式避免多实现一个方法
+ * 用于定制链路Span(是否生成Span、tag)，并通过SPI的方式加载接口实现类（SPI文件的路径即为该接口的路径）
+ * dubbo客户端链路Span定制
  * @author liuzhao
  */
-public interface ICustomLoad<T extends ISpanCustom<?>> {
-	
-	/**
-	 * 
-	 * @param customInstance	泛型中的接口实例
-	 */
-	void custom(T customInstance);
-	
+public interface IDubboClientCustom extends ISpanCustom<Object[]> {
+
 }

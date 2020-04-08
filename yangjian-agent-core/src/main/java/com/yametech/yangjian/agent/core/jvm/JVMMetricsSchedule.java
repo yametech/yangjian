@@ -16,11 +16,15 @@
 package com.yametech.yangjian.agent.core.jvm;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.yametech.yangjian.agent.api.IAppStatusListener;
+import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.common.Constants;
@@ -47,9 +51,10 @@ import com.yametech.yangjian.agent.core.report.ReportManage;
  * @author zcn
  * @date: 2019-10-25
  **/
-public class JVMMetricsSchedule implements IAppStatusListener, ISchedule {
-    private static final ILogger logger = LoggerFactory.getLogger(JVMMetricsSchedule.class);
-    
+public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfigReader {
+    private static final ILogger LOG = LoggerFactory.getLogger(JVMMetricsSchedule.class);
+    private static final String CONFIG_KEY = "jvmMetricOutput.interval";
+    private static final String BASE_PATH = "status/";
     private IReportData report = ReportManage.getReport("JVMMetricsSchedule");
     private BufferPoolCollector bufferPoolCollector;
     private GcCollector gcCollector;
@@ -58,7 +63,29 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule {
     private MemoryPoolCollector memoryPoolCollector;
     private ProcessCollector processCollector;
     private ClassCollector classCollector;
+    private int interval = 5;
 
+    @Override
+    public Set<String> configKey() {
+        return new HashSet<>(Arrays.asList(CONFIG_KEY));
+    }
+
+    @Override
+    public void configKeyValue(Map<String, String> kv) {
+        if (kv == null) {
+            return;
+        }
+        
+        String intervalStr = kv.get(CONFIG_KEY);
+    	if(intervalStr != null) {
+    		try {
+    			interval = Integer.parseInt(intervalStr);
+            } catch(Exception e) {
+            	LOG.warn("{}配置错误：{}", CONFIG_KEY, intervalStr);
+            }
+    	}
+    }
+    
     @Override
     public void beforeRun() {
         bufferPoolCollector = new BufferPoolCollector();
@@ -72,7 +99,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule {
 
     @Override
     public int interval() {
-        return 1;
+        return interval;
     }
 
     @Override
@@ -83,7 +110,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule {
             processJVMMetrics();
             processThreadMetrics();
         } catch (Exception e) {
-            logger.error(e, "collect jvm metrics error");
+        	LOG.error(e, "collect jvm metrics error");
         }
     }
 
@@ -106,7 +133,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule {
         params.put("non_heap", memoryMetrics.getNonHeapUsed());
         params.put("cpu", processMetrics.getCpuUsagePercent());
         params.put("memory_total", processMetrics.getMemoryUsage());
-    	report.report(MetricData.get(null, "status/" + Constants.Status.RESOURCES, params));
+    	report.report(MetricData.get(null, BASE_PATH + Constants.Status.RESOURCES, params));
     }
 
     private void processBufferPoolMetrics() {
@@ -117,7 +144,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule {
             params.put(bufferPoolMetrics.getName() + "_buffer_pool_memory_used", bufferPoolMetrics.getMemoryUsed());
             params.put(bufferPoolMetrics.getName() + "_buffer_pool_memory_capacity", bufferPoolMetrics.getMemoryCapacity());
         }
-        report.report(MetricData.get(null, "status/" + Constants.Status.RESOURCES, params));
+        report.report(MetricData.get(null, BASE_PATH + Constants.Status.RESOURCES, params));
     }
 
     private void processJVMMetrics() {
@@ -132,7 +159,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule {
         params.put("class_total", classMetrics.getTotal());
         params.put("class_loaded", classMetrics.getLoaded());
         params.put("class_unloaded", classMetrics.getUnloaded());
-        report.report(MetricData.get(null, "status/" + Constants.Status.RESOURCES, params));
+        report.report(MetricData.get(null, BASE_PATH + Constants.Status.RESOURCES, params));
     }
 
     private void processThreadMetrics() {
@@ -148,6 +175,6 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule {
         params.put("thread_terminated", threadMetrics.getTerminated());
         params.put("thread_peak", threadMetrics.getPeak());
         params.put("thread_news", threadMetrics.getNews());
-        report.report(MetricData.get(null, "status/" + Constants.Status.RESOURCES, params));
+        report.report(MetricData.get(null, BASE_PATH + Constants.Status.RESOURCES, params));
     }
 }

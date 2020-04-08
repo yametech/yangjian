@@ -27,7 +27,7 @@ public interface ISpanSample {
 	
 	/**
 	 * 
-	 * @param context	其他可能扩展的数据
+	 * @param tracer	brave链路实例
 	 * @return	true：生成Span，false：不生产span
 	 */
 	boolean sample(Tracer tracer);

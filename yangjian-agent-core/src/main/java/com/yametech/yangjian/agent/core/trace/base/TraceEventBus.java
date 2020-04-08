@@ -25,8 +25,6 @@ import com.yametech.yangjian.agent.core.report.ReportManage;
 import com.yametech.yangjian.agent.core.trace.SpanListener;
 import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
 
-import zipkin2.Span;
-
 /**
  * 
  * @Description 
@@ -34,15 +32,15 @@ import zipkin2.Span;
  * @author liuzhao
  * @date 2020年4月3日 下午4:52:21
  */
-public class TraceEventBus extends BaseEventPublish<Span> {
+public class TraceEventBus extends BaseEventPublish<TraceSpan> {
     
     public TraceEventBus() {
-		super(Constants.ProductConsume.TRACE, ReportManage.getReport("TraceEventBus"));
+		super(Constants.ProductConsume.TRACE, "trace", ReportManage.getReport("TraceEventBus"));
 	}
     
     @Override
-	public List<ConsumeConfig<Span>> consumes() {
-		List<ConsumeConfig<Span>> consumes = new ArrayList<>();
+	public List<ConsumeConfig<TraceSpan>> consumes() {
+		List<ConsumeConfig<TraceSpan>> consumes = new ArrayList<>();
 		consumes.add(InstanceManage.getSpiInstance(SpanListener.class));
 		return consumes;
 	}

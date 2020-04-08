@@ -17,6 +17,12 @@ package com.yametech.yangjian.agent.api.trace.custom;
 
 import com.yametech.yangjian.agent.api.trace.ISpanCustom;
 
-public interface IDubboCustom extends ISpanCustom<Object[]> {
+/**
+ * 
+ * 用于定制链路Span(是否生成Span、tag)，并通过SPI的方式加载接口实现类（SPI文件的路径即为该接口的路径）
+ * dubbo服务端链路Span定制
+ * @author liuzhao
+ */
+public interface IDubboServerCustom extends ISpanCustom<Object[]> {
 
 }

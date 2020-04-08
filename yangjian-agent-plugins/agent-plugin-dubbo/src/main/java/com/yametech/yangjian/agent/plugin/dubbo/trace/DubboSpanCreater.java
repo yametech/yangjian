@@ -16,41 +16,133 @@
 package com.yametech.yangjian.agent.plugin.dubbo.trace;
 
 import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
+import java.util.Map;
+
+import org.apache.dubbo.rpc.Result;
+import org.apache.dubbo.rpc.RpcContext;
+import org.apache.dubbo.rpc.RpcException;
 
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.trace.ICustomLoad;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
+import com.yametech.yangjian.agent.api.trace.ISpanCustom;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
-import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
 
+import brave.Span;
 import brave.Tracer;
+import brave.Tracing;
+import brave.internal.Platform;
 
-public class DubboSpanCreater implements ISpanCreater, ICustomLoad<IDubboCustom> {
-
+public abstract class DubboSpanCreater<T extends ISpanCustom<Object[]>> implements ISpanCreater<SpanInfo>, ICustomLoad<T> {
+	private T custom;
+	protected Tracer tracer;
+	private ISpanSample spanSample;
+	
 	@Override
-	public Class<IDubboCustom> load() {
-		// TODO Auto-generated method stub
-		return null;
+	public void init(Tracing tracing, ISpanSample spanSample) {
+		this.tracer = tracing.tracer();
+		this.spanSample = spanSample;
+	}
+	
+	@Override
+	public void custom(T instance) {
+		custom = instance;
 	}
 
+//	@Override
+//	public BeforeResult<Long> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
+//		return new BeforeResult<>(null, TraceUtil.nowMicros(), null);
+//	}
+	
+//	protected Span getSpan(String className, String methodName, Class<?>[] parameterTypes, long startTime) {
+//		Span span = tracer.nextSpan(extracted)
+//				.kind(kind)
+//				.name(getSpanName(className, methodName, parameterTypes))
+//				.start(beforeResult.getLocalVar());
+//	}
+	
+	protected BeforeResult<SpanInfo> spanInit(Span span, Object[] allArguments) {
+		InetSocketAddress remoteAddress = RpcContext.getContext().getRemoteAddress();
+	    if (remoteAddress != null) {
+	    	span.remoteIpAndPort(Platform.get().getHostString(remoteAddress), remoteAddress.getPort());
+	    }
+	    setTags(span, allArguments);
+	    return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
+	}
+	
 	@Override
-	public void instance(IDubboCustom instance) {
-		// TODO Auto-generated method stub
-		
+	public void after(Object thisObj, Object[] allArguments, Method method, Object ret, Throwable t, BeforeResult<SpanInfo> beforeResult) {
+		if(beforeResult == null || beforeResult.getLocalVar() == null || beforeResult.getLocalVar().getSpan() == null) {
+			return;
+		}
+		SpanInfo span = beforeResult.getLocalVar();
+	    Throwable exception = t;
+	    if (exception == null) {
+	    	Result result = (Result) ret;
+	    	if (result.hasException()) {
+	    		exception = result.getException();
+	    	}
+	    }
+	    if(exception != null) {
+	    	span.getSpan().error(exception);
+			if (exception instanceof RpcException) {
+				span.getSpan().tag("dubbo.error_code", Integer.toString(((RpcException) exception).getCode()));
+			}
+	    }
+		span.getSpan().finish();
+		if(span.getScope() != null) {
+			span.getScope().close();
+		}
 	}
 
-	@Override
-	public BeforeResult<Object> before(Tracer tracer, ISpanSample spanSample, Object thisObj, Object[] allArguments,
-			Method method) throws Throwable {
-		// TODO Auto-generated method stub
-		return null;
+	/**
+	 * 是否生成Span
+	 * @param allArguments
+	 * @return
+	 */
+	protected boolean generateSpan(Object[] allArguments) {
+		if(custom != null) {
+			return custom.sample(allArguments);
+		}
+		return spanSample.sample(tracer);
 	}
-
-	@Override
-	public void after(Tracer tracer, ISpanSample spanSample, Object thisObj, Object[] allArguments, Method method,
-			Object ret, Throwable t, BeforeResult<Object> beforeResult) {
-		// TODO Auto-generated method stub
-		
+	
+	/**
+	 * 获取span名称
+	 * @param className
+	 * @param methodName
+	 * @param parameterTypes
+	 * @return
+	 */
+	protected String getSpanName(String className, String methodName, Class<?>[] parameterTypes) {
+		StringBuilder name = new StringBuilder();
+		name.append(className)
+			.append('.').append(methodName)
+			.append('(');
+		for (Class<?> classes : parameterTypes) {
+			name.append(classes.getSimpleName() + ",");
+        }
+        if (parameterTypes.length > 0) {
+        	name.delete(name.length() - 1, name.length());
+        }
+        name.append(")");
+        return name.toString();
 	}
-
+	
+	/**
+	 * 设置tags
+	 * @param span
+	 * @param arguments
+	 */
+	protected void setTags(Span span, Object[] arguments) {
+		if(custom == null) {
+			return;
+		}
+		Map<String, String> tags = custom.tags(arguments);
+		if(tags != null) {
+			tags.forEach(span::tag);
+		}
+	}
+	
 }

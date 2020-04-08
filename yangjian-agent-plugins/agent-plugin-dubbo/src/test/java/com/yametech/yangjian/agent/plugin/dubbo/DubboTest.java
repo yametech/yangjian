@@ -54,7 +54,7 @@ public class DubboTest {
 		return RpcServer.instance()
 				.appName("javaagent-test")
 				.addProtocol(20901, 3)
-				.addRegistry("zookeeper://127.0.0.1:2181")
+				.addRegistry("zookeeper://10.1.0.64:2181")
 				.version(version)
 				.start(IDubboService.class, new DubboService());
 //		return rpcServer;
@@ -66,7 +66,7 @@ public class DubboTest {
 	public static void initDubboClient(String version) {
 		RpcClient.instance()
 				.appName("javaagent-test")
-				.addRegistry("zookeeper://127.0.0.1:2181")
+				.addRegistry("zookeeper://10.1.0.64:2181")
 				.version(version)
 				.timeout(10000);
 	}

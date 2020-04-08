@@ -21,14 +21,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.IMetricMatcher;
-import com.yametech.yangjian.agent.api.InterceptorMatcher;
-import com.yametech.yangjian.agent.api.base.IConfigMatch;
-import com.yametech.yangjian.agent.api.base.IMatcherProxy;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.convert.IConvertBase;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.common.BaseMatcherProxy;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
 import com.yametech.yangjian.agent.core.metric.base.ConvertMethodAOP;
@@ -37,11 +35,10 @@ import com.yametech.yangjian.agent.core.metric.base.MetricEventBus;
 import com.yametech.yangjian.agent.core.util.Util;
 import com.yametech.yangjian.agent.core.util.Value;
 
-public class MetricMatcherProxy implements IMatcherProxy<BaseConvertAOP, IMetricMatcher>, InterceptorMatcher {
+public class MetricMatcherProxy extends BaseMatcherProxy<IMetricMatcher, BaseConvertAOP> {
 	private static ILogger log = LoggerFactory.getLogger(MetricMatcherProxy.class);
 	private static Map<MethodType, Class<?>> typeClass = new EnumMap<>(MethodType.class);
 	private static Map<String, Object> convertAopInstance = new ConcurrentHashMap<>();
-	private IMetricMatcher metricMatcher;
 	private MetricEventBus metricEventBus;
 	
 	static {
@@ -50,13 +47,13 @@ public class MetricMatcherProxy implements IMatcherProxy<BaseConvertAOP, IMetric
 	}
 	
 	public MetricMatcherProxy(IMetricMatcher metricMatcher) {
-		this.metricMatcher = metricMatcher;
+		super(metricMatcher);
 		this.metricEventBus = InstanceManage.getSpiInstance(MetricEventBus.class);
 	}
 	
 	@Override
 	public void init(BaseConvertAOP obj, ClassLoader classLoader, MethodType type) {
-		LoadClassKey convertClass = metricMatcher.loadClass(type);
+		LoadClassKey convertClass = matcher.loadClass(type);
 		if(convertClass == null) {
 			return;
 		}
@@ -69,24 +66,19 @@ public class MetricMatcherProxy implements IMatcherProxy<BaseConvertAOP, IMetric
 			if(instance instanceof IConfigReader) {
 				InstanceManage.registryConfigReaderInstance((IConfigReader)instance);
 			}
-			obj.init(instance, metricEventBus, metricMatcher.type());
+			obj.init(instance, metricEventBus, matcher.type());
 		} catch (Exception e) {
 			log.warn(e, "加载convert异常：{}，\nclassLoader={}，\nmetricMatcher classLoader：{},\nconvertInstance classLoader：{}",
 					convertClass, classLoader,
-					Util.join(" > ", Util.listClassLoaders(metricMatcher.getClass())),
+					Util.join(" > ", Util.listClassLoaders(matcher.getClass())),
 					Util.join(" > ", Util.listClassLoaders(instance == null ? null : instance.getClass())));
 			throw new RuntimeException(e);
 		}
 	}
 
 	@Override
-	public IConfigMatch match() {
-		return metricMatcher.match();
-	}
-
-	@Override
 	public LoadClassKey loadClass(MethodType type) {
-		LoadClassKey convertClass = metricMatcher.loadClass(type);
+		LoadClassKey convertClass = matcher.loadClass(type);
 		if(convertClass == null) {
 			return null;
 		}

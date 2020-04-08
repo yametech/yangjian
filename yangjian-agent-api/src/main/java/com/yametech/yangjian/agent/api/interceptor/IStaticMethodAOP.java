@@ -38,7 +38,7 @@ public interface IStaticMethodAOP<T> {
 	BeforeResult<T> before(Object[] allArguments, Method method) throws Throwable;
 
     /**
-     *增强方法调用之后执行
+     *增强方法调用之后执行，增强方法执行异常时如果exception中不抛出异常则after也会执行
      * @param allArguments  所有的方法参数
      * @param method    类方法定义实例
      * @param beforeResult  before的返回值，可能为null
@@ -51,7 +51,7 @@ public interface IStaticMethodAOP<T> {
 	Object after(Object[] allArguments, Method method, BeforeResult<T> beforeResult, Object ret, Throwable t, Map<Class<?>, Object> globalVar) throws Throwable;
 
     /**
-     * 增强方法处理异常时执行
+     * 增强方法处理异常时执行，早于after执行
      * @param allArguments  所有的方法参数
      * @param method    类方法定义实例
      * @param beforeResult  before的返回值，可能为null

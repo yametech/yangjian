@@ -15,15 +15,13 @@
  */
 package com.yametech.yangjian.agent.api.base;
 
-import com.yametech.yangjian.agent.api.InterceptorMatcher;
-
 /**
  * 将实例对象转换为interception对象
  * 
  * @author liuzhao
  * 2019年12月21日 下午10:21:04
  */
-public interface IMatcherProxy<T, V extends InterceptorMatcher> {
+public interface IMatcherProxy<T> {
 	
 	/**
 	 * 初始化Interceptor

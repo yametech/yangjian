@@ -2,9 +2,9 @@ package com.yametech.yangjian.agent.plugin.dubbo.trace;
 
 import java.util.Map;
 
-import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
+import com.yametech.yangjian.agent.api.trace.custom.IDubboClientCustom;
 
-public class DubboSpanCustom implements IDubboCustom {
+public class DubboSpanCustom implements IDubboClientCustom {
 
 	@Override
 	public boolean sample(Object[] obj) {

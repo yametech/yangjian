@@ -21,12 +21,10 @@ import java.lang.instrument.Instrumentation;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +37,6 @@ import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
-import com.yametech.yangjian.agent.api.base.IMatcherProxy;
 import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.StringUtil;
@@ -47,6 +44,7 @@ import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodRegexMatch;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.common.MatchProxyManage;
 import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.core.agent.AgentListener;
@@ -54,10 +52,7 @@ import com.yametech.yangjian.agent.core.core.agent.AgentTransformer;
 import com.yametech.yangjian.agent.core.core.classloader.AgentClassLoader;
 import com.yametech.yangjian.agent.core.core.elementmatch.ClassElementMatcher;
 import com.yametech.yangjian.agent.core.metric.MetricData;
-import com.yametech.yangjian.agent.core.metric.MetricMatcherProxy;
-import com.yametech.yangjian.agent.core.pool.PoolMonitorMatcherProxy;
 import com.yametech.yangjian.agent.core.report.ReportManage;
-import com.yametech.yangjian.agent.core.trace.TraceMatcherProxy;
 import com.yametech.yangjian.agent.core.util.Util;
 import com.yametech.yangjian.agent.util.CustomThreadFactory;
 import com.yametech.yangjian.agent.util.OSUtil;
@@ -75,14 +70,6 @@ public class YMAgent {
 			"^org\\.apache\\.skywalking\\.", "^com\\.yametech\\.yangjian\\.agent\\."};
 	private static final String[] IGNORE_METHOD_CONFIG = new String[] {".*toString\\(\\)$", ".*equals\\(java.lang.Object\\)$",
             ".*hashCode\\(\\)$", ".*clone\\(\\).*"};
-	private static final Map<Class<?>, Class<?>> MATCHER_PROXY_CLASS;
-	
-	static {
-		MATCHER_PROXY_CLASS = new HashMap<>();
-		for(Class<?> matcher : Arrays.asList(MetricMatcherProxy.class, PoolMonitorMatcherProxy.class, TraceMatcherProxy.class)) {// 此处手动维护，后续自动发现
-			MATCHER_PROXY_CLASS.put(Util.interfacesGeneric(matcher, IMatcherProxy.class, 1), matcher);
-		}
-	}
 	
 	/**
 	 * -javaagent:E:\eclipse-workspace\tool-ecpark-monitor\ecpark-agent\dist\ecpark-agent\ecpark-agent.jar=args -Dskywalking.agent.service_name=testlog
@@ -137,20 +124,22 @@ public class YMAgent {
     }
     
     private static InterceptorMatcher getMatcherProxy(InterceptorMatcher matcher) {
-    	Class<?> proxy = MATCHER_PROXY_CLASS.get(matcher.getClass());
+    	Entry<Class<?>, Class<?>> proxy = MatchProxyManage.getProxy(matcher.getClass());
     	if(proxy == null) {
     		return matcher;
     	}
     	try {
-    		InterceptorMatcher proxyMatcher = (InterceptorMatcher) proxy.getConstructor(matcher.getClass()).newInstance(matcher);
+    		InterceptorMatcher proxyMatcher = (InterceptorMatcher) proxy.getValue().getConstructor(proxy.getKey()).newInstance(matcher);
     		if(proxyMatcher instanceof IConfigReader) {
     			InstanceManage.registryConfigReaderInstance((IConfigReader)proxyMatcher);
     		}
+    		log.info("{} proxy {}", matcher.getClass(),proxyMatcher.getClass());
+    		return proxyMatcher;
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
 			log.warn(e, "转换proxy异常：{}", matcher.getClass());
+			return matcher;
 		}
-    	return matcher;
     }
 
     private static IConfigMatch getOrRegexMatch(Set<String> configs, String... extra) {
@@ -189,7 +178,7 @@ public class YMAgent {
      * 开启定时调度
      */
     private static void startSchedule() {
-    	service = Executors.newScheduledThreadPool(Config.SCHEDULE_CORE_POOL_SIZE.getValue(), new CustomThreadFactory("schedule", true));
+    	service = Executors.newScheduledThreadPool(Config.SCHEDULE_CORE_POOL_SIZE.getValue(), new CustomThreadFactory("agent-schedule", true));
     	InstanceManage.listSpiInstance(ISchedule.class).forEach(schedule -> {
     		if(schedule.initialDelay() == 0) {
     			schedule.execute();

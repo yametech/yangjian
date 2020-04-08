@@ -43,7 +43,7 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
     private IReportData report = ReportManage.getReport("RTEventListener");
     
     public RTEventListener() {
-		super(Constants.ProductConsume.METRIC, "metric.consume.threadNum", ReportManage.getReport("RTEventListener"));
+		super(Constants.ProductConsume.METRIC, "metric", ReportManage.getReport("RTEventListener"));
 	}
 
     @Override

@@ -28,10 +28,10 @@ import com.yametech.yangjian.agent.core.common.BaseEventPublish;
 import com.yametech.yangjian.agent.core.util.Util;
 import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
 
-public class MatcherProxyTest extends BaseEventPublish<String> implements IMatcherProxy<String, ITraceMatcher> {
+public class MatcherProxyTest extends BaseEventPublish<String> implements IMatcherProxy<String> {
 	
 	public MatcherProxyTest() {
-		super(null, null);
+		super(null, null, null);
 	}
 	
 	@Test

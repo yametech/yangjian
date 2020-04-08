@@ -15,6 +15,9 @@
  */
 package com.yametech.yangjian.agent.plugin.dubbo;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+
 public class Utils {
 	/**
 	 * 检测参数是否合法，非法时抛出异常
@@ -54,5 +57,58 @@ public class Utils {
 		} else {
 			return new StringBuilder().append(Character.toLowerCase(s.charAt(0))).append(s.substring(1)).toString();
 		}
+	}
+	
+	/**
+	 * 获取父类泛型类型
+	 * @param clazz	类类型
+	 * @param index	泛型index
+	 * @return
+	 */
+	public static Class<?> superClassGeneric(Class<?> clazz, int index) {
+		Type t = clazz.getGenericSuperclass();
+		if (t instanceof ParameterizedType) {
+			Type[] args = ((ParameterizedType) t).getActualTypeArguments();
+			if(args.length > index) {
+				if(args[index] instanceof Class) {
+					return (Class<?>) args[index];
+				} else if(args[index] instanceof ParameterizedType) {
+					return (Class<?>) ((ParameterizedType)args[index]).getRawType();
+				}
+			}
+		}
+		throw new RuntimeException("无法获取泛型类型：" + clazz + "	" + index);
+	}
+	
+	/**
+	 * 获取接口泛型类型
+	 * @param clazz	类类型
+	 * @param inter	接口类型
+	 * @param index	泛型index
+	 * @return
+	 */
+	public static Class<?> interfacesGeneric(Class<?> clazz, Class<?> inter, int index) {
+		Type[] types = clazz.getGenericInterfaces();
+		if(types == null) {
+			throw new RuntimeException("无法获取泛型类型：" + clazz + "	" + inter + "	" + index);
+		}
+		for(Type type : types) {
+			if(!(type instanceof ParameterizedType)) {
+				continue;
+			}
+			ParameterizedType parameterized = (ParameterizedType) type;
+			if(!parameterized.getRawType().getTypeName().equals(inter.getName())) {
+				continue;
+			}
+			if(parameterized.getActualTypeArguments() != null && parameterized.getActualTypeArguments().length > index) {
+				Type actualType = parameterized.getActualTypeArguments()[index];
+				if(actualType instanceof Class) {
+					return (Class<?>) parameterized.getActualTypeArguments()[index];
+				} else if(actualType instanceof ParameterizedType) {
+					return (Class<?>) ((ParameterizedType)actualType).getRawType();
+				}
+			}
+		}
+		throw new RuntimeException("无法获取泛型类型：" + clazz + "	" + inter + "	" + index);
 	}
 }

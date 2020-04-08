@@ -23,27 +23,26 @@ import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.common.BaseEventListener;
 import com.yametech.yangjian.agent.core.report.ReportManage;
+import com.yametech.yangjian.agent.core.trace.base.TraceSpan;
 import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
-
-import zipkin2.Span;
 
 /**
  * @author liuzhao
  * @Description
  * @date 2019年10月11日 下午4:51:45
  */
-public class SpanListener extends BaseEventListener<Span> implements BaseConsume<Span> {
+public class SpanListener extends BaseEventListener<TraceSpan> implements BaseConsume<TraceSpan> {
 	private static final ILogger log = LoggerFactory.getLogger(SpanListener.class);
     private AtomicLong totalNum = new AtomicLong(0);// 总消费量
 	private AtomicLong periodTotalNum = new AtomicLong(0);// 最近一个输出周期产生的事件量
 	private IReportData report = ReportManage.getReport("SpanListener");
     
 	public SpanListener() {
-		super(Constants.ProductConsume.TRACE, "trace.consume.threadNum", ReportManage.getReport("SpanListener"));
+		super(Constants.ProductConsume.TRACE, "trace", ReportManage.getReport("SpanListener"));
 	}
 	
     @Override
-    public BaseConsume<Span> getConsume() {
+    public BaseConsume<TraceSpan> getConsume() {
         // 该方法会调用parallelism次，如果返回同一个实例且parallelism>0，则实例为多线程消费
         return this;
     }
@@ -59,21 +58,21 @@ public class SpanListener extends BaseEventListener<Span> implements BaseConsume
     }
 
 	@Override
-	public boolean test(Span t) {
+	public boolean test(TraceSpan t) {
 		totalNum.getAndIncrement();
 		periodTotalNum.getAndIncrement();
 		return true;
 	}
     
     @Override
-	public void accept(Span t) {
-    	if(!report.report(t)) {// TODO 需确认此处多线程消费是否有问题
+	public void accept(TraceSpan t) {
+    	if(!report.report(t.getSpan())) {// TODO 需确认此处多线程消费是否有问题
     		log.warn("span上报失败：{}", t);
     	}
 	}
 
 	@Override
-	protected int eventHashCode(Span event) {
-		return event.traceId().hashCode();
+	protected int eventHashCode(TraceSpan event) {
+		return event.getSpan().traceId().hashCode();
 	}
 }

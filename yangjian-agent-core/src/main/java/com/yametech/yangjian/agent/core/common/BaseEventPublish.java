@@ -16,20 +16,23 @@
 package com.yametech.yangjian.agent.core.common;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.ExceptionHandler;
 import com.yametech.yangjian.agent.api.IAppStatusListener;
+import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
-import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.metric.MetricData;
 import com.yametech.yangjian.agent.core.util.Util;
 import com.yametech.yangjian.agent.util.CustomThreadFactory;
@@ -45,26 +48,60 @@ import com.yametech.yangjian.agent.util.eventbus.process.EventBus;
  * @date 2020年4月3日 下午4:52:35 
  * @param <T>
  */
-public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedule {
+public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedule, IConfigReader {
     private static final ILogger log = LoggerFactory.getLogger(BaseEventPublish.class);
     private static final int MIN_BUFFER_SIZE = 1 << 6;
+    private static final String BUFFER_SIZE_KEY_PREFIX = "bufferSize.";
+    private static final String INTERVAL_KEY_PREFIX = "publishMetricOutput.interval.";
     private IReportData report;
     private EventBus<T> eventBus;
     private String metricType;
+    private String configKeySuffix;
+    private int bufferSize = MIN_BUFFER_SIZE;
+    private int interval = 5;
     
-    public BaseEventPublish(String metricType, IReportData report) {
+    public BaseEventPublish(String metricType, String configKeySuffix, IReportData report) {
     	this.metricType = metricType;
+    	this.configKeySuffix = configKeySuffix;
 		this.report = report;
 	}
+    
+    @Override
+    public Set<String> configKey() {
+    	return new HashSet<>(Arrays.asList(BUFFER_SIZE_KEY_PREFIX + configKeySuffix, INTERVAL_KEY_PREFIX + configKeySuffix));
+    }
+    
+    @Override
+    public void configKeyValue(Map<String, String> kv) {
+    	if (kv == null) {
+            return;
+        }
+    	String bufferSizeStr = kv.get(BUFFER_SIZE_KEY_PREFIX + configKeySuffix);
+    	if(bufferSizeStr != null) {
+    		try {
+            	int bufferSizeConfig = Integer.parseInt(bufferSizeStr);
+            	if(bufferSizeConfig > MIN_BUFFER_SIZE) {
+            		this.bufferSize = bufferSizeConfig;
+            	}
+            } catch(Exception e) {
+            	log.warn("{}配置错误：{}", BUFFER_SIZE_KEY_PREFIX + configKeySuffix, bufferSizeStr);
+            }
+    	}
+    	
+    	String intervalStr = kv.get(INTERVAL_KEY_PREFIX + configKeySuffix);
+    	if(intervalStr != null) {
+    		try {
+    			interval = Integer.parseInt(intervalStr);
+            } catch(Exception e) {
+            	log.warn("{}配置错误：{}", INTERVAL_KEY_PREFIX + configKeySuffix, intervalStr);
+            }
+    	}
+    }
     
     protected abstract List<ConsumeConfig<T>> consumes();
     
     @Override
     public void beforeRun() {
-        Integer bufferSize = Config.CALL_EVENT_BUFFER_SIZE.getValue();
-        if (bufferSize == null || bufferSize < MIN_BUFFER_SIZE) {
-            bufferSize = MIN_BUFFER_SIZE;
-        }
         @SuppressWarnings("unchecked")
 		Class<T> cls = (Class<T>) Util.superClassGeneric(this.getClass(), 0);
         eventBus = EventBusBuilder
@@ -91,7 +128,7 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
                         log.error(e, "Disruptor shutdown error.");
                     }
                 });
-        log.info("{} inited.", metricType);
+        log.info("{} eventPublish inited.", metricType);
     }
 
     public void publish(Consumer<T> consumer) {
@@ -137,7 +174,7 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
 
     @Override
     public int interval() {
-        return 2;
+        return interval;
     }
 
     private static AtomicLong discardNum = new AtomicLong(0);// 总共丢弃的数据量

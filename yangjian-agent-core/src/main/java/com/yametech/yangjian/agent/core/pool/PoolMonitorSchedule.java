@@ -16,10 +16,14 @@
 package com.yametech.yangjian.agent.core.pool;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.log.ILogger;
@@ -32,13 +36,36 @@ import com.yametech.yangjian.agent.core.report.ReportManage;
  * @author dengliming
  * @date 2019/12/21
  */
-public class PoolMonitorSchedule implements ISchedule {
-    private static final ILogger LOGGER = LoggerFactory.getLogger(PoolMonitorSchedule.class);
+public class PoolMonitorSchedule implements ISchedule, IConfigReader {
+    private static final ILogger LOG = LoggerFactory.getLogger(PoolMonitorSchedule.class);
+    private static final String CONFIG_KEY = "poolMetricOutput.interval";
     private IReportData report = ReportManage.getReport(PoolMonitorSchedule.class.getSimpleName());
+    private int interval = 5;
+    
+    @Override
+    public Set<String> configKey() {
+        return new HashSet<>(Arrays.asList(CONFIG_KEY));
+    }
+
+    @Override
+    public void configKeyValue(Map<String, String> kv) {
+        if (kv == null) {
+            return;
+        }
+        
+        String intervalStr = kv.get(CONFIG_KEY);
+    	if(intervalStr != null) {
+    		try {
+    			interval = Integer.parseInt(intervalStr);
+            } catch(Exception e) {
+            	LOG.warn("{}配置错误：{}", CONFIG_KEY, intervalStr);
+            }
+    	}
+    }
     
     @Override
     public int interval() {
-        return 1;
+        return interval;
     }
 
     @Override
@@ -59,7 +86,7 @@ public class PoolMonitorSchedule implements ISchedule {
             }
             inactives.forEach(PoolMonitorRegistry.INSTANCE::unregister);
         } catch (Exception e) {
-            LOGGER.error(e, "execute error.");
+            LOG.error(e, "execute error.");
         }
     }
 }

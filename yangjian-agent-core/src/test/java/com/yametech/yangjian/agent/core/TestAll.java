@@ -24,20 +24,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.common.MethodUtil;
-import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.core.agent.AgentTransformer;
 import com.yametech.yangjian.agent.core.core.agent.IContextField;
 import com.yametech.yangjian.agent.core.core.interceptor.ContextInterceptor;
+import com.yametech.yangjian.agent.core.metric.MetricMatcherProxy;
 import com.yametech.yangjian.agent.core.metric.consume.RTEventListener;
 import com.yametech.yangjian.agent.core.old.MethodEvent;
+import com.yametech.yangjian.agent.core.pool.PoolMonitorMatcherProxy;
+import com.yametech.yangjian.agent.core.trace.TraceMatcherProxy;
 import com.yametech.yangjian.agent.core.util.AgentPath;
+import com.yametech.yangjian.agent.core.util.Util;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.implementation.FieldAccessor;
@@ -81,28 +82,14 @@ public class TestAll {
 	public void path() {
 		File path = AgentPath.getPath();
 		System.err.println(path.getAbsolutePath());
-		System.err.println(1 << 15);
+		System.err.println(1 << 6);
 		int bufferSize = 1 << 3;
 		System.err.println(bufferSize);
 		
-		long start = System.currentTimeMillis();
-		for(int i = 0; i < 1000; i++) {
-			int index = i & (8 - 1);
-//			int index = i % 8;
-//			System.err.println(index);
+		for(Class<?> matcher : Arrays.asList(MetricMatcherProxy.class, PoolMonitorMatcherProxy.class, TraceMatcherProxy.class)) {// 此处手动维护，后续自动发现
+			System.err.println(Util.superClassGeneric(matcher, 0));
 		}
-		System.err.println(System.currentTimeMillis() - start);
-		
-		
-		System.err.println(Pattern.matches("test", "test"));
-		
-		System.err.println(1 << 16);
-		
-		
-		List<Integer> list = Arrays.asList(1,2,3,4,5).stream().map(num -> num > 3 ? null : num).collect(Collectors.toList());
-		System.err.println(list);
 	}
-	
 	
 	@org.junit.Test
 	public void processId() throws InterruptedException {
@@ -119,16 +106,10 @@ public class TestAll {
 	    System.err.println(Runtime.getRuntime().freeMemory());// 空闲内存
 	    System.err.println(Runtime.getRuntime().totalMemory());// 总内存
 	    System.err.println(Runtime.getRuntime().maxMemory());// 最大内存
-	    
-	    int j = 0;
-	    while (true) { // Noncompliant; end condition omitted
-	      j++;
-	    }
 	}
 	
 	@org.junit.Test
 	public void test() throws ClassNotFoundException, NoSuchMethodException, SecurityException {
-		System.err.println(Config.CALL_EVENT_BUFFER_SIZE.getValue());
 		System.err.println(RTEventListener.class.isAssignableFrom(ISchedule.class));
 		/*System.err.println(IConfigReader.class.isAssignableFrom(CallEventAOP.class));
 		System.err.println(IMethodAOP.class.isAssignableFrom(CallEventAOP.class));

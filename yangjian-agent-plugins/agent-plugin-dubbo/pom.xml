@@ -11,9 +11,11 @@
     <artifactId>agent-plugin-dubbo</artifactId>
 
     <properties>
-		<dubbo.version>2.7.0</dubbo.version>
+		<dubbo.version>2.7.3</dubbo.version>
 		<curator-recipes.version>4.1.0</curator-recipes.version>
 		<zkclient.version>0.1</zkclient.version>
+		<zookeeper.version>3.4.13</zookeeper.version>
+		<brave.version>5.10.2</brave.version>
     </properties>
 
     <dependencies>
@@ -21,27 +23,40 @@
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo</artifactId>
             <version>${dubbo.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-aop</artifactId>
-            <version>5.0.8.RELEASE</version>
             <scope>provided</scope>
         </dependency>
+<!--         <dependency> -->
+<!--             <groupId>org.springframework</groupId> -->
+<!--             <artifactId>spring-aop</artifactId> -->
+<!--             <version>5.0.8.RELEASE</version> -->
+<!--             <scope>provided</scope> -->
+<!--         </dependency> -->
         <!-- https://mvnrepository.com/artifact/io.zipkin.brave/brave -->
 		<dependency>
 		    <groupId>io.zipkin.brave</groupId>
 		    <artifactId>brave</artifactId>
-		    <version>5.10.2</version>
+		    <version>${brave.version}</version>
 		    <scope>provided</scope>
 		</dependency>
-
+<!--         <dependency> -->
+<!--             <groupId>com.github.sgroschupf</groupId> -->
+<!--             <artifactId>zkclient</artifactId> -->
+<!--             <version>${zkclient.version}</version> -->
+<!--             <scope>test</scope> -->
+<!--         </dependency> -->
+        <!-- https://mvnrepository.com/artifact/org.apache.curator/curator-recipes -->
+		<dependency>
+		    <groupId>org.apache.curator</groupId>
+		    <artifactId>curator-recipes</artifactId>
+		    <version>${curator-recipes.version}</version>
+		    <scope>provided</scope>
+		</dependency>
         <dependency>
-            <groupId>com.github.sgroschupf</groupId>
-            <artifactId>zkclient</artifactId>
-            <version>${zkclient.version}</version>
-            <scope>test</scope>
-        </dependency>
+	        <groupId>org.apache.zookeeper</groupId>
+	        <artifactId>zookeeper</artifactId>
+	        <version>${zookeeper.version}</version>
+	        <scope>provided</scope>
+		</dependency>
+        
     </dependencies>
 </project>

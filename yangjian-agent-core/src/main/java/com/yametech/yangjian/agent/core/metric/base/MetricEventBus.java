@@ -32,7 +32,7 @@ import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
 public class MetricEventBus extends BaseEventPublish<ConvertTimeEvent> {
     
     public MetricEventBus() {
-		super(Constants.ProductConsume.METRIC, ReportManage.getReport("MetricEventBus"));
+		super(Constants.ProductConsume.METRIC, "metric", ReportManage.getReport("MetricEventBus"));
 	}
     
     @Override

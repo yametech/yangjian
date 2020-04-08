@@ -80,11 +80,15 @@ public class Util {
 		Type t = clazz.getGenericSuperclass();
 		if (t instanceof ParameterizedType) {
 			Type[] args = ((ParameterizedType) t).getActualTypeArguments();
-			if(args.length > index && args[index] instanceof Class) {
-				return (Class<?>) args[index];
+			if(args.length > index) {
+				if(args[index] instanceof Class) {
+					return (Class<?>) args[index];
+				} else if(args[index] instanceof ParameterizedType) {
+					return (Class<?>) ((ParameterizedType)args[index]).getRawType();
+				}
 			}
 		}
-		throw new RuntimeException("无法获取泛型类型");
+		throw new RuntimeException("无法获取泛型类型：" + clazz + "	" + index);
 	}
 	
 	/**
@@ -97,7 +101,7 @@ public class Util {
 	public static Class<?> interfacesGeneric(Class<?> clazz, Class<?> inter, int index) {
 		Type[] types = clazz.getGenericInterfaces();
 		if(types == null) {
-			throw new RuntimeException("无法获取泛型类型");
+			throw new RuntimeException("无法获取泛型类型：" + clazz + "	" + inter + "	" + index);
 		}
 		for(Type type : types) {
 			if(!(type instanceof ParameterizedType)) {
@@ -108,10 +112,15 @@ public class Util {
 				continue;
 			}
 			if(parameterized.getActualTypeArguments() != null && parameterized.getActualTypeArguments().length > index) {
-				return (Class<?>) parameterized.getActualTypeArguments()[index];
+				Type actualType = parameterized.getActualTypeArguments()[index];
+				if(actualType instanceof Class) {
+					return (Class<?>) parameterized.getActualTypeArguments()[index];
+				} else if(actualType instanceof ParameterizedType) {
+					return (Class<?>) ((ParameterizedType)actualType).getRawType();
+				}
 			}
 		}
-		throw new RuntimeException("无法获取泛型类型");
+		throw new RuntimeException("无法获取泛型类型：" + clazz + "	" + inter + "	" + index);
 	}
 	
 }

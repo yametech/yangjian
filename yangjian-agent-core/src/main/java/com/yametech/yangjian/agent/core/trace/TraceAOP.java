@@ -24,13 +24,12 @@ import com.yametech.yangjian.agent.api.interceptor.IStaticMethodAOP;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 
-import brave.Tracer;
 import brave.Tracing;
 
-public class TraceAOP implements IMethodAOP<Object>, IStaticMethodAOP<Object> {
-	private Tracer tracer;
-	private ISpanSample spanSample;
-	private ISpanCreater spanCreater;
+public class TraceAOP<T> implements IMethodAOP<T>, IStaticMethodAOP<T> {
+//	private Tracer tracer;
+//	private ISpanSample spanSample;
+	private ISpanCreater<T> spanCreater;
 	
 	/**
 	 * 
@@ -38,33 +37,34 @@ public class TraceAOP implements IMethodAOP<Object>, IStaticMethodAOP<Object> {
 	 * @param tracing	brave实现的实例
 	 * @param spanCustom	span定制实现
 	 */
-	void init(ISpanCreater spanCreater, Tracing tracing, ISpanSample spanSample) {
+	void init(ISpanCreater<T> spanCreater, Tracing tracing, ISpanSample spanSample) {
 		this.spanCreater = spanCreater;
-		this.tracer = tracing.tracer();
-		this.spanSample = spanSample;
+//		this.tracer = tracing.tracer();
+//		this.spanSample = spanSample;
+		spanCreater.init(tracing, spanSample);
 	}
 
 	@Override
-	public BeforeResult<Object> before(Object[] allArguments, Method method) throws Throwable {
-		return spanCreater.before(tracer, spanSample, null, allArguments, method);
+	public BeforeResult<T> before(Object[] allArguments, Method method) throws Throwable {
+		return spanCreater.before(null, allArguments, method);
 	}
 
 	@Override
-	public Object after(Object[] allArguments, Method method, BeforeResult<Object> beforeResult, Object ret, Throwable t,
+	public Object after(Object[] allArguments, Method method, BeforeResult<T> beforeResult, Object ret, Throwable t,
 			Map<Class<?>, Object> globalVar) throws Throwable {
-		spanCreater.after(tracer, spanSample, null, allArguments, method, ret, t, beforeResult);
+		spanCreater.after(null, allArguments, method, ret, t, beforeResult);
 		return ret;
 	}
 
 	@Override
-	public BeforeResult<Object> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
-		return spanCreater.before(tracer, spanSample, thisObj, allArguments, method);
+	public BeforeResult<T> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
+		return spanCreater.before(thisObj, allArguments, method);
 	}
 
 	@Override
-	public Object after(Object thisObj, Object[] allArguments, Method method, BeforeResult<Object> beforeResult,
+	public Object after(Object thisObj, Object[] allArguments, Method method, BeforeResult<T> beforeResult,
 			Object ret, Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
-		spanCreater.after(tracer, spanSample, thisObj, allArguments, method, ret, t, beforeResult);
+		spanCreater.after(thisObj, allArguments, method, ret, t, beforeResult);
 		return ret;
 	}
 	

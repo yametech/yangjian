@@ -1,2 +1,4 @@
 com.yametech.yangjian.agent.plugin.dubbo.DubboClientMatcher
 com.yametech.yangjian.agent.plugin.dubbo.DubboServerMatcher
+com.yametech.yangjian.agent.plugin.dubbo.trace.DubboClientTraceMatcher
+com.yametech.yangjian.agent.plugin.dubbo.trace.DubboServerTraceMatcher

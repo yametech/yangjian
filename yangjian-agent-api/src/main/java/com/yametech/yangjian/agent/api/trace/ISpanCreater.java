@@ -19,11 +19,39 @@ import java.lang.reflect.Method;
 
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 
-import brave.Tracer;
+import brave.Tracing;
 
-public interface ISpanCreater {
+/**
+ * 创建链路span
+ * 
+ * @author liuzhao
+ */
+public interface ISpanCreater<T> {
 	
-	BeforeResult<Object> before(Tracer tracer, ISpanSample spanSample, Object thisObj, Object[] allArguments, Method method) throws Throwable;
+	/**
+	 * @param tracing	生成Span的brave链路实例
+	 * @param spanSample	span采样率配置，不为null
+	 */
+	void init(Tracing tracing, ISpanSample spanSample);
+	
+	/**
+	 * 
+	 * @param thisObj	拦截的方法类实例，如果拦截的是静态方法，则该值为null
+	 * @param allArguments	方法参数
+	 * @param method	方法定义
+	 * @return	需要传递到after的数据
+	 * @throws Throwable	可以抛出异常，不影响正常调用
+	 */
+	BeforeResult<T> before(Object thisObj, Object[] allArguments, Method method) throws Throwable;
 
-	void after(Tracer tracer, ISpanSample spanSample, Object thisObj, Object[] allArguments, Method method, Object ret, Throwable t, BeforeResult<Object> beforeResult);
+	/**
+	 * 
+	 * @param thisObj	拦截的方法类实例，如果拦截的是静态方法，则该值为null
+	 * @param allArguments	方法参数
+	 * @param method	方法定义
+	 * @param ret	方法返回值
+	 * @param t	方法抛出的异常，如果无异常则为null
+	 * @param beforeResult	before的返回值
+	 */
+	void after(Object thisObj, Object[] allArguments, Method method, Object ret, Throwable t, BeforeResult<T> beforeResult);
 }

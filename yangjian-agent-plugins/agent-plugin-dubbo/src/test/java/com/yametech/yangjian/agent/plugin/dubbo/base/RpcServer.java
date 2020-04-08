@@ -18,9 +18,9 @@ package com.yametech.yangjian.agent.plugin.dubbo.base;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.alibaba.dubbo.config.MonitorConfig;
-import com.alibaba.dubbo.config.ProtocolConfig;
-import com.alibaba.dubbo.config.ServiceConfig;
+import org.apache.dubbo.config.MonitorConfig;
+import org.apache.dubbo.config.ProtocolConfig;
+import org.apache.dubbo.config.ServiceConfig;
 
 import com.yametech.yangjian.agent.plugin.dubbo.Utils;
 
@@ -29,8 +29,8 @@ public class RpcServer extends Rpc<RpcServer> {
 	private static RpcServer server = new RpcServer();
 	private static final String DEFAULT_PROTOCOL_NAME = "dubbo";
 	
-	private List<ProtocolConfig> protocols = new ArrayList<ProtocolConfig>();// 服务提供者协议集合
-	private List<ServiceConfig<?>> services = new ArrayList<ServiceConfig<?>>();
+	private List<ProtocolConfig> protocols = new ArrayList<>();// 服务提供者协议集合
+	private List<ServiceConfig<?>> services = new ArrayList<>();
 	
 	private RpcServer() {}
 	
@@ -85,7 +85,7 @@ public class RpcServer extends Rpc<RpcServer> {
 		Utils.checkArgument(instance == null, "服务实现类不能为null");
 		Utils.checkStatus(getApplication().getName() == null, "必须设置应用名称");
 		// 服务提供者暴露服务配置
-		ServiceConfig<T> config = new ServiceConfig<T>(); // 此实例很重，封装了与注册中心的连接，请自行缓存，否则可能造成内存和连接泄漏
+		ServiceConfig<T> config = new ServiceConfig<>(); // 此实例很重，封装了与注册中心的连接，请自行缓存，否则可能造成内存和连接泄漏
 		config.setApplication(getApplication());
 		config.setRegistries(getRegistrys());
 		config.setProtocols(protocols);

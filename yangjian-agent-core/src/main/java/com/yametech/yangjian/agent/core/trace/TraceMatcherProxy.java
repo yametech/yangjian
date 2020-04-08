@@ -22,9 +22,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.yametech.yangjian.agent.api.IConfigReader;
-import com.yametech.yangjian.agent.api.InterceptorMatcher;
-import com.yametech.yangjian.agent.api.base.IConfigMatch;
-import com.yametech.yangjian.agent.api.base.IMatcherProxy;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.log.ILogger;
@@ -35,9 +32,11 @@ import com.yametech.yangjian.agent.api.trace.ISpanCustom;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.ITraceMatcher;
 import com.yametech.yangjian.agent.api.trace.SampleStrategy;
+import com.yametech.yangjian.agent.core.common.BaseMatcherProxy;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
 import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
+import com.yametech.yangjian.agent.core.trace.base.BraveHelper;
 import com.yametech.yangjian.agent.core.trace.base.TraceEventBus;
 import com.yametech.yangjian.agent.core.trace.sample.FollowerRateLimitSampler;
 import com.yametech.yangjian.agent.core.trace.sample.RateLimitSampler;
@@ -46,26 +45,20 @@ import com.yametech.yangjian.agent.core.util.Util;
 
 import brave.Tracing;
 
-public class TraceMatcherProxy implements IMatcherProxy<TraceAOP, ITraceMatcher>, InterceptorMatcher, IConfigReader {
+public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<?>> implements IConfigReader {
 	private static ILogger log = LoggerFactory.getLogger(TraceMatcherProxy.class);
 	private static ISpanSample globalSample;
-	private ITraceMatcher matcher;
 	private ISpanSample spanSample;
 	private TraceEventBus traceCache;
 	
 	public TraceMatcherProxy(ITraceMatcher matcher) {
-		this.matcher = matcher;
+		super(matcher);
 		this.traceCache = InstanceManage.getSpiInstance(TraceEventBus.class);
 	}
 	
 	@Override
 	public LoadClassKey loadClass(MethodType type) {
 		return new LoadClassKey(TraceAOP.class.getName(), "TraceAOP:" + matcher.loadClass(type).getCls());
-	}
-
-	@Override
-	public IConfigMatch match() {
-		return matcher.match();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -88,10 +81,10 @@ public class TraceMatcherProxy implements IMatcherProxy<TraceAOP, ITraceMatcher>
 				ICustomLoad customLoad = (ICustomLoad)instance;
 				ISpanCustom spanCustom = getCustomInstance(customLoad, classLoader);
 				if(spanCustom != null) {
-					customLoad.instance(spanCustom);
+					customLoad.custom(spanCustom);
 				}
 			}
-			Tracing tracing = BraveHelper.getTracing(span -> traceCache.publish(t -> BraveHelper.copySpan(span, t)), null);
+			Tracing tracing = BraveHelper.getTracing(span -> traceCache.publish(t -> t.setSpan(span)), null);
 			aop.init((ISpanCreater)instance, tracing, spanSample);
 		} catch (Exception e) {
 			log.warn(e, "加载异常：{}，\nclassLoader={}，\nmatcher classLoader：{},\ninstance classLoader：{}",
@@ -104,8 +97,11 @@ public class TraceMatcherProxy implements IMatcherProxy<TraceAOP, ITraceMatcher>
 	
 	@SuppressWarnings("rawtypes")
 	private ISpanCustom getCustomInstance(ICustomLoad customLoad, ClassLoader classLoader) throws IllegalAccessException, InstantiationException, ClassNotFoundException, AgentPackageNotFoundException {
-		Class<?> cls = customLoad.load();
-		if(cls == null) {
+		Class<?> cls = null;
+		try {
+			cls = Util.superClassGeneric(customLoad.getClass(), 0);
+		} catch (Exception e) {
+			log.warn(e, "无法识别泛型：{}，不设置customLoad", customLoad.getClass());
 			return null;
 		}
 		List<String> customClassNames = InstanceManage.getSPIClass(cls);

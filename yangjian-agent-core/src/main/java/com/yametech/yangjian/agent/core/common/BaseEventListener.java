@@ -39,20 +39,23 @@ import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeFactory;
  */
 public abstract class BaseEventListener<T> implements IAppStatusListener, ConsumeFactory<T>, ISchedule, IConfigReader {
     private static final ILogger log = LoggerFactory.getLogger(BaseEventListener.class);
+    private static final String THREADNUM_KEY_PREFIX = "consume.threadNum.";
+    private static final String INTERVAL_KEY_PREFIX = "consumeMetricOutput.interval.";
     private int threadNum = 1;
-    private String threadNumConfigKey;
+    private String configKeySuffix;
     private IReportData report;
     private String type;
+    private int interval = 5;
     
-    public BaseEventListener(String type, String threadNumConfigKey, IReportData report) {
-		this.threadNumConfigKey = threadNumConfigKey;
+    public BaseEventListener(String type, String configKeySuffix, IReportData report) {
+		this.configKeySuffix = configKeySuffix;
 		this.report = report;
 		this.type = type;
 	}
     
     @Override
     public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList(threadNumConfigKey));
+        return new HashSet<>(Arrays.asList(THREADNUM_KEY_PREFIX + configKeySuffix, INTERVAL_KEY_PREFIX + configKeySuffix));
     }
 
     @Override
@@ -60,18 +63,26 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
         if (kv == null) {
             return;
         }
-        String threadNumStr = kv.get(threadNumConfigKey);
-        if(threadNumStr == null) {
-        	return;
-        }
-        try {
-        	int num = Integer.parseInt(threadNumStr.trim());
-        	if(num > 0) {
-        		threadNum = num;
+        String threadNumStr = kv.get(THREADNUM_KEY_PREFIX + configKeySuffix);
+        if(threadNumStr != null) {
+        	try {
+        		int num = Integer.parseInt(threadNumStr.trim());
+        		if(num > 0) {
+        			threadNum = num;
+        		}
+        	} catch(Exception e) {
+        		log.warn("{}配置错误：{}", THREADNUM_KEY_PREFIX + configKeySuffix, threadNumStr);
         	}
-        } catch(Exception e) {
-        	log.warn("{}配置错误：{}", threadNumConfigKey, threadNumStr);
         }
+        
+        String intervalStr = kv.get(INTERVAL_KEY_PREFIX + configKeySuffix);
+    	if(intervalStr != null) {
+    		try {
+    			interval = Integer.parseInt(intervalStr);
+            } catch(Exception e) {
+            	log.warn("{}配置错误：{}", INTERVAL_KEY_PREFIX + configKeySuffix, intervalStr);
+            }
+    	}
     }
     
     @Override
@@ -81,7 +92,7 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
 
     @Override
     public int interval() {
-        return 2;
+        return interval;
     }
 
     @Override

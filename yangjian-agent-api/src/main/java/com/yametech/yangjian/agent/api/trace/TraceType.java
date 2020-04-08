@@ -15,9 +15,16 @@
  */
 package com.yametech.yangjian.agent.api.trace;
 
+/**
+ * 链路Span类型
+ * 
+ * @author liuzhao
+ */
 public enum TraceType {
-	DUBBO("dubbo"),
-	KAFKA("kafka");
+	DUBBO_CLIENT("dubbo-client"),
+	DUBBO_SERVER("dubbo-server"),
+	MQ_PUBLISH("mq-publish"),
+	MQ_CONSUME("mq-consume");
 	
 	private String key;
 	private TraceType(String key) {

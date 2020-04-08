@@ -18,8 +18,8 @@ package com.yametech.yangjian.agent.plugin.dubbo.base;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.alibaba.dubbo.config.ReferenceConfig;
-import com.alibaba.dubbo.config.RegistryConfig;
+import org.apache.dubbo.config.ReferenceConfig;
+import org.apache.dubbo.config.RegistryConfig;
 
 import com.yametech.yangjian.agent.plugin.dubbo.Utils;
 
@@ -30,7 +30,7 @@ public class RpcClient extends Rpc<RpcClient> {
 	private static RpcClient server = new RpcClient();
 	
 //	private Map<Class<?>, Map<String, Object>> cachedService = new HashMap<Class<?>, Map<String, Object>>();
-	private Map<String, Object> cachedService = new HashMap<String, Object>();
+	private Map<String, Object> cachedService = new HashMap<>();
 	
 	private int timeoutMillis = 0;
 	private boolean isDirectConnect = false;// 是否是直连服务（不走注册中心）
@@ -86,12 +86,12 @@ public class RpcClient extends Rpc<RpcClient> {
 		Utils.checkArgument(cls == null, "接口不能为null");
 		Utils.checkArgument(version == null, "版本号不能为null");
 		Utils.checkStatus(getApplication().getName() == null, "必须设置应用名称");
-		Utils.checkStatus(getRegistrys().size() == 0, "未配置注册地址");
-		synchronized (cls) {
+		Utils.checkStatus(getRegistrys().isEmpty(), "未配置注册地址");
+		synchronized (cachedService) {
 			if(cachedService.containsKey(cacheKey)) {
 				return (T) cachedService.get(cacheKey);
 			}
-			ReferenceConfig<T> reference = new ReferenceConfig<T>(); // 此实例很重，封装了与注册中心的连接以及与提供者的连接，请自行缓存，否则可能造成内存和连接泄漏
+			ReferenceConfig<T> reference = new ReferenceConfig<>(); // 此实例很重，封装了与注册中心的连接以及与提供者的连接，请自行缓存，否则可能造成内存和连接泄漏
 			reference.setApplication(getApplication());
 			reference.setInterface(cls);
 			reference.setVersion(version);

@@ -47,7 +47,7 @@ public class Config {
     	value -> new HashSet<String>(Arrays.asList(value.split("\r\n")))
 	);
     // 方法调用事件缓存大小，必须为2的倍数，需考虑内存占用
-	public static final ConfigValue<Integer> CALL_EVENT_BUFFER_SIZE = new ConfigValue<>("methodCallEvent.bufferSize", (1 << 15) + "", Integer::parseInt);
+//	public static final ConfigValue<Integer> CALL_EVENT_BUFFER_SIZE = new ConfigValue<>("methodCallEvent.bufferSize", (1 << 15) + "", Integer::parseInt);
     // 定时调度线程池线程个数，定时任务使用
 	public static final ConfigValue<Integer> SCHEDULE_CORE_POOL_SIZE = new ConfigValue<>("schedule.corePoolSize", 5 + "", Integer::parseInt);
 	// 默认读取服务名称使用的key
@@ -65,7 +65,7 @@ public class Config {
     static {
     	CONFIG_VALUES.add(IGNORE_CLASS);
     	CONFIG_VALUES.add(IGNORE_METHODS);
-    	CONFIG_VALUES.add(CALL_EVENT_BUFFER_SIZE);
+//    	CONFIG_VALUES.add(CALL_EVENT_BUFFER_SIZE);
     	CONFIG_VALUES.add(SCHEDULE_CORE_POOL_SIZE);
 //    	CONFIG_VALUES.add(SERVICE_NAME_SYSTEMKEY);
     	CONFIG_VALUES.add(SERVICE_NAME);

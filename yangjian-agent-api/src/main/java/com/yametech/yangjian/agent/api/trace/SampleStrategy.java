@@ -15,6 +15,10 @@
  */
 package com.yametech.yangjian.agent.api.trace;
 
+/**
+ * 采样策略
+ * @author liuzhao
+ */
 public enum SampleStrategy {
 	NONE(),
 	ALWAYS(),

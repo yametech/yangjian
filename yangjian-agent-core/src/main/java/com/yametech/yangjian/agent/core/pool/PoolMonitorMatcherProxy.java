@@ -16,15 +16,13 @@
 package com.yametech.yangjian.agent.core.pool;
 
 import com.yametech.yangjian.agent.api.IConfigReader;
-import com.yametech.yangjian.agent.api.InterceptorMatcher;
-import com.yametech.yangjian.agent.api.base.IConfigMatch;
-import com.yametech.yangjian.agent.api.base.IMatcherProxy;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.api.pool.IPoolMonitorCreater;
 import com.yametech.yangjian.agent.api.pool.IPoolMonitorMatcher;
+import com.yametech.yangjian.agent.core.common.BaseMatcherProxy;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
 import com.yametech.yangjian.agent.core.util.Util;
@@ -36,12 +34,11 @@ import com.yametech.yangjian.agent.core.util.Util;
  * @author liuzhao
  * @date 2020年3月6日 下午3:14:22
  */
-public class PoolMonitorMatcherProxy implements IMatcherProxy<PoolMonitorCreater, IPoolMonitorMatcher>, InterceptorMatcher {
+public class PoolMonitorMatcherProxy extends BaseMatcherProxy<IPoolMonitorMatcher, PoolMonitorCreater> {
 	private static ILogger log = LoggerFactory.getLogger(PoolMonitorMatcherProxy.class);
-	private IPoolMonitorMatcher matcher;
 	
 	public PoolMonitorMatcherProxy(IPoolMonitorMatcher matcher) {
-		this.matcher = matcher;
+		super(matcher);
 	}
 	
 	@Override
@@ -67,11 +64,6 @@ public class PoolMonitorMatcherProxy implements IMatcherProxy<PoolMonitorCreater
 					Util.join(" > ", Util.listClassLoaders(instance == null ? null : instance.getClass())));
 			throw new RuntimeException(e);
 		}
-	}
-
-	@Override
-	public IConfigMatch match() {
-		return matcher.match();
 	}
 
 	@Override

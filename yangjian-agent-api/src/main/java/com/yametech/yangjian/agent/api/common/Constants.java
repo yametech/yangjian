@@ -69,8 +69,8 @@ public class Constants {
     }
     
     public static class ProductConsume {
-    	public static final String METRIC = "metric";// metric数据生产/消费量
-    	public static final String TRACE = "trace";// trace数据生产/消费量
+    	public static final String METRIC = "metric";// metric数据生产/消费量，用于日志输出标识、线程标识、配置
+    	public static final String TRACE = "trace";// trace数据生产/消费量，用于日志输出标识、线程标识、配置
     }
     
     public static class DbOperation {

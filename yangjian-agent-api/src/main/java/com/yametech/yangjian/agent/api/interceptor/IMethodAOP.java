@@ -39,7 +39,7 @@ public interface IMethodAOP<T> {
 	BeforeResult<T> before(Object thisObj, Object[] allArguments, Method method) throws Throwable;
 
     /**
-     *增强方法调用之后执行
+     *增强方法调用之后执行，增强方法执行异常时如果exception中不抛出异常则after也会执行
      * @param thisObj   增强的类实例
      * @param allArguments  所有的方法参数
      * @param method    类方法定义实例
@@ -53,7 +53,7 @@ public interface IMethodAOP<T> {
 	Object after(Object thisObj, Object[] allArguments, Method method, BeforeResult<T> beforeResult, Object ret, Throwable t, Map<Class<?>, Object> globalVar) throws Throwable;
 
     /**
-     * 增强方法处理异常时执行
+     * 增强方法处理异常时执行，早于after执行
      * @param thisObj   增强的类实例
      * @param allArguments  所有的方法参数
      * @param method    类方法定义实例

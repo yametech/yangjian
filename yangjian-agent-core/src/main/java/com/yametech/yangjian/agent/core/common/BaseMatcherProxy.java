@@ -13,20 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.api.trace;
+package com.yametech.yangjian.agent.core.common;
+
+import com.yametech.yangjian.agent.api.InterceptorMatcher;
+import com.yametech.yangjian.agent.api.base.IConfigMatch;
+import com.yametech.yangjian.agent.api.base.IMatcherProxy;
 
 /**
  * 
- * 定制Span属性接口，此处通过泛型或许需要加载的接口实例类型，通过instance回调并带上泛型对应的实例，如果有多个匹配则仅使用第一个
- * 注意：一定要指定泛型，否则无法获取接口实例，通过该方式避免多实现一个方法
+ * @Description PoolMonitorMatcher实例代理器
+ * 
  * @author liuzhao
+ * @date 2020年3月6日 下午3:14:22
  */
-public interface ICustomLoad<T extends ISpanCustom<?>> {
+public abstract class BaseMatcherProxy<T extends InterceptorMatcher, V> implements IMatcherProxy<V>, InterceptorMatcher {
+	protected T matcher;
 	
-	/**
-	 * 
-	 * @param customInstance	泛型中的接口实例
-	 */
-	void custom(T customInstance);
+	public BaseMatcherProxy(T matcher) {
+		this.matcher = matcher;
+	}
 	
+	@Override
+	public IConfigMatch match() {
+		return matcher.match();
+	}
+
 }
