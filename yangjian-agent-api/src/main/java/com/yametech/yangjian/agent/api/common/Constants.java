@@ -73,6 +73,11 @@ public class Constants {
     	public static final String TRACE = "trace";// trace数据生产/消费量，用于日志输出标识、线程标识、配置
     }
     
+    public static class ReportType {
+    	public static final String LOG = "log";// log上报方式
+    	public static final String HTTP = "http";// http上报方式
+    }
+    
     public static class DbOperation {
         public static final String INSERT = "Insert";
         public static final String DELETE = "Delete";

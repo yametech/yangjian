@@ -18,6 +18,7 @@ package com.yametech.yangjian.agent.core.report;
 import java.util.List;
 
 import com.yametech.yangjian.agent.api.IReport;
+import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 
@@ -42,7 +43,7 @@ public class LogReport implements IReport {
 
 	@Override
 	public String type() {
-		return "log";
+		return Constants.ReportType.LOG;
 	}
 
 }

@@ -23,6 +23,7 @@ import java.util.Set;
 
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.IReport;
+import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.util.HttpClient;
 import com.yametech.yangjian.agent.util.HttpRequest;
@@ -63,7 +64,7 @@ public class HttpReporter implements IReport, IConfigReader {
     
     @Override
     public String type() {
-        return "http";
+        return Constants.ReportType.HTTP;
     }
 
     @Override

@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.dubbo.rpc.Result;
 import org.apache.dubbo.rpc.RpcContext;
@@ -48,9 +49,8 @@ public abstract class DubboSpanCreater<T extends ISpanCustom> implements ISpanCr
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public void custom(List<T> customs) {
-		this.customs = (List<IDubboCustom>) customs;
+		this.customs = customs.stream().map(t -> (IDubboCustom)t).collect(Collectors.toList());
 	}
 	
 	protected BeforeResult<SpanInfo> spanInit(Span span, Object[] allArguments, IDubboCustom custom) {
