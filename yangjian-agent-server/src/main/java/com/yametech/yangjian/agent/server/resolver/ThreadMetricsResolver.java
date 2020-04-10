@@ -38,8 +38,7 @@ public class ThreadMetricsResolver implements IMetricsResolver<MetricsParameter,
         if (metricsParameter == null) {
             return false;
         }
-        return "resources".equals(MapUtils.getString(metricsParameter.getParams(), "dataType"))
-                && metricsParameter.getParams().containsKey("thread_total_started");
+        return "resources".equals(metricsParameter.getDataType()) && metricsParameter.getParams().containsKey("thread_total_started");
     }
 
     @Override
