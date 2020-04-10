@@ -73,11 +73,11 @@ public class SpanListener extends BaseEventListener<TraceSpan> implements BaseCo
     
     @Override
     protected boolean hashShard() {
-    	return true;
+    	return false;
     }
 
-	@Override
-	protected int eventHashCode(TraceSpan event) {
-		return event.getSpan().traceId().hashCode();
-	}
+//	@Override
+//	protected int eventHashCode(TraceSpan event) {
+//		return event.getSpan().traceId().hashCode();
+//	}
 }

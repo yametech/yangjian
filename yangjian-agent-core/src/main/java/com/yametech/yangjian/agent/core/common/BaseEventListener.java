@@ -41,7 +41,7 @@ import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeFactory;
 public abstract class BaseEventListener<T> implements IAppStatusListener, ConsumeFactory<T>, ISchedule, IConfigReader {
     private static final ILogger log = LoggerFactory.getLogger(BaseEventListener.class);
     private static final String THREADNUM_KEY_PREFIX = "consume.threadNum.";
-    private static final String INTERVAL_KEY_PREFIX = "consumeMetricOutput.interval.";
+    private static final String INTERVAL_KEY_PREFIX = "metricOutput.interval.consume.";
     private int threadNum = 1;
     private String configKeySuffix;
     private IReportData report = ReportManage.getReport("EventListener");

@@ -52,7 +52,7 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
     private static final ILogger log = LoggerFactory.getLogger(BaseEventPublish.class);
     private static final int MIN_BUFFER_SIZE = 1 << 6;
     private static final String BUFFER_SIZE_KEY_PREFIX = "bufferSize.";
-    private static final String INTERVAL_KEY_PREFIX = "publishMetricOutput.interval.";
+    private static final String INTERVAL_KEY_PREFIX = "metricOutput.interval.publish.";
     private IReportData report;
     private EventBus<T> eventBus;
     private String metricType;

@@ -17,7 +17,6 @@ package com.yametech.yangjian.agent.api.trace.custom;
 
 import java.util.Map;
 
-import com.yametech.yangjian.agent.api.trace.ISpanCustom;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 
 /**
@@ -26,7 +25,7 @@ import com.yametech.yangjian.agent.api.trace.ISpanSample;
  * dubbo链路Span tags定制
  * @author liuzhao
  */
-public interface IDubboCustom extends ISpanCustom {
+public interface IDubboCustom {
 	
 	/**
 	 * 

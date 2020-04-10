@@ -44,6 +44,7 @@ import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodRegexMatch;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.common.CoreConstants;
 import com.yametech.yangjian.agent.core.common.MatchProxyManage;
 import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
@@ -95,7 +96,7 @@ public class YMAgent {
     	addShutdownHook();
     	instrumentation(instrumentation);
     	// 埋点日志，不允许删除
-    	report.report(MetricData.get("status/" + Constants.Status.STARTING));
+    	report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.STARTING));
     }
     
     private static void instrumentation(Instrumentation instrumentation) {
@@ -207,7 +208,7 @@ public class YMAgent {
             @Override
     		public void run() {
             	// 埋点日志，不允许删除
-            	report.report(MetricData.get("status/" + Constants.Status.CLOSING));
+            	report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.CLOSING));
             	List<IAppStatusListener> shutdowns = InstanceManage.listSpiInstance(IAppStatusListener.class);
             	Collections.reverse(shutdowns);// 启动时顺序init，关闭时倒序showdown
             	try {
@@ -220,7 +221,7 @@ public class YMAgent {
 					log.warn(e, "关闭服务异常，可能丢失数据");
 				}
             	// 埋点日志，不允许删除
-            	report.report(MetricData.get("status/" + Constants.Status.CLOSED));
+            	report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.CLOSED));
             }
         });
     }

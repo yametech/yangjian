@@ -30,6 +30,7 @@ import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.common.CoreConstants;
 import com.yametech.yangjian.agent.core.jvm.collector.BufferPoolCollector;
 import com.yametech.yangjian.agent.core.jvm.collector.ClassCollector;
 import com.yametech.yangjian.agent.core.jvm.collector.GcCollector;
@@ -53,8 +54,7 @@ import com.yametech.yangjian.agent.core.report.ReportManage;
  **/
 public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfigReader {
     private static final ILogger LOG = LoggerFactory.getLogger(JVMMetricsSchedule.class);
-    private static final String CONFIG_KEY = "jvmMetricOutput.interval";
-    private static final String BASE_PATH = "status/";
+    private static final String CONFIG_KEY = "metricOutput.interval.jvm";
     private IReportData report = ReportManage.getReport("JVMMetricsSchedule");
     private BufferPoolCollector bufferPoolCollector;
     private GcCollector gcCollector;
@@ -133,7 +133,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfi
         params.put("non_heap", memoryMetrics.getNonHeapUsed());
         params.put("cpu", processMetrics.getCpuUsagePercent());
         params.put("memory_total", processMetrics.getMemoryUsage());
-    	report.report(MetricData.get(null, BASE_PATH + Constants.Status.RESOURCES, params));
+    	report.report(MetricData.get(null, CoreConstants.BASE_PATH_STATUS + Constants.Status.RESOURCES, params));
     }
 
     private void processBufferPoolMetrics() {
@@ -144,7 +144,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfi
             params.put(bufferPoolMetrics.getName() + "_buffer_pool_memory_used", bufferPoolMetrics.getMemoryUsed());
             params.put(bufferPoolMetrics.getName() + "_buffer_pool_memory_capacity", bufferPoolMetrics.getMemoryCapacity());
         }
-        report.report(MetricData.get(null, BASE_PATH + Constants.Status.RESOURCES, params));
+        report.report(MetricData.get(null, CoreConstants.BASE_PATH_STATUS + Constants.Status.RESOURCES, params));
     }
 
     private void processJVMMetrics() {
@@ -159,7 +159,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfi
         params.put("class_total", classMetrics.getTotal());
         params.put("class_loaded", classMetrics.getLoaded());
         params.put("class_unloaded", classMetrics.getUnloaded());
-        report.report(MetricData.get(null, BASE_PATH + Constants.Status.RESOURCES, params));
+        report.report(MetricData.get(null, CoreConstants.BASE_PATH_STATUS + Constants.Status.RESOURCES, params));
     }
 
     private void processThreadMetrics() {
@@ -175,6 +175,6 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfi
         params.put("thread_terminated", threadMetrics.getTerminated());
         params.put("thread_peak", threadMetrics.getPeak());
         params.put("thread_news", threadMetrics.getNews());
-        report.report(MetricData.get(null, BASE_PATH + Constants.Status.RESOURCES, params));
+        report.report(MetricData.get(null, CoreConstants.BASE_PATH_STATUS + Constants.Status.RESOURCES, params));
     }
 }

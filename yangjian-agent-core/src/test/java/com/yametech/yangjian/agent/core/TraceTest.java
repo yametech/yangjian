@@ -15,19 +15,30 @@
  */
 package com.yametech.yangjian.agent.core;
 
+import org.junit.Assert;
+
 import com.yametech.yangjian.agent.core.trace.sample.RateLimitSampler;
 
 public class TraceTest {
 	
 	@org.junit.Test
-	public void test() throws InterruptedException {
+	public void test() throws Exception {
 		System.err.println(new Object());
+	}
+	
+	@org.junit.Test
+	public void testSample() throws Exception {
+		int sample = 10;
+		RateLimitSampler sampler = new RateLimitSampler(sample);// 每秒10个样本，并且均匀分布在一秒钟
 		
-		RateLimitSampler sampler = new RateLimitSampler(10);
+		for(int i = 0; i < 3 * sample; i++) {
+			Assert.assertTrue(sampler.sample());
+			Thread.sleep(101);// 每次睡眠101ms,保证每次sample都是true
+		}
 		
-		for(int i = 0; i < 30; i++) {
-			System.err.println(System.currentTimeMillis() + "-----" + sampler.sample());
-			Thread.sleep(101);
+		sampler.sample();
+		for(int i = 0; i < sample - 1; i++) {
+			Assert.assertFalse(sampler.sample());// 因集中取值，都是false
 		}
 	}
 }

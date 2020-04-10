@@ -38,7 +38,7 @@ import com.yametech.yangjian.agent.core.report.ReportManage;
  */
 public class PoolMonitorSchedule implements ISchedule, IConfigReader {
     private static final ILogger LOG = LoggerFactory.getLogger(PoolMonitorSchedule.class);
-    private static final String CONFIG_KEY = "poolMetricOutput.interval";
+    private static final String CONFIG_KEY = "metricOutput.interval.pool";
     private IReportData report = ReportManage.getReport(PoolMonitorSchedule.class.getSimpleName());
     private int interval = 5;
     

@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core.config;
+package com.yametech.yangjian.agent.core.common;
 
 import com.yametech.yangjian.agent.api.common.Constants;
 
 public class CoreConstants extends Constants {
 	public static final String CONFIG_KEY_ENABLE = "enable";
+	public static final String BASE_PATH_STATUS = "status/";
 }
