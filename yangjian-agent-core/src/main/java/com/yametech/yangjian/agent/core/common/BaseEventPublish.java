@@ -133,12 +133,12 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
 
     public void publish(Consumer<T> consumer) {
         eventBus.publish(event -> {
+        	incrTotalNum();
         	if (event == null) {
             	incrDiscardNum();
                 return;
             }
         	consumer.accept(event);
-            incrTotalNum();
         });
     }
 
@@ -177,10 +177,10 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
         return interval;
     }
 
-    private static AtomicLong discardNum = new AtomicLong(0);// 总共丢弃的数据量
-    private static AtomicLong periodDiscardNum = new AtomicLong(0);// 最近一个输出周期丢弃的数据量
-    private static AtomicLong totalNum = new AtomicLong(0);// 总产生的事件量
-    private static AtomicLong periodTotalNum = new AtomicLong(0);// 最近一个输出周期产生的事件量
+    private AtomicLong discardNum = new AtomicLong(0);// 总共丢弃的数据量
+    private AtomicLong periodDiscardNum = new AtomicLong(0);// 最近一个输出周期丢弃的数据量
+    private AtomicLong totalNum = new AtomicLong(0);// 总产生的事件量
+    private AtomicLong periodTotalNum = new AtomicLong(0);// 最近一个输出周期产生的事件量
 
     @Override
     public void execute() {

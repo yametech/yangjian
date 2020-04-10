@@ -38,7 +38,7 @@ public class SpanListener extends BaseEventListener<TraceSpan> implements BaseCo
 	private IReportData report = ReportManage.getReport("SpanListener");
     
 	public SpanListener() {
-		super(Constants.ProductConsume.TRACE, "trace", ReportManage.getReport("SpanListener"));
+		super(Constants.ProductConsume.TRACE, "trace");
 	}
 	
     @Override
@@ -66,10 +66,15 @@ public class SpanListener extends BaseEventListener<TraceSpan> implements BaseCo
     
     @Override
 	public void accept(TraceSpan t) {
-    	if(!report.report(t.getSpan())) {// TODO 需确认此处多线程消费是否有问题
-    		log.warn("span上报失败：{}", t);
+    	if(!report.report("[" + t.getSpan() + "]")) {// 兼容zipkin数据上报格式，方便测试
+    		log.warn("span上报失败：{}", t.getSpan());
     	}
 	}
+    
+    @Override
+    protected boolean hashShard() {
+    	return true;
+    }
 
 	@Override
 	protected int eventHashCode(TraceSpan event) {

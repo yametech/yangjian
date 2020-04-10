@@ -13,21 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core;
+package com.yametech.yangjian.agent.core.trace.sample;
 
-import com.yametech.yangjian.agent.core.trace.sample.RateLimitSampler;
+import com.yametech.yangjian.agent.api.trace.ISpanSample;
+import com.yametech.yangjian.agent.core.trace.base.ITraceDepend;
 
-public class TraceTest {
+import brave.Tracer;
+
+public class FollowerSampler implements ITraceDepend, ISpanSample {
+	private Tracer tracer;
 	
-	@org.junit.Test
-	public void test() throws InterruptedException {
-		System.err.println(new Object());
-		
-		RateLimitSampler sampler = new RateLimitSampler(10);
-		
-		for(int i = 0; i < 30; i++) {
-			System.err.println(System.currentTimeMillis() + "-----" + sampler.sample());
-			Thread.sleep(101);
-		}
+	@Override
+	public void tracer(Tracer tracer) {
+		this.tracer = tracer;
 	}
+	
+	@Override
+	public boolean sample() {
+		return tracer != null && tracer.currentSpan() != null;
+	}
+	
 }

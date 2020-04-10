@@ -16,11 +16,24 @@ public class DubboClientTraceMatcher implements ITraceMatcher {
 
 	@Override
 	public IConfigMatch match() {
+//		return new CombineAndMatch(Arrays.asList(
+//				new SuperClassMatch("org.apache.dubbo.rpc.cluster.support.AbstractClusterInvoker"),
+//        		new MethodNameMatch("invoke")
+//        		new MethodArgumentIndexMatch(0, "org.apache.dubbo.rpc.Invocation")
+//        ));
+		
+//		return new CombineAndMatch(Arrays.asList(
+//				new ClassMatch("org.apache.dubbo.rpc.cluster.support.wrapper.MockClusterInvoker"),
+//        		new MethodNameMatch("invoke"),
+//        		new MethodArgumentIndexMatch(0, "org.apache.dubbo.rpc.Invocation")
+//        ));
+		
 		return new CombineAndMatch(Arrays.asList(
-        		new ClassMatch("org.apache.dubbo.rpc.protocol.dubbo.filter.TraceFilter"),
+        		new ClassMatch("org.apache.dubbo.monitor.support.MonitorFilter"),
         		new MethodNameMatch("invoke"),
                 new MethodArgumentNumMatch(2)
         ));
+		
 	}
 
 	@Override

@@ -32,10 +32,13 @@ public class DubboTest {
 	}
 	
 	@org.junit.Test
-	public void client() {
+	public void client() throws InterruptedException {
 		initDubboClient();
 		IDubboService service = RpcClient.getService(IDubboService.class);
 		System.err.println(service.hello("aaa"));
+		System.err.println(service.hello("aaa", 15));
+		System.err.println(service.heart());
+//		Thread.sleep(5000);
 	}
 	
 	@Before

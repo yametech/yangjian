@@ -23,6 +23,6 @@ import com.yametech.yangjian.agent.api.trace.ISpanCustom;
  * dubbo服务端链路Span定制
  * @author liuzhao
  */
-public interface IDubboServerCustom extends ISpanCustom<Object[]> {
-
+public interface IDubboServerCustom extends ISpanCustom, IDubboCustom {
+	
 }

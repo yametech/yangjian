@@ -29,14 +29,13 @@ public class TimeEvent {
     private String identify;
     private long useTime;// 耗时
     private long number = 1;// 数量，默认为1，批量操作时该值为批量数量
-    public static final StatisticType[] DEFAULT_STATISTIC_TYPES = new StatisticType[]{StatisticType.RT};
+    protected static final StatisticType[] DEFAULT_STATISTIC_TYPES = new StatisticType[]{StatisticType.RT};
 
     public TimeEvent() {
         this(DEFAULT_STATISTIC_TYPES);
     }
 
-    // TODO 去掉
-    public TimeEvent(StatisticType[] statisticTypes) {
+    private TimeEvent(StatisticType[] statisticTypes) {
         if (statisticTypes == null || statisticTypes.length == 0) {
             throw new IllegalArgumentException("必须指定至少一个StatisticType");
         }

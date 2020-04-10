@@ -16,13 +16,12 @@
     </properties>
 
     <dependencies>
-<!--     	TODO 日志api包独立出来后去掉该依赖 -->
     	<dependency>
             <groupId>com.github.yametech</groupId>
-	    	<artifactId>yangjian-agent-core</artifactId>
-	    	<version>${project.version}</version>
-	    	 <scope>provided</scope>
-    	</dependency>
+            <artifactId>yangjian-agent-util</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>com.zaxxer</groupId>

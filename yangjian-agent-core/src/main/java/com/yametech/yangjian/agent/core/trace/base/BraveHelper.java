@@ -50,16 +50,4 @@ public class BraveHelper {
 		return builder.build();
 	}
 	
-	/**
-	 * 将source中的数据拷贝到target中
-	 * @param source
-	 * @param target
-	 */
-	public static void copySpan(Span source, Span target) {
-		// TODO
-	}
-	
-//	public static Sampler getSampler(int qps, int ) {
-//		
-//	}
 }

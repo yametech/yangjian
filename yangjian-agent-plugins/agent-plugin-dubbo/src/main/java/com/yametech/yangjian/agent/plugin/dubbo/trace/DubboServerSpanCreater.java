@@ -26,6 +26,7 @@ import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.BraveUtil;
 import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
+import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
 import com.yametech.yangjian.agent.api.trace.custom.IDubboServerCustom;
 
 import brave.Span;
@@ -41,20 +42,22 @@ public class DubboServerSpanCreater extends DubboSpanCreater<IDubboServerCustom>
 	public void init(Tracing tracing, ISpanSample spanSample) {
 		super.init(tracing, spanSample);
 		this.extractor = tracing.propagation().extractor(BraveUtil.MAP_GETTER);
+		
 	}
 
 	@Override
 	public BeforeResult<SpanInfo> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
-		if(!generateSpan(allArguments)) {// 不需要生成
-			return null;
-		}
 		RpcContext rpcContext = RpcContext.getContext();
-	    Kind kind = rpcContext.isProviderSide() ? Kind.SERVER : Kind.CLIENT;
+		Kind kind = rpcContext.isConsumerSide() ? Kind.CLIENT : Kind.SERVER;
 		if(!kind.equals(Kind.SERVER)) {
 			return null;
 		}
 		Invoker<?> invoker = (Invoker<?>) allArguments[0];
 		Invocation invocation = (Invocation) allArguments[1];
+		IDubboCustom custom = getCustom(invoker.getInterface(), invocation.getMethodName(), invocation.getParameterTypes());
+		if(!generateSpan(invocation.getArguments(), custom)) {// 不需要生成
+			return null;
+		}
 		TraceContextOrSamplingFlags extracted = extractor.extract(invocation.getAttachments());// 注入请求中带的链路信息
 //		invoker.getUrl().getServiceInterface();
 //		invoker.getInterface().getName();
@@ -62,6 +65,6 @@ public class DubboServerSpanCreater extends DubboSpanCreater<IDubboServerCustom>
 				.kind(kind)
 				.name(getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes()))
 				.start(TraceUtil.nowMicros());
-		return spanInit(span, invocation.getArguments());
+		return spanInit(span, invocation.getArguments(), custom);
 	}
 }

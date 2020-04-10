@@ -327,12 +327,15 @@ public final class ClassUtil {
      * @param classes 类集合
      */
     private static void processClassFile(String classPath, File file, String packageName, ClassFilter classFilter, Set<Class<?>> classes) {
-        if(false == classPath.endsWith(File.separator)) {
+        if(!classPath.endsWith(File.separator)) {
             classPath += File.separator;
         }
         String path = file.getAbsolutePath();
         if(packageName == null || packageName.trim().length() == 0) {
             path = removePrefix(path, classPath);
+        }
+        if(path == null) {
+        	return;
         }
         final String filePathWithDot = path.replace(File.separator, ".");
 
@@ -354,8 +357,8 @@ public final class ClassUtil {
      * @param classes 类集合
      */
     private static void processJarFile(File file, String packageName, ClassFilter classFilter, Set<Class<?>> classes) {
-        try {
-            for (JarEntry entry : Collections.list(new JarFile(file).entries())) {
+        try(JarFile jarFile = new JarFile(file)) {
+            for (JarEntry entry : Collections.list(jarFile.entries())) {
                 if (isClass(entry.getName())) {
                     final String className = entry.getName().replace("/", ".").replace(CLASS_EXT, "");
                     fillClass(className, packageName, classes, classFilter);

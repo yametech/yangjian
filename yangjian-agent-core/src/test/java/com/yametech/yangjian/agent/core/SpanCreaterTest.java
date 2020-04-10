@@ -18,6 +18,7 @@ package com.yametech.yangjian.agent.core;
 import static org.junit.Assert.assertEquals;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -32,11 +33,6 @@ import brave.Tracer;
 import brave.Tracing;
 
 public class SpanCreaterTest implements ISpanCreater<Object>, ICustomLoad<IDubboClientCustom> {
-	
-	@Override
-	public void custom(IDubboClientCustom instance) {
-		
-	}
 	
 	@Override
 	public void init(Tracing tracing, ISpanSample spanSample) {
@@ -58,6 +54,11 @@ public class SpanCreaterTest implements ISpanCreater<Object>, ICustomLoad<IDubbo
 		Class<?> cls = Util.interfacesGeneric(SpanCreaterTest.class, ICustomLoad.class, 0);
 		System.err.println(cls);
 		assertEquals("interfacesGeneric error", IDubboClientCustom.class, cls);
+	}
+
+	@Override
+	public void custom(List<IDubboClientCustom> customInstance) {
+		
 	}
 
 }

@@ -18,8 +18,6 @@ package com.yametech.yangjian.agent.core.trace.sample;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.core.util.RateLimit;
 
-import brave.Tracer;
-
 public class RateLimitSampler implements ISpanSample {
 	private RateLimit limiter;
 	
@@ -28,7 +26,7 @@ public class RateLimitSampler implements ISpanSample {
 	}
 	
 	@Override
-	public boolean sample(Tracer tracer) {
+	public boolean sample() {
 		return limiter.tryAcquire();
 	}
 

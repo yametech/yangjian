@@ -15,6 +15,7 @@
  */
 package com.yametech.yangjian.agent.core.trace;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -37,8 +38,10 @@ import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
 import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
 import com.yametech.yangjian.agent.core.trace.base.BraveHelper;
+import com.yametech.yangjian.agent.core.trace.base.ITraceDepend;
 import com.yametech.yangjian.agent.core.trace.base.TraceEventBus;
 import com.yametech.yangjian.agent.core.trace.sample.FollowerRateLimitSampler;
+import com.yametech.yangjian.agent.core.trace.sample.FollowerSampler;
 import com.yametech.yangjian.agent.core.trace.sample.RateLimitSampler;
 import com.yametech.yangjian.agent.core.trace.sample.SampleFactory;
 import com.yametech.yangjian.agent.core.util.Util;
@@ -47,6 +50,7 @@ import brave.Tracing;
 
 public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<?>> implements IConfigReader {
 	private static ILogger log = LoggerFactory.getLogger(TraceMatcherProxy.class);
+//	private static AsyncReporter<Span> report = AsyncReporter.builder(OkHttpSender.newBuilder().endpoint("http://localhost:9411/api/v2/spans").compressionEnabled(false).build()).build();
 	private static ISpanSample globalSample;
 	private ISpanSample spanSample;
 	private TraceEventBus traceCache;
@@ -79,12 +83,18 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 			}
 			if(instance instanceof ICustomLoad) {// 指定了定制tag接口，加载实现类
 				ICustomLoad customLoad = (ICustomLoad)instance;
-				ISpanCustom spanCustom = getCustomInstance(customLoad, classLoader);
-				if(spanCustom != null) {
-					customLoad.custom(spanCustom);
+				List<ISpanCustom> spanCustoms = getCustomInstance(customLoad, classLoader);
+				if(spanCustoms != null) {
+					customLoad.custom(spanCustoms);
 				}
 			}
+
+			// 测试上报到zipkin后端
+//			Tracing tracing = BraveHelper.getTracing(report, null);
 			Tracing tracing = BraveHelper.getTracing(span -> traceCache.publish(t -> t.setSpan(span)), null);
+			if(spanSample instanceof ITraceDepend) {
+				((ITraceDepend)spanSample).tracer(tracing.tracer());
+			}
 			aop.init((ISpanCreater)instance, tracing, spanSample);
 		} catch (Exception e) {
 			log.warn(e, "加载异常：{}，\nclassLoader={}，\nmatcher classLoader：{},\ninstance classLoader：{}",
@@ -96,7 +106,7 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 	}
 	
 	@SuppressWarnings("rawtypes")
-	private ISpanCustom getCustomInstance(ICustomLoad customLoad, ClassLoader classLoader) throws IllegalAccessException, InstantiationException, ClassNotFoundException, AgentPackageNotFoundException {
+	private List<ISpanCustom> getCustomInstance(ICustomLoad customLoad, ClassLoader classLoader) throws IllegalAccessException, InstantiationException, ClassNotFoundException, AgentPackageNotFoundException {
 		Class<?> cls = null;
 		try {
 			cls = Util.superClassGeneric(customLoad.getClass(), 0);
@@ -108,8 +118,11 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 		if(customClassNames == null || customClassNames.isEmpty()) {
 			return null;
 		}
-		String loadClassName = customClassNames.get(0);
-		return InterceptorInstanceLoader.load(loadClassName, loadClassName, classLoader);
+		List<ISpanCustom> customs = new ArrayList<>();
+		for(String loadClassName : customClassNames) {
+			customs.add(InterceptorInstanceLoader.load(loadClassName, loadClassName, classLoader));
+		}
+		return customs;
 	}
 	
 	@Override
@@ -141,7 +154,7 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 		}
 		
 		if(SampleStrategy.FOLLOWER.equals(sampleStrategy)) {
-			spanSample = SampleFactory.FOLLOWER;
+			spanSample = new FollowerSampler();
 			return;
 		}
 		

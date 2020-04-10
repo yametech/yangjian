@@ -15,20 +15,28 @@
  */
 package com.yametech.yangjian.agent.core.trace.sample;
 
+import com.yametech.yangjian.agent.core.trace.base.ITraceDepend;
+
 import brave.Tracer;
 
-public class FollowerRateLimitSampler extends RateLimitSampler {
+public class FollowerRateLimitSampler extends RateLimitSampler implements ITraceDepend {
+	private Tracer tracer;
 	
 	public FollowerRateLimitSampler(int qps) {
 		super(qps);
 	}
 	
 	@Override
-	public boolean sample(Tracer tracer) {
-		if(tracer.currentSpan() != null) {
+	public void tracer(Tracer tracer) {
+		this.tracer = tracer;
+	}
+	
+	@Override
+	public boolean sample() {
+		if(tracer != null && tracer.currentSpan() != null) {
 			return true;
 		}
-		return super.sample(tracer);
+		return super.sample();
 	}
 	
 }

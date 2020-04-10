@@ -43,7 +43,7 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
     private IReportData report = ReportManage.getReport("RTEventListener");
     
     public RTEventListener() {
-		super(Constants.ProductConsume.METRIC, "metric", ReportManage.getReport("RTEventListener"));
+		super(Constants.ProductConsume.METRIC, "metric");
 	}
 
     @Override
@@ -93,7 +93,12 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
         }
         return periodNum;
     }
-
+    
+    @Override
+    protected boolean hashShard() {
+    	return true;
+    }
+    
 	@Override
 	protected int eventHashCode(ConvertTimeEvent event) {
 		return event.getType().hashCode();

@@ -31,55 +31,21 @@ import net.bytebuddy.implementation.bind.annotation.SuperCall;
 
 public class YmStaticInterceptor {
 	private static final ILogger log = LoggerFactory.getLogger(YmStaticInterceptor.class);
-//	private static final MethodType TYPE = MethodType.STATIC;
     private IStaticMethodAOP<?>[] interceptors;
     
     public YmStaticInterceptor(IStaticMethodAOP<?>[] interceptors) {
     	this.interceptors = interceptors;
     }
-    
-//	public YmStaticInterceptor(List<InterceptorMatcher> interceptors, ClassLoader classLoader, MethodDescription.InDefinedShape inDefinedShape) {
-//		this.interceptors = interceptors.stream().map(matcher -> {
-//			LoadClassKey loadClass = matcher.loadClass(TYPE);
-//			if(loadClass == null) {
-//				return null;// TODO 需测试是否可以返回null
-//			}
-//			try {
-//				Object obj = InterceptorInstanceLoader.load(loadClass.getKey(), loadClass.getCls(), classLoader);
-//				if(obj instanceof SPI) {
-//					throw new IllegalStateException("不能实现SPI接口");
-//				}
-//				if(!(obj instanceof IStaticMethodAOP)) {
-//					throw new IllegalStateException("必须实现IStaticMethodAOP");
-//				}
-//				if(matcher instanceof IInterceptorInit) {
-//					((IInterceptorInit)matcher).init(obj, classLoader, TYPE);
-//				}
-//				log.debug("classLoader:{}	{}	{}	{}", obj, classLoader, loadClass, inDefinedShape);
-//				return obj;
-//			} catch (IllegalAccessException | InstantiationException | ClassNotFoundException
-//					| AgentPackageNotFoundException e) {
-//				log.warn(e, "加载实例异常{}", loadClass);
-//				return null;// TODO 需测试是否可以返回null
-//			}
-//		}).toArray(IStaticMethodAOP[]::new);
-//	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@RuntimeType
 	public Object intercept(@Origin Class<?> clazz, @AllArguments Object[] allArguments, @SuperCall Callable<?> callable, @Origin Method method)
 			throws Throwable {
-//      if(interceptors == null || interceptors.length == 0) {// 无需判断，不会为null或者length为0，减少性能损耗
-//      return callable.call();
-//  }
 		InterceptBean<IStaticMethodAOP<?>>[] interceptBeans = new InterceptBean[interceptors.length];
 		int index = 0;
 		Object ret = null;
 		Map<Class<?>, Object> globalVar = null;
 		for (IStaticMethodAOP<?> interceptor : interceptors) {
-//      if (!methodInterceptor.enable()) {
-//          continue;
-//      }
 			try {
 				BeforeResult<?> result = interceptor.before(allArguments, method);
 				interceptBeans[index++] = new InterceptBean<>(interceptor, result);

@@ -15,14 +15,41 @@
  */
 package com.yametech.yangjian.agent.api.trace.custom;
 
+import java.util.Map;
+
 import com.yametech.yangjian.agent.api.trace.ISpanCustom;
+import com.yametech.yangjian.agent.api.trace.ISpanSample;
 
 /**
  * 
  * 用于定制链路Span(是否生成Span、tag)，并通过SPI的方式加载接口实现类（SPI文件的路径即为该接口的路径）
- * dubbo客户端链路Span定制
+ * dubbo链路Span tags定制
  * @author liuzhao
  */
-public interface IDubboClientCustom extends ISpanCustom, IDubboCustom {
+public interface IDubboCustom extends ISpanCustom {
+	
+	/**
+	 * 
+	 * @param interfaceCls	接口类
+	 * @param methodName	调用的方法名
+	 * @param parameterTypes	方法参数类型
+	 * @return	是否匹配，true：则执行sample、tags，false：不执行
+	 */
+	boolean filter(Class<?> interfaceCls, String methodName, Class<?>[] parameterTypes);
+	
+	/**
+	 * 
+	 * @param params	方法参数
+	 * @Param configSample	配置的采样实例
+	 * @return	true：采样，false：不采样
+	 */
+	boolean sample(Object[] params, ISpanSample configSample);
+	
+	/**
+	 * 
+	 * @param params	方法参数
+	 * @return	trace tag数据
+	 */
+	Map<String, String> tags(Object[] params);
 	
 }

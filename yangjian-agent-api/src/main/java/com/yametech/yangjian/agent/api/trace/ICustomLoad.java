@@ -15,18 +15,20 @@
  */
 package com.yametech.yangjian.agent.api.trace;
 
+import java.util.List;
+
 /**
  * 
- * 定制Span属性接口，此处通过泛型或许需要加载的接口实例类型，通过instance回调并带上泛型对应的实例，如果有多个匹配则仅使用第一个
- * 注意：一定要指定泛型，否则无法获取接口实例，通过该方式避免多实现一个方法
+ * 定制Span属性接口，此处通过泛型获取需要加载的接口实例类型，通过custom回调并带上泛型对应的实例
+ * 注意：一定要指定泛型，否则无法获取接口实例，该方式可简化配置
  * @author liuzhao
  */
-public interface ICustomLoad<T extends ISpanCustom<?>> {
+public interface ICustomLoad<T extends ISpanCustom> {
 	
 	/**
 	 * 
-	 * @param customInstance	泛型中的接口实例
+	 * @param customs	Span定制实例
 	 */
-	void custom(T customInstance);
+	void custom(List<T> customs);
 	
 }

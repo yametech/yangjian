@@ -64,6 +64,9 @@ public class ReportManage implements IReportData, IConfigReader {
 	@Override
 	public boolean report(Object data) {
 		List<IReport> useReports = reports;
+		if(useReports == null || useReports.isEmpty()) {
+			return false;
+		}
 		for(IReport report : useReports) {
 			if(!report.report(data)) {
 				return false;
@@ -75,6 +78,9 @@ public class ReportManage implements IReportData, IConfigReader {
 	@Override
 	public boolean batchReport(List<Object> datas) {
 		List<IReport> useReports = reports;
+		if(useReports == null || useReports.isEmpty()) {
+			return false;
+		}
 		for(IReport report : useReports) {
 			if(!report.batchReport(datas)) {
 				return false;

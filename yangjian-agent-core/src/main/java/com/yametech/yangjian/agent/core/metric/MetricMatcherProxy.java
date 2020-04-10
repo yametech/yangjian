@@ -88,13 +88,9 @@ public class MetricMatcherProxy extends BaseMatcherProxy<IMetricMatcher, BaseCon
 //			convertCls = typeClass.get(type).getName();
 //		}
 		if(MethodType.STATIC.equals(type)) {
-			convertCls =
-					ConvertStatisticMethodAOP.class.getName();
-//					"com.yametech.yangjian.agent.core.aop.base.ConvertStatisticMethodAOP";// TODO 此处使用getClass试试会不会有类加载问题，如果可行，就换成类加载，避免类换路径时此处不自动更换，也无法通过类依赖查询
+			convertCls = ConvertStatisticMethodAOP.class.getName();
 		} else if(MethodType.INSTANCE.equals(type)) {
-			convertCls =
-					ConvertMethodAOP.class.getName();
-//					"com.yametech.yangjian.agent.core.aop.base.ConvertMethodAOP";
+			convertCls = ConvertMethodAOP.class.getName();
 		}
 		return convertCls == null ? null : new LoadClassKey(convertCls, "ConvertAOP:" + convertClass.getCls());
 	}

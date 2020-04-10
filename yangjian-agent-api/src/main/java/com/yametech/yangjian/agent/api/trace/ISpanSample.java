@@ -15,8 +15,6 @@
  */
 package com.yametech.yangjian.agent.api.trace;
 
-import brave.Tracer;
-
 /**
  * 链路Span采样及tag定制
  * 
@@ -27,9 +25,8 @@ public interface ISpanSample {
 	
 	/**
 	 * 
-	 * @param tracer	brave链路实例
 	 * @return	true：生成Span，false：不生产span
 	 */
-	boolean sample(Tracer tracer);
+	boolean sample();
 	
 }

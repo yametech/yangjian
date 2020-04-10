@@ -18,9 +18,6 @@ package com.yametech.yangjian.agent.api.common;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import com.yametech.yangjian.agent.api.bean.TimeEvent;
-import com.yametech.yangjian.agent.api.convert.statistic.StatisticType;
-
 /**
  * @author zcn
  **/
@@ -90,13 +87,13 @@ public class StringUtil {
 		System.err.println(join(null));
 		System.err.println(join(new Object[0]));
 		System.err.println(join(new String[] {"111", "2222", "333"}));
-		TimeEvent event = new TimeEvent(new StatisticType[] {StatisticType.QPS, StatisticType.RT});
-		event.setEventTime(123L);
-		event.setIdentify("identify");
-		event.setNumber(100);
-		event.setType("type");
-		event.setUseTime(100000);
-		System.err.println(event);
+//		TimeEvent event = new TimeEvent(new StatisticType[] {StatisticType.QPS, StatisticType.RT});
+//		event.setEventTime(123L);
+//		event.setIdentify("identify");
+//		event.setNumber(100);
+//		event.setType("type");
+//		event.setUseTime(100000);
+//		System.err.println(event);
 		
 	}
 }

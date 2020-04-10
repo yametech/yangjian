@@ -17,6 +17,7 @@ package com.yametech.yangjian.agent.plugin.dubbo.trace;
 
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.dubbo.rpc.Result;
@@ -28,14 +29,15 @@ import com.yametech.yangjian.agent.api.trace.ICustomLoad;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanCustom;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
+import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
 
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
 import brave.internal.Platform;
 
-public abstract class DubboSpanCreater<T extends ISpanCustom<Object[]>> implements ISpanCreater<SpanInfo>, ICustomLoad<T> {
-	private T custom;
+public abstract class DubboSpanCreater<T extends ISpanCustom> implements ISpanCreater<SpanInfo>, ICustomLoad<T> {
+	private List<IDubboCustom> customs;
 	protected Tracer tracer;
 	private ISpanSample spanSample;
 	
@@ -46,28 +48,17 @@ public abstract class DubboSpanCreater<T extends ISpanCustom<Object[]>> implemen
 	}
 	
 	@Override
-	public void custom(T instance) {
-		custom = instance;
+	@SuppressWarnings("unchecked")
+	public void custom(List<T> customs) {
+		this.customs = (List<IDubboCustom>) customs;
 	}
-
-//	@Override
-//	public BeforeResult<Long> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
-//		return new BeforeResult<>(null, TraceUtil.nowMicros(), null);
-//	}
 	
-//	protected Span getSpan(String className, String methodName, Class<?>[] parameterTypes, long startTime) {
-//		Span span = tracer.nextSpan(extracted)
-//				.kind(kind)
-//				.name(getSpanName(className, methodName, parameterTypes))
-//				.start(beforeResult.getLocalVar());
-//	}
-	
-	protected BeforeResult<SpanInfo> spanInit(Span span, Object[] allArguments) {
+	protected BeforeResult<SpanInfo> spanInit(Span span, Object[] allArguments, IDubboCustom custom) {
 		InetSocketAddress remoteAddress = RpcContext.getContext().getRemoteAddress();
 	    if (remoteAddress != null) {
 	    	span.remoteIpAndPort(Platform.get().getHostString(remoteAddress), remoteAddress.getPort());
 	    }
-	    setTags(span, allArguments);
+	    setTags(span, allArguments, custom);
 	    return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
 	}
 	
@@ -95,17 +86,36 @@ public abstract class DubboSpanCreater<T extends ISpanCustom<Object[]>> implemen
 			span.getScope().close();
 		}
 	}
+	
+	/**
+	 * 获取匹配的custom，如果有多个使用第一个
+	 * @param interfaceCls
+	 * @param methodName
+	 * @param parameterTypes
+	 * @return
+	 */
+	protected IDubboCustom getCustom(Class<?> interfaceCls, String methodName, Class<?>[] parameterTypes) {
+		if(customs == null) {
+			return null;
+		}
+		for(IDubboCustom custom : customs) {
+			if(custom.filter(interfaceCls, methodName, parameterTypes)) {
+				return custom;
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * 是否生成Span
 	 * @param allArguments
 	 * @return
 	 */
-	protected boolean generateSpan(Object[] allArguments) {
+	protected boolean generateSpan(Object[] allArguments, IDubboCustom custom) {
 		if(custom != null) {
-			return custom.sample(allArguments);
+			return custom.sample(allArguments, spanSample);
 		}
-		return spanSample.sample(tracer);
+		return spanSample.sample();
 	}
 	
 	/**
@@ -135,7 +145,7 @@ public abstract class DubboSpanCreater<T extends ISpanCustom<Object[]>> implemen
 	 * @param span
 	 * @param arguments
 	 */
-	protected void setTags(Span span, Object[] arguments) {
+	protected void setTags(Span span, Object[] arguments, IDubboCustom custom) {
 		if(custom == null) {
 			return;
 		}

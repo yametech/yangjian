@@ -23,5 +23,17 @@ public class DubboService implements IDubboService {
 		System.err.println("call hello");
 		return "hello " + name;
 	}
-
+	
+	@Override
+	public String hello(String name, Integer age) {
+		System.err.println("call hello age");
+		return "hello " + name + " - " + age;
+	}
+	
+	@Override
+	public String heart() {
+		System.err.println("call heart");
+		return "heart";
+	}
+	
 }

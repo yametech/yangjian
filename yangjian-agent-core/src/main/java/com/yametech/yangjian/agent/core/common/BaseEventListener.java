@@ -29,6 +29,7 @@ import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.metric.MetricData;
+import com.yametech.yangjian.agent.core.report.ReportManage;
 import com.yametech.yangjian.agent.util.eventbus.assignor.MultiThreadAssignor;
 import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeFactory;
 
@@ -43,13 +44,12 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
     private static final String INTERVAL_KEY_PREFIX = "consumeMetricOutput.interval.";
     private int threadNum = 1;
     private String configKeySuffix;
-    private IReportData report;
+    private IReportData report = ReportManage.getReport("EventListener");
     private String type;
     private int interval = 5;
     
-    public BaseEventListener(String type, String configKeySuffix, IReportData report) {
+    public BaseEventListener(String type, String configKeySuffix) {
 		this.configKeySuffix = configKeySuffix;
-		this.report = report;
 		this.type = type;
 	}
     
@@ -131,7 +131,7 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
 	@Override
 	public MultiThreadAssignor<T> assignor() {
 		if(threadNum > 1) {
-			return (msg, totalThreadNum) -> eventHashCode(msg) % totalThreadNum;
+			return (msg, totalThreadNum) -> Math.abs(eventHashCode(msg) % totalThreadNum);
 		} else {
 			return null;
 		}
@@ -139,5 +139,23 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
 	
     protected abstract long getTotalNum();
     protected abstract long getPeriodNum();
-	protected abstract int eventHashCode(T event);
+    
+    /**
+     * 	是否启用hash分片，用于针对一种类型数据需要保证顺序消费的场景
+     * threadNum大于1时有用
+     * @return
+     */
+    protected boolean hashShard() {
+    	return false;
+    }
+    
+    /**
+     * 	业务hash值，用于将同类型业务绑定在一个线程消费
+     * threadNum大于1且hashShard为true时有用
+     * @param event
+     * @return
+     */
+	protected int eventHashCode(T event) {
+		return event.hashCode();
+	}
 }

@@ -15,27 +15,11 @@
  */
 package com.yametech.yangjian.agent.api.trace;
 
-import java.util.Map;
-
 /**
- * 链路Span采样及tag定制
+ * 链路Span采定制标识接口
  * 
  * @author liuzhao
  */
-public interface ISpanCustom<T> {
-	
-	/**
-	 * 
-	 * @param obj	业务数据对象
-	 * @return	true：采样，false：不采样
-	 */
-	boolean sample(T obj);
-	
-	/**
-	 * 
-	 * @param obj	业务数据对象
-	 * @return	trace tag数据
-	 */
-	Map<String, String> tags(T obj);
+public interface ISpanCustom {
 	
 }

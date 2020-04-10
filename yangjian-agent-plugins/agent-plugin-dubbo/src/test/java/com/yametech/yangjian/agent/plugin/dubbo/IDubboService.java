@@ -17,4 +17,8 @@ package com.yametech.yangjian.agent.plugin.dubbo;
 
 public interface IDubboService {
 	String hello(String name);
+	
+	String hello(String name, Integer age);
+	
+	String heart();
 }

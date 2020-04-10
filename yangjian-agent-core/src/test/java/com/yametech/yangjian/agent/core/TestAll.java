@@ -82,10 +82,7 @@ public class TestAll {
 	public void path() {
 		File path = AgentPath.getPath();
 		System.err.println(path.getAbsolutePath());
-		System.err.println(1 << 6);
-		int bufferSize = 1 << 3;
-		System.err.println(bufferSize);
-		
+		System.err.println(1 << 16);
 		for(Class<?> matcher : Arrays.asList(MetricMatcherProxy.class, PoolMonitorMatcherProxy.class, TraceMatcherProxy.class)) {// 此处手动维护，后续自动发现
 			System.err.println(Util.superClassGeneric(matcher, 0));
 		}

@@ -18,7 +18,6 @@ package com.yametech.yangjian.agent.core.trace.sample;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 
 public class SampleFactory {
-	public static final ISpanSample NONE = (tracer) -> false;
-	public static final ISpanSample ALWAYS = (tracer) -> true;
-	public static final ISpanSample FOLLOWER = (tracer) -> tracer.currentSpan() != null;
+	public static final ISpanSample NONE = () -> false;
+	public static final ISpanSample ALWAYS = () -> true;
 }

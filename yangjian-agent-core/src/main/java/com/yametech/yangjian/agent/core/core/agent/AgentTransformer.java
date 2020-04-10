@@ -155,7 +155,9 @@ public class AgentTransformer implements AgentBuilder.Transformer {
     			continue;
     		}
 //    		log.info("{}:for builder", inDefinedShape);
-    		log.debug("match method:{}", inDefinedShape);
+    		if(log.isDebugEnable()) {
+    			log.debug("match method:{} - {}", inDefinedShape, listClass(interceptors));
+    		}
             if(inDefinedShape.isStatic()) {// 静态方法
         		builder = builder.method(getMethodMatch(inDefinedShape))
         				.intercept(MethodDelegation.withDefaultConfiguration()
@@ -176,6 +178,18 @@ public class AgentTransformer implements AgentBuilder.Transformer {
         }
 //        log.info("{}:for exit", typeDescription);
         return builder;
+    }
+    
+    private String listClass(List<Object> interceptors) {
+    	if(interceptors == null || interceptors.isEmpty()) {
+    		return "";
+    	}
+    	StringBuilder builder = new StringBuilder();
+    	for(Object o : interceptors) {
+    		builder.append(o).append(", ");
+    	}
+    	builder.delete(builder.length() - 2, builder.length());
+    	return builder.toString();
     }
     
     private MethodType getMethodType(MethodDescription.InDefinedShape inDefinedShape) {

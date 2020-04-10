@@ -23,6 +23,7 @@
         <maven-shade-plugin.version>3.1.1</maven-shade-plugin.version>
         <maven-resources-plugin.version>2.6</maven-resources-plugin.version>
         <brave.version>5.10.2</brave.version>
+        <disruptor.version>3.4.2</disruptor.version>
 <!--     	<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths> -->
 <!--         <sonar.exclusions> -->
 <!-- 		      src/test/**/*, -->
@@ -41,6 +42,11 @@
             <artifactId>yangjian-agent-util</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+		    <groupId>com.lmax</groupId>
+		    <artifactId>disruptor</artifactId>
+		    <version>${disruptor.version}</version>
+		</dependency>
 		<dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
@@ -51,8 +57,14 @@
 		    <artifactId>brave</artifactId>
 		    <version>${brave.version}</version>
 		</dependency>
-        
-        
+		
+		
+        <dependency>
+		    <groupId>io.zipkin.reporter2</groupId>
+		    <artifactId>zipkin-sender-okhttp3</artifactId>
+		    <version>2.12.2</version>
+		    <scope>test</scope>
+		</dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
@@ -109,10 +121,12 @@
                     <artifactSet>
                         <includes>
                             <include>net.bytebuddy:byte-buddy</include>
-                            <include>okio:okio</include>
                             <include>com.lmax:disruptor</include>
                             <include>com.github.yametech:yangjian-agent-util</include>
                             <include>com.github.yametech:yangjian-agent-api</include>
+                            <include>io.zipkin.brave:brave</include>
+                            <include>io.zipkin.zipkin2:zipkin</include>
+                            <include>io.zipkin.reporter2:zipkin-reporter</include>
                         </includes>
                     </artifactSet>
                     <filters>
@@ -131,10 +145,10 @@
                             <pattern>net.bytebuddy</pattern>
                             <shadedPattern>com.yametech.yangjian.agent.thirdparty.net.bytebuddy</shadedPattern>
                         </relocation>
-                        <relocation>
-                            <pattern>okio</pattern>
-                            <shadedPattern>com.yametech.yangjian.agent.thirdparty.okio</shadedPattern>
-                        </relocation>
+<!--                         <relocation> -->
+<!--                             <pattern>okio</pattern> -->
+<!--                             <shadedPattern>com.yametech.yangjian.agent.thirdparty.okio</shadedPattern> -->
+<!--                         </relocation> -->
                         <relocation>
                             <pattern>com.lmax.disruptor</pattern>
                             <shadedPattern>com.yametech.yangjian.agent.thirdparty.com.lmax.disruptor</shadedPattern>
@@ -165,7 +179,7 @@
                                 <mkdir dir="${project.basedir}/../${agent.package.name}/config" />
                                 <mkdir dir="${project.basedir}/../${agent.package.name}/lib" />
                                 <mkdir dir="${project.basedir}/../${agent.package.name}/plugins" />
-                                <mkdir dir="${project.basedir}/../${agent.package.name}/logs" />
+<!--                                 <mkdir dir="${project.basedir}/../${agent.package.name}/logs" /> -->
                                 
                                 <copy file="${project.build.directory}/yangjian-agent-core.jar" tofile="${project.basedir}/../${agent.package.name}/lib/yangjian-agent.jar" overwrite="true" />
 								<!-- 此处不能拷贝src下的文件，所以使用maven-resources-plugin拷贝config -->

@@ -15,6 +15,19 @@
  */
 package com.yametech.yangjian.agent.core.log.appender;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -26,18 +39,6 @@ import com.yametech.yangjian.agent.core.log.LogEvent;
 import com.yametech.yangjian.agent.core.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.log.impl.LogMessageHolder;
 import com.yametech.yangjian.agent.util.CustomThreadFactory;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author zcn
@@ -195,7 +196,9 @@ public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<Lo
         int outOf = children.length - maxFileNum;
         if (outOf > 0) {
             for (int i = 0; outOf > 0; outOf--, i++) {
-                fileInfos.get(i).file.delete();
+                if(!fileInfos.get(i).file.delete()) {
+                	
+                }
             }
         }
 

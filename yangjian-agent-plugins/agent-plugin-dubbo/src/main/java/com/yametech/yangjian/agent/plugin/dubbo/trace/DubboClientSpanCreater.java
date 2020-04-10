@@ -27,6 +27,7 @@ import com.yametech.yangjian.agent.api.common.BraveUtil;
 import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.custom.IDubboClientCustom;
+import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
 
 import brave.Span;
 import brave.Span.Kind;
@@ -44,21 +45,23 @@ public class DubboClientSpanCreater extends DubboSpanCreater<IDubboClientCustom>
 	
 	@Override
 	public BeforeResult<SpanInfo> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
-		if(!generateSpan(allArguments)) {// 不需要生成
-			return null;
-		}
 		RpcContext rpcContext = RpcContext.getContext();
-	    Kind kind = rpcContext.isProviderSide() ? Kind.SERVER : Kind.CLIENT;
+		Kind kind = rpcContext.isConsumerSide() ? Kind.CLIENT : Kind.SERVER;
 		if(!kind.equals(Kind.CLIENT)) {
 			return null;
 		}
 		Invoker<?> invoker = (Invoker<?>) allArguments[0];
 		Invocation invocation = (Invocation) allArguments[1];
-		Span span = tracer.nextSpan().kind(kind)
+		IDubboCustom custom = getCustom(invoker.getInterface(), invocation.getMethodName(), invocation.getParameterTypes());
+		if(!generateSpan(invocation.getArguments(), custom)) {// 不需要生成
+			return null;
+		}
+		
+		Span span = tracer.nextSpan().kind(Kind.CLIENT)
 				.name(getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes()))
 				.start(TraceUtil.nowMicros());
 		injector.inject(span.context(), rpcContext.getAttachments());
-		return spanInit(span, invocation.getArguments());
+		return spanInit(span, invocation.getArguments(), custom);
 	}
 	
 }

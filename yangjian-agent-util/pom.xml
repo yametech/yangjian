@@ -29,12 +29,16 @@
             <groupId>com.github.yametech</groupId>
             <artifactId>yangjian-agent-api</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
+            <!-- 此处使用provided防止自定义plugin依赖util后使用了依赖的包，导致运行时无法拿到类（在core中会更改依赖jar包路径） -->
         </dependency>
 		<!-- https://mvnrepository.com/artifact/com.lmax/disruptor -->
 		<dependency>
 		    <groupId>com.lmax</groupId>
 		    <artifactId>disruptor</artifactId>
 		    <version>${disruptor.version}</version>
+		    <scope>provided</scope>
+		    <!-- 此处使用provided防止自定义plugin依赖util后使用了依赖的包，导致运行时无法拿到类（在core中会更改依赖jar包路径） -->
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
