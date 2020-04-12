@@ -20,7 +20,9 @@ import com.yametech.yangjian.agent.api.IReport;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.util.HttpClient;
 import com.yametech.yangjian.agent.util.HttpRequest;
+import com.yametech.yangjian.agent.util.HttpResponse;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -52,8 +54,9 @@ public class HttpReporter implements IReport, IConfigReader {
         params.put("serviceName", serviceName);
         params.put("dataType", dataType);
         params.put("second", second == null ? System.currentTimeMillis() / 1000 : second);
-        return StringUtil.notEmpty(HttpClient.doHttpRequest(new HttpRequest(url, HttpRequest.HttpMethod.POST)
-                .setDatas(buildRequestData(params))));
+        HttpResponse httpResponse = HttpClient.doHttpRequest(new HttpRequest(url, HttpRequest.HttpMethod.POST)
+                .setDatas(buildRequestData(params)));
+        return httpResponse != null && HttpsURLConnection.HTTP_OK == httpResponse.getCode();
     }
 
     @Override
