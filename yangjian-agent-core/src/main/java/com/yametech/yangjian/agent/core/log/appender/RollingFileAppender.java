@@ -29,6 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.lmax.disruptor.EventHandler;
+import com.lmax.disruptor.InsufficientCapacityException;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.yametech.yangjian.agent.api.common.Constants;
@@ -106,6 +107,16 @@ public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<Lo
 
     @Override
     public void append(LogEvent logEvent) {
+    	// TODO 修改为下面的方式，防止日志量过多时阻塞问题，增加日志输出监控（丢弃多少条，发布多少条）
+//    	long sequence = -1;
+//		try {
+//			sequence = ringBuffer.tryNext();
+//		} catch (InsufficientCapacityException e) {
+//			consumer.accept(null);
+//			return false;
+//		}
+//		return publish(consumer, sequence);
+    	
         long next = ringBuffer.next();
         try {
             LogMessageHolder messageHolder = ringBuffer.get(next);

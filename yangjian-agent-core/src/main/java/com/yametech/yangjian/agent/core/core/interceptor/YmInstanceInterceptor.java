@@ -24,6 +24,8 @@ import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.interceptor.IMethodAOP;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.util.RateLimit;
+
 import net.bytebuddy.implementation.bind.annotation.AllArguments;
 import net.bytebuddy.implementation.bind.annotation.Origin;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
@@ -31,7 +33,8 @@ import net.bytebuddy.implementation.bind.annotation.SuperCall;
 import net.bytebuddy.implementation.bind.annotation.This;
 
 public class YmInstanceInterceptor {
-	private static final ILogger log = LoggerFactory.getLogger(YmInstanceInterceptor.class);
+	private static final ILogger LOG = LoggerFactory.getLogger(YmInstanceInterceptor.class);
+	private static final RateLimit LIMITER = RateLimit.create(500);
 	private IMethodAOP<?>[] interceptors;
 
 	public YmInstanceInterceptor(IMethodAOP<?>[] interceptors) {
@@ -61,7 +64,9 @@ public class YmInstanceInterceptor {
 					}
 				}
 			} catch (Throwable t) {
-				log.warn(t, "interceptor before");// before异常，不再执行after和exception，通过index控制
+				if(LIMITER.tryAcquire()) {
+					LOG.warn(t, "interceptor before");// before异常，不再执行after和exception，通过index控制
+				}
 			}
 		}
 
@@ -85,7 +90,9 @@ public class YmInstanceInterceptor {
 				}
 				ret = interceptor.after(thisObj, allArguments, method, result, ret, methodThrowable, globalVar);
 			} catch (Throwable t) {
-				log.warn(t, "interceptor exception/after");// TODO 增加打印速率限制(每秒N条)，防止因插件写的有问题，发生大量异常时影响方法调用速度
+				if(LIMITER.tryAcquire()) {// 增加打印速率限制(每秒N条)，防止因插件写的有问题，发生大量异常时影响方法调用速度
+					LOG.warn(t, "interceptor exception/after");
+				}
 			}
 		}
 		if (methodThrowable == null) {
