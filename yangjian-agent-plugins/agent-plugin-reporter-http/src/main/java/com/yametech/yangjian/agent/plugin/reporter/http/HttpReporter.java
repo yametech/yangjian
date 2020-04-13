@@ -27,6 +27,13 @@ import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.util.HttpClient;
 import com.yametech.yangjian.agent.util.HttpRequest;
+import com.yametech.yangjian.agent.util.HttpResponse;
+
+import javax.net.ssl.HttpsURLConnection;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * HTTP上报
@@ -48,8 +55,10 @@ public class HttpReporter implements IReport, IConfigReader {
         if (StringUtil.isEmpty(url) || data == null) {
             return false;
         }
-        return StringUtil.notEmpty(HttpClient.doHttpRequest(new HttpRequest(url, HttpRequest.HttpMethod.POST)
-                .setDatas(data.toString())));
+
+        HttpResponse httpResponse = HttpClient.doHttpRequest(new HttpRequest(url, HttpRequest.HttpMethod.POST)
+                .setDatas(data.toString()));
+        return httpResponse != null && HttpsURLConnection.HTTP_OK == httpResponse.getCode();
     }
 
     @Override
@@ -61,7 +70,7 @@ public class HttpReporter implements IReport, IConfigReader {
 		}
 		return true;
     }
-    
+
     @Override
     public String type() {
         return Constants.ReportType.HTTP;
