@@ -42,6 +42,9 @@ public class Config {
 	public static final ConfigValue<Set<String>> IGNORE_CLASS = new ConfigValue<>("ignore.enhance.classRegular", null,
     	value -> new HashSet<String>(Arrays.asList(value.split("\r\n")))
 	);
+	public static final ConfigValue<Set<String>> IGNORE_CLASSLOADERNAMES = new ConfigValue<>("ignore.classLoaderNames", null,
+    	value -> new HashSet<String>(Arrays.asList(value.split(",")))
+	);
     // 忽略加强类方法配置，支持格式toString()、test(java.lang.Long)、com.*.XxService.equal()
 	public static final ConfigValue<Set<String>> IGNORE_METHODS = new ConfigValue<>("ignore.enhance.methodRegular", null,
     	value -> new HashSet<String>(Arrays.asList(value.split("\r\n")))
@@ -69,6 +72,7 @@ public class Config {
     	CONFIG_VALUES.add(SCHEDULE_CORE_POOL_SIZE);
 //    	CONFIG_VALUES.add(SERVICE_NAME_SYSTEMKEY);
     	CONFIG_VALUES.add(SERVICE_NAME);
+    	CONFIG_VALUES.add(IGNORE_CLASSLOADERNAMES);
     }
     
     private Config() {}

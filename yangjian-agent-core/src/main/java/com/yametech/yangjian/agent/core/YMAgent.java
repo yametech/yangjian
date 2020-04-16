@@ -79,7 +79,7 @@ public class YMAgent {
 	 * @throws Exception
 	 */
     public static void premain(String arguments, Instrumentation instrumentation) throws Exception{
-    	log.info("os: {}, {}", OSUtil.OS, arguments);
+    	log.info("os: {}, {}, {}", OSUtil.OS, arguments, YMAgent.class.getClassLoader().getClass());
     	if(StringUtil.isEmpty(Config.SERVICE_NAME.getValue())) {
     		log.warn("未配置应用名称，跳过代理");
     		return;
@@ -92,7 +92,7 @@ public class YMAgent {
     	loadConfig(arguments);
     	InstanceManage.notifyReader();
     	beforeRun();
-    	startSchedule();
+    	startSchedule();// 一定要早于instrumentation
     	addShutdownHook();
     	instrumentation(instrumentation);
     	// 埋点日志，不允许删除
@@ -118,7 +118,7 @@ public class YMAgent {
 //        		.with(AgentBuilder.LambdaInstrumentationStrategy.ENABLED)
                 .type(new ClassElementMatcher(new CombineOrMatch(matches), "class_match"))
 //                .type(ElementMatchers.nameEndsWith("Timed"))
-                .transform(new AgentTransformer(interceptorMatchers, ignoreMethodMatch, classMatches))
+                .transform(new AgentTransformer(interceptorMatchers, ignoreMethodMatch, classMatches, Config.IGNORE_CLASSLOADERNAMES.getValue()))
 //                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)// 使用后会异常
                 .with(new AgentListener())
                 .installOn(instrumentation);
