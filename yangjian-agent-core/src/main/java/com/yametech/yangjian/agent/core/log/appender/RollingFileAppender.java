@@ -18,13 +18,14 @@ package com.yametech.yangjian.agent.core.log.appender;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +34,7 @@ import com.lmax.disruptor.InsufficientCapacityException;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.log.AppenderFactory;
 import com.yametech.yangjian.agent.core.log.IAppender;
@@ -47,7 +49,8 @@ import com.yametech.yangjian.agent.util.CustomThreadFactory;
  * @description: 日志文件实现类
  **/
 public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<LogMessageHolder> {
-
+	
+	private static final String DISCARDED_LOG = "log.discarded";
     private static final int RING_BUFFER_SIZE = 512;
     private static final String LOG_FILE_PREFIX = "statistic.";
     private static Pattern LOG_NAME_PATTERN = Pattern.compile("statistic\\.(\\d{8})\\.(\\d+)\\.log");
@@ -62,13 +65,23 @@ public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<Lo
     private int maxFileNum;
     private long currentFileSize;
     private int lineNum;
+    private boolean discardedLog = false;
+    
+    private static final int PRINT_INTERVAL_SECOND = 10;
+    private AtomicLong printTime = new AtomicLong(0);// 打印时间
+    private AtomicLong discardNum = new AtomicLong(0);// 总共丢弃的数据量
+    private AtomicLong periodDiscardNum = new AtomicLong(0);// 最近一个输出周期丢弃的数据量
+    private AtomicLong totalNum = new AtomicLong(0);// 总产生的事件量
+    private AtomicLong periodTotalNum = new AtomicLong(0);// 最近一个输出周期产生的事件量
 
     public RollingFileAppender(String appenderName) {
         this.serviceName = Config.SERVICE_NAME.getValue();
         this.dir = getAppenderDir(appenderName);
         this.maxFileSize = Long.valueOf(Config.getKv(Constants.LOG_MAX_FILE_SIZE, LoggerFactory.DEFAULT_MAX_FILE_SIZE.toString()));
         this.maxFileNum = Integer.valueOf(Config.getKv(Constants.LOG_MAX_FILE_NUM, LoggerFactory.DEFAULT_MAX_FILE_NUM.toString()));
-
+        if(Config.getKv(DISCARDED_LOG) != null) {
+        	this.discardedLog = Boolean.valueOf(Config.getKv(DISCARDED_LOG));
+        }
         Disruptor<LogMessageHolder> disruptor = new Disruptor<>(
                 () -> new LogMessageHolder(),
                 RING_BUFFER_SIZE,
@@ -94,6 +107,9 @@ public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<Lo
     @Override
     public void onEvent(LogMessageHolder msgHolder, long sequence, boolean endOfBatch) {
         if (isStreamEnable()) {
+        	if(discardedLog) {
+        		printMetric();
+        	}
             try {
                 write(msgHolder.getMessage(), endOfBatch);
             } catch (IOException e) {
@@ -104,26 +120,43 @@ public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<Lo
             }
         }
     }
+    
+    private void printMetric() {
+    	long seconds = printTime.get();
+    	long nowSecond = Instant.now().getEpochSecond();
+    	if(seconds < nowSecond - PRINT_INTERVAL_SECOND && printTime.compareAndSet(seconds, nowSecond)) {
+    		ResourceHolder.log.info("totalNum={}&periodTotalNum={}&discardNum={}&periodDiscardNum={}", 
+    				totalNum.get(), periodTotalNum.getAndSet(0), discardNum.get(), periodDiscardNum.getAndSet(0));
+    	}
+    }
+    
+    private static class ResourceHolder {// 保证惰加载
+        static ILogger log = com.yametech.yangjian.agent.api.log.LoggerFactory.getLogger(ResourceHolder.class);
+    }
 
     @Override
     public void append(LogEvent logEvent) {
-    	// TODO 修改为下面的方式，防止日志量过多时阻塞问题，增加日志输出监控（丢弃多少条，发布多少条）
-//    	long sequence = -1;
-//		try {
-//			sequence = ringBuffer.tryNext();
-//		} catch (InsufficientCapacityException e) {
-//			consumer.accept(null);
-//			return false;
-//		}
-//		return publish(consumer, sequence);
-    	
-        long next = ringBuffer.next();
-        try {
-            LogMessageHolder messageHolder = ringBuffer.get(next);
-            messageHolder.setMessage(logEvent.getMessage());
-        } finally {
-            ringBuffer.publish(next);
-        }
+    	if(discardedLog) {// 防止日志量过多时阻塞，增加日志输出监控（丢弃多少条，发布多少条）
+    		try {
+    			long sequence = ringBuffer.tryNext();
+    			LogMessageHolder messageHolder = ringBuffer.get(sequence);
+    			messageHolder.setMessage(logEvent.getMessage());
+    			ringBuffer.publish(sequence);
+    		} catch (InsufficientCapacityException e) {
+    			discardNum.getAndIncrement();
+    			periodDiscardNum.getAndIncrement();
+    		}
+    		totalNum.getAndIncrement();
+    		periodTotalNum.getAndIncrement();
+    	} else {
+    		long next = ringBuffer.next();
+    		try {
+    			LogMessageHolder messageHolder = ringBuffer.get(next);
+    			messageHolder.setMessage(logEvent.getMessage());
+    		} finally {
+    			ringBuffer.publish(next);
+    		}
+    	}
     }
 
     private void write(String message, boolean endOfBatch) throws IOException {

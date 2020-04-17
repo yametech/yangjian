@@ -179,7 +179,7 @@
                                 <mkdir dir="${project.basedir}/../${agent.package.name}/config" />
                                 <mkdir dir="${project.basedir}/../${agent.package.name}/lib" />
                                 <mkdir dir="${project.basedir}/../${agent.package.name}/plugins" />
-<!--                                 <mkdir dir="${project.basedir}/../${agent.package.name}/logs" /> -->
+                                <mkdir dir="${project.basedir}/../${agent.package.name}/logs" />
                                 
                                 <copy file="${project.build.directory}/yangjian-agent-core.jar" tofile="${project.basedir}/../${agent.package.name}/lib/yangjian-agent.jar" overwrite="true" />
 								<!-- 此处不能拷贝src下的文件，所以使用maven-resources-plugin拷贝config -->

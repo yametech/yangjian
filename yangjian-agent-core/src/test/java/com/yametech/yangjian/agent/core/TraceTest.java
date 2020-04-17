@@ -23,7 +23,27 @@ public class TraceTest {
 	
 	@org.junit.Test
 	public void test() throws Exception {
-		System.err.println(new Object());
+		System.err.println(System.currentTimeMillis() + ": " + ResourceHolder.print());
+		Thread.sleep(1300);
+		System.err.println(System.currentTimeMillis() + ": " + ResourceHolder.resource.print());
+	}
+	
+	private static class ResourceHolder {
+        public static Resource resource = new Resource();
+        
+        private static String print() {
+        	return "445566";
+        }
+    }
+	
+	static class Resource {
+		public Resource() {
+			System.err.println(System.currentTimeMillis() + ": " + "init Resource");
+		}
+		
+		public String print() {
+			return "123";
+		}
 	}
 	
 	@org.junit.Test
