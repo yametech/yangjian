@@ -17,6 +17,7 @@ package com.yametech.yangjian.agent.core.core.agent;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.yametech.yangjian.agent.api.IConfigReader;
@@ -65,14 +66,16 @@ public class AgentTransformer implements AgentBuilder.Transformer {
     private List<InterceptorMatcher> interceptorMatchers;
     private List<IEnhanceClassMatch> classMatches;
     private ElementMatcher<? super MethodDescription> notMatches;
+    private Set<String> ignoreClassLoaderName;// 忽略增强的classLoader，saturn容器化部署时，因为类加载器问题导致服务无法启动
 
 	public AgentTransformer(List<InterceptorMatcher> interceptorMatchers, 
-			IConfigMatch ignoreMethods, List<IEnhanceClassMatch> classMatches) {
+			IConfigMatch ignoreMethods, List<IEnhanceClassMatch> classMatches, Set<String> ignoreClassLoaderName) {
         this.interceptorMatchers = interceptorMatchers;
         if(ignoreMethods != null) {
             notMatches = new MethodElementMatcher(ignoreMethods, "method_ignore");
         }
         this.classMatches = classMatches;
+        this.ignoreClassLoaderName = ignoreClassLoaderName;
     }
 
     @Override
@@ -82,8 +85,13 @@ public class AgentTransformer implements AgentBuilder.Transformer {
     	if(typeDescription.isInterface()) {
     		return builder;
     	}
+    	String classLoaderName = classLoader.getClass().getName();
+    	if(ignoreClassLoaderName != null && ignoreClassLoaderName.contains(classLoaderName)) {
+    		log.warn("忽略增强指定classLoader类名：{}	{}", classLoaderName, typeDescription);
+    		return builder;
+    	}
 //    	log.info("{}:enhanceContextClass", typeDescription);
-    	builder = enhanceContextClass(typeDescription, builder);
+    	builder = enhanceContextClass(typeDescription, builder, classLoader);
 //    	if(typeDescription.toString().indexOf("RabbitmqService") != -1) {
 //    		System.err.println(">>>>>>>>>>>>>");
 //    	}
@@ -137,7 +145,8 @@ public class AgentTransformer implements AgentBuilder.Transformer {
 							((IMatcherProxy)matcher).init(obj, classLoader, type);
 						}
 //						log.info("{}:map init", inDefinedShape);
-						log.debug("loadInstance:{}	{}	{}	{}", obj, classLoader, loadClass, inDefinedShape);
+						log.info("enhanceMethod:{}	{}	{}	{}	{}", obj, classLoader.getClass(), 
+								classLoader.getParent() != null ? classLoader.getParent().getClass() : "null", loadClass, inDefinedShape);
 						return obj;
 					} catch (Exception e) {
 						log.warn(e, "加载实例异常{},\n{}", loadClass, Util.join(" > ", Util.listClassLoaders(classLoader)));
@@ -214,7 +223,7 @@ public class AgentTransformer implements AgentBuilder.Transformer {
      * @param builder
      * @return
      */
-    private DynamicType.Builder<?> enhanceContextClass(TypeDescription typeDescription, DynamicType.Builder<?> builder) {
+    private DynamicType.Builder<?> enhanceContextClass(TypeDescription typeDescription, DynamicType.Builder<?> builder, ClassLoader classLoader) {
     	if(classMatches == null || classMatches.isEmpty()) {
     		return builder;
     	}
@@ -225,6 +234,7 @@ public class AgentTransformer implements AgentBuilder.Transformer {
     	if(!match) {
     		return builder;
     	}
+    	log.info("enhanceContextClass:{}	{}	{}", typeDescription, classLoader.getClass(), classLoader.getParent() != null ? classLoader.getParent().getClass() : "null");
 //    	log.info("{}:builder", typeDescription);
     	// 将context放入对象实例中，好处：生命周期与对象实例一致、取值时间复杂度为O(1)，经过测试大量创建对象时，这种方式耗时更少
     	return builder.defineField(OBJECT_CONTEXT_FIELD_NAME, Map.class, Opcodes.ACC_PRIVATE | Opcodes.ACC_VOLATILE)
