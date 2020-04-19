@@ -47,6 +47,8 @@ public class Constants {
         public static final String DUBBO_SERVER = "dubbo-server";
         public static final String HTTP_CLIENT = "http-client";
         public static final String REDIS = "redis";
+        public static final String REDIS_KEY = "redis-key";
+        public static final String REDIS_COMMAND = "redis-command";
         public static final String KAFKA_CONSUME = "kafka-consume";
         public static final String KAFKA_PUBLISH = "kafka-publish";
         public static final String RABBITMQ_CONSUME = "rabbitmq-consume";
