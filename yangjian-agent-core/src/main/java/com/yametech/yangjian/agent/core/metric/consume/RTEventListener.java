@@ -54,6 +54,8 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
         return consume;
     }
 
+    // 注意interval的执行间隔要低于RTEventConsume.STATISTICS_SECOND_SIZE，否则会丢失
+
     @Override
     public void execute() {
     	super.execute();
