@@ -83,8 +83,8 @@ public class RTEventListener implements IAppStatusListener, ConsumeFactory<Conve
     }
 
     @Override
-    public int interval() {
-        return 2;
+    public int interval() {// 注意此处的间隔要低于RTEventConsume.STATISTICS_SECOND_SIZE，否则会丢失
+        return 1;
     }
 
     @Override
