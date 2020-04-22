@@ -31,7 +31,6 @@ public abstract class BaseStatistic implements IStatistic {
 	private String type;// 事件类型
 	private String sign;// 事件唯一标识
 	private long second;// 统计的秒数
-	private long updateTime;// 数据最近更新事件，在数据输出时会判断该时间与当前时间的差值
 	
 	public String getType() {
 		return type;
@@ -41,14 +40,6 @@ public abstract class BaseStatistic implements IStatistic {
 		return second;
 	}
 
-	public long getUpdateTime() {
-		return updateTime;
-	}
-
-	public void setUpdateTime(long updateTime) {
-		this.updateTime = updateTime;
-	}
-	
 	@Override
 	public String toString() {
 		return type + "	" + sign + "	" + second;
@@ -59,7 +50,6 @@ public abstract class BaseStatistic implements IStatistic {
 		this.type = type;
 		this.sign = sign;
 		this.second = second;
-		updateTime = System.currentTimeMillis();
 		clear();
 	}
 	

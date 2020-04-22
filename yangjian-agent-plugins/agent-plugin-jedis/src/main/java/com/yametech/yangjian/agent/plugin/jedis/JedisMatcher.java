@@ -53,7 +53,7 @@ public class JedisMatcher implements IMetricMatcher {
 
     @Override
     public String type() {
-        return Constants.EventType.REDIS;
+        return Constants.EventType.REDIS_KEY;
     }
     
     @Override

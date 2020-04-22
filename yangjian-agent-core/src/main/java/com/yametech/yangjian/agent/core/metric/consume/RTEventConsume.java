@@ -16,8 +16,6 @@
 package com.yametech.yangjian.agent.core.metric.consume;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,8 +33,8 @@ import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
 
 public class RTEventConsume implements BaseConsume<ConvertTimeEvent> {
 	private static final ILogger log = LoggerFactory.getLogger(RTEventConsume.class);
-	private static final int STATISTICS_SECOND_SIZE = 1 << 5;// 每种类型的统计，内存中存放的最大统计秒数个数
-	private Map<String, Map<String, Map<StatisticType, BaseStatistic[]>>> allStatistics = new HashMap<>();
+	private static final int STATISTICS_SECOND_SIZE = 1 << 3;// 每种类型的统计，内存中存放的最大统计秒数个数
+	private SecondStatisticBean[] allStatistics = new SecondStatisticBean[STATISTICS_SECOND_SIZE];
 	private long totalNum = 0;// 总消费量
 	private AtomicLong periodTotalNum = new AtomicLong(0);// 最近一个输出周期产生的事件量
 
@@ -54,68 +52,35 @@ public class RTEventConsume implements BaseConsume<ConvertTimeEvent> {
 			return;
 		}
 		List<TimeEvent> timeEvents = event.getConvert().convert(event.getData());
-		if (timeEvents != null) {
-			timeEvents.parallelStream()
-					.filter(Objects::nonNull)
-					.forEach(timeEvent -> {
-						// 默认优先使用timeEvent自定义的type
-						if (StringUtil.isEmpty(timeEvent.getType())) {
-							timeEvent.setType(event.getType());
-						}
-						consume(timeEvent);
-					});
+		if (timeEvents == null) {
+			return;
 		}
+		timeEvents.parallelStream()
+			.filter(Objects::nonNull)
+			.forEach(timeEvent -> {
+				// 默认优先使用timeEvent自定义的type
+				if (StringUtil.isEmpty(timeEvent.getType())) {
+					timeEvent.setType(event.getType());
+				}
+				consume(timeEvent);
+			});
 	}
 
 	/**
-	 * 在RTEventListener中配置了一个当前实例仅被一个线程调用，所以此处的consume为线程安全的
+	 * 在RTEventListener中配置了一个当前实例仅被一个线程调用，所以此处的consume为线程安全的，但是与getReportStatistics可能出现并发操作
 	 * @param timeEvent
 	 */
-	public void consume(TimeEvent timeEvent) {
-		if((System.currentTimeMillis() - timeEvent.getEventTime()) / 1000 >= STATISTICS_SECOND_SIZE) {// 数据时间超过缓存长度，丢弃
-			log.warn("discard delay timeEvent: {}", timeEvent);
-			return;
-		}
-
-		Map<String, Map<StatisticType, BaseStatistic[]>> typeStatistics = allStatistics.get(timeEvent.getType());
-		if(typeStatistics == null) {
-			typeStatistics = new HashMap<>();
-			allStatistics.put(timeEvent.getType(), typeStatistics);
-		}
-		Map<StatisticType, BaseStatistic[]> identifyStatistics = typeStatistics.get(timeEvent.getIdentify());
-		if(identifyStatistics == null) {
-			identifyStatistics = new EnumMap<>(StatisticType.class);
-			typeStatistics.put(timeEvent.getIdentify(), identifyStatistics);
-		}
-
-		for(StatisticType type : timeEvent.getStatisticTypes()) {
-			BaseStatistic[] statistics = identifyStatistics.get(type);
-			if(statistics == null) {
-				statistics = new BaseStatistic[STATISTICS_SECOND_SIZE];
-				identifyStatistics.put(type, statistics);
+	private void consume(TimeEvent timeEvent) {
+		long nowSecond = System.currentTimeMillis() / 1000;// 此处以当前时间聚合数据，避免因为eventTime时间延迟导致的allStatistics超出范围以及输出过多日志（之前的统计值输出后又产生了之前的统计值，导致同一秒的统计值输出多次）
+		int index = (int) (nowSecond & (STATISTICS_SECOND_SIZE - 1));
+		if(allStatistics[index] == null || nowSecond != allStatistics[index].getSecond()) {
+			if(allStatistics[index] != null && nowSecond != allStatistics[index].getSecond()) {
+				log.warn("未及时输出统计值，已丢弃", allStatistics[index].getSecond());
 			}
-			long second = timeEvent.getEventTime() / 1000;
-			int index = (int) (second & (STATISTICS_SECOND_SIZE - 1));
-			BaseStatistic secondStatistics = statistics[index];
-			if(secondStatistics == null) {
-				try {
-					secondStatistics = type.getStatistic();
-				} catch (InstantiationException | IllegalAccessException e) {
-					log.warn(e, "创建BaseStatistic实例异常{}", type);
-					continue;
-				}
-				secondStatistics.reset(timeEvent.getType(), timeEvent.getIdentify(), second);
-				statistics[index] = secondStatistics;
-			} else if(secondStatistics.getSecond() != second) {// 大部分数据不会走这里
-//				if(secondStatistics.getTotal().sum() != 0) {
-//					log.warn("statistics cover:{} - {}", timeEvent.getIdentify(), secondStatistics);
-//				}
-				secondStatistics.reset(timeEvent.getType(), timeEvent.getIdentify(), second);
-			}
-
-			secondStatistics.setUpdateTime(System.currentTimeMillis());
-			secondStatistics.combine(timeEvent);
+			allStatistics[index] = new SecondStatisticBean(nowSecond);
 		}
+		SecondStatisticBean statisticBean = allStatistics[index];
+		statisticBean.statistic(timeEvent);
 	}
 
 	/**
@@ -124,18 +89,20 @@ public class RTEventConsume implements BaseConsume<ConvertTimeEvent> {
 	 */
 	public List<BaseStatistic> getReportStatistics() {
 		List<BaseStatistic> reportStatistic = new ArrayList<>();
-		for(Entry<String, Map<String, Map<StatisticType, BaseStatistic[]>>> entryType : allStatistics.entrySet()) {
-			for(Entry<String, Map<StatisticType, BaseStatistic[]>> entrySign : entryType.getValue().entrySet()) {
-				for(Entry<StatisticType, BaseStatistic[]> entry : entrySign.getValue().entrySet()) {
-					for(int i = 0; i < entry.getValue().length; i++) {
-						BaseStatistic statistics = entry.getValue()[i];
-						if(statistics != null && System.currentTimeMillis() - statistics.getUpdateTime() > 1000) {// 统计值所在时间秒数已不再更新或者最近处理事件的事件距离当前事件已超过1秒
-							entry.getValue()[i] = null;// 重置，下次不会再取到
-							reportStatistic.add(statistics);
-						}
+		long nowMillis = System.currentTimeMillis();
+		for(int i = 0; i < allStatistics.length; i++) {
+			SecondStatisticBean statistic = allStatistics[i];
+			if(statistic == null || nowMillis / 1000 - statistic.getSecond() <= 1) {// 不存在对应秒数的统计数据或者对应秒的统计还未完成则不输出
+				continue;
+			}
+			for(Entry<String, Map<String, Map<StatisticType, BaseStatistic>>> entryType : statistic.getStatistics().entrySet()) {
+				for(Entry<String, Map<StatisticType, BaseStatistic>> entrySign : entryType.getValue().entrySet()) {
+					for(Entry<StatisticType, BaseStatistic> entry : entrySign.getValue().entrySet()) {
+						reportStatistic.add(entry.getValue());
 					}
 				}
 			}
+			allStatistics[i] = null;// 输出后重置
 		}
 		return reportStatistic;
 	}
