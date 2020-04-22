@@ -44,7 +44,7 @@ public class PoolMonitorSchedule implements ISchedule, IConfigReader {
     
     @Override
     public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList(CONFIG_KEY));
+        return new HashSet<>(Arrays.asList(CONFIG_KEY.replaceAll("\\.", "\\\\.")));
     }
 
     @Override

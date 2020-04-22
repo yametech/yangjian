@@ -15,14 +15,10 @@
  */
 package com.yametech.yangjian.agent.core.metric;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.IMetricMatcher;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
+import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.convert.IConvertBase;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
@@ -33,18 +29,10 @@ import com.yametech.yangjian.agent.core.metric.base.ConvertMethodAOP;
 import com.yametech.yangjian.agent.core.metric.base.ConvertStatisticMethodAOP;
 import com.yametech.yangjian.agent.core.metric.base.MetricEventBus;
 import com.yametech.yangjian.agent.core.util.Util;
-import com.yametech.yangjian.agent.core.util.Value;
 
 public class MetricMatcherProxy extends BaseMatcherProxy<IMetricMatcher, BaseConvertAOP> {
 	private static ILogger log = LoggerFactory.getLogger(MetricMatcherProxy.class);
-	private static Map<MethodType, Class<?>> typeClass = new EnumMap<>(MethodType.class);
-	private static Map<String, Object> convertAopInstance = new ConcurrentHashMap<>();
 	private MetricEventBus metricEventBus;
-	
-	static {
-		typeClass.put(MethodType.STATIC, ConvertStatisticMethodAOP.class);
-		typeClass.put(MethodType.INSTANCE, ConvertMethodAOP.class);
-	}
 	
 	public MetricMatcherProxy(IMetricMatcher metricMatcher) {
 		super(metricMatcher);
@@ -52,8 +40,8 @@ public class MetricMatcherProxy extends BaseMatcherProxy<IMetricMatcher, BaseCon
 	}
 	
 	@Override
-	public void init(BaseConvertAOP obj, ClassLoader classLoader, MethodType type) {
-		LoadClassKey convertClass = matcher.loadClass(type);
+	public void init(BaseConvertAOP obj, ClassLoader classLoader, MethodType type, MethodDefined methodDefined) {
+		LoadClassKey convertClass = matcher.loadClass(type, methodDefined);
 		if(convertClass == null) {
 			return;
 		}
@@ -63,9 +51,7 @@ public class MetricMatcherProxy extends BaseMatcherProxy<IMetricMatcher, BaseCon
 			if(!(instance instanceof IConvertBase)) {
 				throw new RuntimeException("metricMatcher配置的loadClass错误，必须为IConvertBase的子类");
 			}
-			if(instance instanceof IConfigReader) {
-				InstanceManage.registryConfigReaderInstance((IConfigReader)instance);
-			}
+			InstanceManage.registryInit(instance);
 			obj.init(instance, metricEventBus, matcher.type());
 		} catch (Exception e) {
 			log.warn(e, "加载convert异常：{}，\nclassLoader={}，\nmetricMatcher classLoader：{},\nconvertInstance classLoader：{}",
@@ -77,8 +63,8 @@ public class MetricMatcherProxy extends BaseMatcherProxy<IMetricMatcher, BaseCon
 	}
 
 	@Override
-	public LoadClassKey loadClass(MethodType type) {
-		LoadClassKey convertClass = matcher.loadClass(type);
+	public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
+		LoadClassKey convertClass = matcher.loadClass(type, methodDefined);
 		if(convertClass == null) {
 			return null;
 		}
@@ -95,38 +81,6 @@ public class MetricMatcherProxy extends BaseMatcherProxy<IMetricMatcher, BaseCon
 		return convertCls == null ? null : new LoadClassKey(convertCls, "ConvertAOP:" + convertClass.getCls());
 	}
 	
-	/**
-	 * 加载类
-	 * @param className
-	 * @return
-	 * @throws Exception 
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T getInstance(String key, String className) throws Exception {
-		Class<?> keyCls = null;
-		for(Class<?> cls : typeClass.values()) {
-			if(cls.getName().equals(className)) {
-				keyCls = cls;
-				break;
-			}
-		}
-		if(keyCls == null) {
-			return null;
-		}
-		Class<?> instanceCls = keyCls;
-		Value<Exception> value = Value.absent();
-		Object instance = convertAopInstance.computeIfAbsent(key, cls -> {
-			try {
-				return instanceCls.newInstance();
-			} catch (InstantiationException | IllegalAccessException e) {
-				value.set(e);
-				return null;
-			}
-		});
-		if(value.get() != null) {
-			throw value.get();
-		}
-		return (T) instance;
-	}
+	
 
 }

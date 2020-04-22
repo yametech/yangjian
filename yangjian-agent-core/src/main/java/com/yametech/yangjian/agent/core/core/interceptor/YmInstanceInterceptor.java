@@ -34,7 +34,7 @@ import net.bytebuddy.implementation.bind.annotation.This;
 
 public class YmInstanceInterceptor {
 	private static final ILogger LOG = LoggerFactory.getLogger(YmInstanceInterceptor.class);
-	private static final RateLimit LIMITER = RateLimit.create(500);
+	private static final RateLimit LIMITER = RateLimit.create(10);
 	private IMethodAOP<?>[] interceptors;
 
 	public YmInstanceInterceptor(IMethodAOP<?>[] interceptors) {

@@ -15,6 +15,8 @@
  */
 package com.yametech.yangjian.agent.api.base;
 
+import com.yametech.yangjian.agent.api.bean.MethodDefined;
+
 /**
  * 将实例对象转换为interception对象
  * 
@@ -28,8 +30,9 @@ public interface IMatcherProxy<T> {
 	 * @param obj	返回值必须实现IConstructorListener、IMethodAOP、IStaticMethodAOP中的一个
 	 * @param classLoader	类加载器
 	 * @param type 方法类型
+	 * @param methodDefined	匹配的方法定义
 	 */
-	void init(T obj, ClassLoader classLoader, MethodType type);
+	void init(T obj, ClassLoader classLoader, MethodType type, MethodDefined methodDefined);
 	
 //	default Class<V> interceptClass() {
 //		Type[] types = this.getClass().getGenericInterfaces();

@@ -20,13 +20,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.IContext;
-import com.yametech.yangjian.agent.api.base.IMatcherProxy;
 import com.yametech.yangjian.agent.api.base.IMatch;
+import com.yametech.yangjian.agent.api.base.IMatcherProxy;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.base.SPI;
 import com.yametech.yangjian.agent.api.bean.ClassDefined;
@@ -45,7 +44,6 @@ import com.yametech.yangjian.agent.core.core.interceptor.ContextInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmInstanceConstructorInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmInstanceInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmStaticInterceptor;
-import com.yametech.yangjian.agent.core.metric.MetricMatcherProxy;
 import com.yametech.yangjian.agent.core.util.Util;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -120,29 +118,30 @@ public class AgentTransformer implements AgentBuilder.Transformer {
 //            log.info("{}:for begin", inDefinedShape);
 //    		List<InterceptorMatcher> interceptors = interceptorMatchers.stream()
             @SuppressWarnings({ "unchecked", "rawtypes" })
-			List<Object> interceptors = interceptorMatchers.stream()
+            Set<Object> interceptors = interceptorMatchers.stream()// 此处修改为set避免一个实例重复调用
     			.filter(aop -> aop.match() != null && aop.match().isMatch(methodDefined))
     			.map(matcher -> {
 //    				log.info("{}:map enter", inDefinedShape);
-    				LoadClassKey loadClass = matcher.loadClass(type);
+    				LoadClassKey loadClass = matcher.loadClass(type, methodDefined);
     				if(loadClass == null) {
     					return null;
     				}
 					try {
-						Object obj = MetricMatcherProxy.getInstance(loadClass.getKey(), loadClass.getCls());
-						if(obj == null) {
+						// 此处加载类是考虑使用InterceptorInstanceLoader在有些情况下会出现无法加载的问题（类加载器）
+						Object obj = null;
+						try {
 							obj = InterceptorInstanceLoader.load(loadClass.getKey(), loadClass.getCls(), classLoader);
+						} catch (Exception e) {
+							obj = InterceptorInstanceLoader.load(loadClass.getKey(), loadClass.getCls(), null);
 						}
 //						Object obj = InterceptorInstanceLoader.load(loadClass.getKey(), loadClass.getCls(), classLoader);
 						if(obj instanceof SPI) {
 							throw new IllegalStateException("不能实现SPI接口");
 						}
-						if(obj instanceof IConfigReader) {
-							InstanceManage.registryConfigReaderInstance((IConfigReader)obj);
-						}
+						InstanceManage.registryInit(obj);
 //						log.info("{}:map load", inDefinedShape);
 						if(matcher instanceof IMatcherProxy) {
-							((IMatcherProxy)matcher).init(obj, classLoader, type);
+							((IMatcherProxy)matcher).init(obj, classLoader, type, methodDefined);
 						}
 //						log.info("{}:map init", inDefinedShape);
 						log.info("enhanceMethod:{}	{}	{}	{}	{}", obj, classLoader.getClass(), 
@@ -159,7 +158,7 @@ public class AgentTransformer implements AgentBuilder.Transformer {
         						(inDefinedShape.isMethod() && interceptor instanceof IMethodAOP)
     						);
     				
-    			}).collect(Collectors.toList());
+    			}).collect(Collectors.toSet());
     		if(interceptors == null || interceptors.isEmpty()) {
     			continue;
     		}
@@ -189,7 +188,7 @@ public class AgentTransformer implements AgentBuilder.Transformer {
         return builder;
     }
     
-    private String listClass(List<Object> interceptors) {
+    private String listClass(Set<Object> interceptors) {
     	if(interceptors == null || interceptors.isEmpty()) {
     		return "";
     	}

@@ -27,6 +27,8 @@ import net.bytebuddy.description.type.TypeDescription;
 
 public class ElementMatcherConvert {
     
+	private ElementMatcherConvert() {}
+	
 	/**
 	 * InDefinedShape转换为MethodDefined
 	 * @param inDefinedShape
@@ -64,7 +66,7 @@ public class ElementMatcherConvert {
     	return new ClassDefined(getInterface(typeDescription), getSuperClass(typeDescription), getClassAnnotation(typeDescription), typeDescription.getActualName());
     }
     
-    private static String[] getParams(MethodDescription.InDefinedShape inDefinedShape) {
+    public static String[] getParams(MethodDescription.InDefinedShape inDefinedShape) {
     	return inDefinedShape.getParameters().asTypeList().asErasures().stream()
     			.flatMap(type -> Arrays.stream(new String[] {type.getActualName()}))
     			.toArray(String[]::new);

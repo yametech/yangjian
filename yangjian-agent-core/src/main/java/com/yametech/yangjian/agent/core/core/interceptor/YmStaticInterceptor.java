@@ -33,7 +33,7 @@ import net.bytebuddy.implementation.bind.annotation.SuperCall;
 
 public class YmStaticInterceptor {
 	private static final ILogger LOG = LoggerFactory.getLogger(YmStaticInterceptor.class);
-	private static final RateLimit LIMITER = RateLimit.create(500);
+	private static final RateLimit LIMITER = RateLimit.create(10);
     private IStaticMethodAOP<?>[] interceptors;
     
     public YmStaticInterceptor(IStaticMethodAOP<?>[] interceptors) {

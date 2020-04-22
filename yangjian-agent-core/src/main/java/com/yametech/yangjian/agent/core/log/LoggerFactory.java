@@ -36,7 +36,7 @@ public class LoggerFactory implements ILoggerFactory {
 	private static final String LOG_CONFIG_NAME = "log.properties";
 	private static final String SKYWALKING_SERVICE_NAME_CONFIGKEY = "skywalking.agent.service_name";
 	public static final LogOutput DEFAULT_OUTPUT = LogOutput.CONSOLE;
-	public static final String DEFAULT_DIR = AgentPath.getPath().getAbsolutePath() + "\\logs";
+	public static final String DEFAULT_DIR = AgentPath.getCompatiblePath().getAbsolutePath() + "\\logs";
 	public static final LogLevel DEFAULT_LEVEL = LogLevel.DEBUG;
 	public static final Long DEFAULT_MAX_FILE_SIZE = 1024 * 1024 * 30L;
 	public static final Integer DEFAULT_MAX_FILE_NUM = 10;
@@ -50,7 +50,7 @@ public class LoggerFactory implements ILoggerFactory {
 	 * @throws IOException
 	 */
 	static {
-		String configPath = AgentPath.getPath().getPath() + File.separator + "config" + File.separator + LOG_CONFIG_NAME;
+		String configPath = AgentPath.getCompatiblePath().getPath() + File.separator + "config" + File.separator + LOG_CONFIG_NAME;
 		try {
 			Config.addConfigProperties(configPath);
 		} catch (IOException e) {
@@ -74,7 +74,7 @@ public class LoggerFactory implements ILoggerFactory {
 				logDir = DEFAULT_LINUX_DIR;
 			} else {
 				// 研发环境的日志目录
-				logDir = AgentPath.getPath().getPath() + File.separator + "logs";
+				logDir = AgentPath.getCompatiblePath().getPath() + File.separator + "logs";
 			}
 			// 设置默认日志目录
 			Config.setConfig(Constants.LOG_DIR, logDir);

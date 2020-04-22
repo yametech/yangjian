@@ -16,11 +16,17 @@
 package com.yametech.yangjian.agent.core.core.interceptor;
 
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.util.RateLimit;
+
 import net.bytebuddy.implementation.bind.annotation.AllArguments;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import net.bytebuddy.implementation.bind.annotation.This;
 
 public class YmInstanceConstructorInterceptor {
+	private static final ILogger LOG = LoggerFactory.getLogger(YmInstanceConstructorInterceptor.class);
+	private static final RateLimit LIMITER = RateLimit.create(10);
 	private IConstructorListener[] interceptors;
 
 	public YmInstanceConstructorInterceptor(IConstructorListener[] interceptors) {
@@ -33,7 +39,9 @@ public class YmInstanceConstructorInterceptor {
 			try {
 				interceptor.constructor(thisObj, allArguments);
 			} catch (Throwable t) {
-//				log.warn(t, "interceptor constructor");// 业务异常，不打印
+				if(LIMITER.tryAcquire()) {// 增加打印速率限制(每秒N条)，防止因插件写的有问题，发生大量异常时影响方法调用速度
+					LOG.warn(t, "interceptor constructor exception");
+				}
 			}
 		}
 

@@ -15,9 +15,9 @@
  */
 package com.yametech.yangjian.agent.core.pool;
 
-import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
+import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.api.pool.IPoolMonitorCreater;
@@ -42,8 +42,8 @@ public class PoolMonitorMatcherProxy extends BaseMatcherProxy<IPoolMonitorMatche
 	}
 	
 	@Override
-	public void init(PoolMonitorCreater obj, ClassLoader classLoader, MethodType type) {
-		LoadClassKey loadClassKey = matcher.loadClass(type);
+	public void init(PoolMonitorCreater obj, ClassLoader classLoader, MethodType type, MethodDefined methodDefined) {
+		LoadClassKey loadClassKey = matcher.loadClass(type, methodDefined);
 		if(loadClassKey == null) {
 			return;
 		}
@@ -53,9 +53,7 @@ public class PoolMonitorMatcherProxy extends BaseMatcherProxy<IPoolMonitorMatche
 			if(!(instance instanceof IPoolMonitorCreater)) {
 				throw new RuntimeException("poolMonitorMatcher配置的loadClass错误，必须为IPoolMonitorCreater的子类");
 			}
-			if(instance instanceof IConfigReader) {
-				InstanceManage.registryConfigReaderInstance((IConfigReader)instance);
-			}
+			InstanceManage.registryInit(instance);
 			obj.init((IPoolMonitorCreater)instance);
 		} catch (Exception e) {
 			log.warn(e, "加载异常：{}，\nclassLoader={}，\nmetricMatcher classLoader：{},\ninstance classLoader：{}",
@@ -67,8 +65,8 @@ public class PoolMonitorMatcherProxy extends BaseMatcherProxy<IPoolMonitorMatche
 	}
 
 	@Override
-	public LoadClassKey loadClass(MethodType type) {
-		LoadClassKey loadClassKey = matcher.loadClass(type);
+	public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
+		LoadClassKey loadClassKey = matcher.loadClass(type, methodDefined);
 		if(loadClassKey == null) {
 			return null;
 		}

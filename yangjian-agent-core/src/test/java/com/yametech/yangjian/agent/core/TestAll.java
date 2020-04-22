@@ -80,7 +80,7 @@ public class TestAll {
 	
 	@org.junit.Test
 	public void path() {
-		File path = AgentPath.getPath();
+		File path = AgentPath.getCompatiblePath();
 		System.err.println(path.getAbsolutePath());
 		System.err.println(1 << 16);
 		for(Class<?> matcher : Arrays.asList(MetricMatcherProxy.class, PoolMonitorMatcherProxy.class, TraceMatcherProxy.class)) {// 此处手动维护，后续自动发现

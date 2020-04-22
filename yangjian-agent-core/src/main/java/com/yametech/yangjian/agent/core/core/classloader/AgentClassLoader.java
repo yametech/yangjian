@@ -116,7 +116,7 @@ public class AgentClassLoader extends ClassLoader {
 //        	classLoaders.addAll(Arrays.asList(extClassLoader));
 //        }
 //        System.err.println("parent classLoader:" + parent);
-        File agentDictionary = AgentPath.getPath();
+        File agentDictionary = AgentPath.getCompatiblePath();
 //        System.err.println(agentDictionary.getAbsolutePath());
         classpath = new LinkedList<File>();
         classpath.add(new File(agentDictionary, "plugins"));

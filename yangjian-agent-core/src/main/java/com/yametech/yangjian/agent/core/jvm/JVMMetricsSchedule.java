@@ -67,7 +67,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfi
 
     @Override
     public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList(CONFIG_KEY));
+        return new HashSet<>(Arrays.asList(CONFIG_KEY.replaceAll("\\.", "\\\\.")));
     }
 
     @Override

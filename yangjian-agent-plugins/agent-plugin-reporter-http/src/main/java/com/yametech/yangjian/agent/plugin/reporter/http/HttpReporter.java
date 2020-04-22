@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.IReport;
 import com.yametech.yangjian.agent.api.common.Constants;
@@ -28,12 +30,6 @@ import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.util.HttpClient;
 import com.yametech.yangjian.agent.util.HttpRequest;
 import com.yametech.yangjian.agent.util.HttpResponse;
-
-import javax.net.ssl.HttpsURLConnection;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * HTTP上报
@@ -78,7 +74,7 @@ public class HttpReporter implements IReport, IConfigReader {
 
     @Override
     public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList(URL_CONFIG_KEY));
+        return new HashSet<>(Arrays.asList(URL_CONFIG_KEY.replaceAll("\\.", "\\\\.")));
     }
 
     @Override

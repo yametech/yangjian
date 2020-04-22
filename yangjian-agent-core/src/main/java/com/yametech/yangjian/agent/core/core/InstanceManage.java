@@ -28,26 +28,48 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.yametech.yangjian.agent.api.IAppStatusListener;
+import com.yametech.yangjian.agent.api.IConfigLoader;
 import com.yametech.yangjian.agent.api.IConfigReader;
+import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.base.IWeight;
 import com.yametech.yangjian.agent.api.base.SPI;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.core.classloader.AgentClassLoader;
+import com.yametech.yangjian.agent.util.CustomThreadFactory;
 
 public class InstanceManage {
-	private static ILogger log = LoggerFactory.getLogger(InstanceManage.class);
-    private static List<Object> spis = new ArrayList<>();// 已加载的spi实例
+	private static final ILogger LOG = LoggerFactory.getLogger(InstanceManage.class);
+    private static Set<Object> loadedInstance = new CopyOnWriteArraySet<>();// 需要托管的实例
     private static final String SPI_BASE_PATH = "META-INF/services/";
+    private static final int MAX_INSTANCE = 2000;// 最大托管的实例个数
+    private static ScheduledExecutorService service;
+    private static Map<Class<?>, Boolean> initStatus = new ConcurrentHashMap<>();
+    private static String arguments;
 
+    private InstanceManage() {}
+    
+    static {
+    	initStatus.put(IConfigLoader.class, false);
+    	initStatus.put(IConfigReader.class, false);
+    	initStatus.put(IAppStatusListener.class, false);
+    	initStatus.put(ISchedule.class, false);
+    }
+    
 	/**
 	 * 加载所有的spi
 	 */
-	public static void loadSpi() {
+ 	public static void loadSpi() {
 //		ServiceLoader<SPI> starterLoader = ServiceLoader.load(SPI.class, AgentClassLoader.getDefault());
 //		starterLoader.forEach(spis::add);
 		
@@ -67,9 +89,10 @@ public class InstanceManage {
 //					log.info("disable SPI：{}", cls.getName());
 //					return;
 //				}
-				spis.add(cls.newInstance());
+//				loadedInstance.add(cls.newInstance());
+				registry(cls.newInstance(), false);
 			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-				log.warn(e, "load spi error");
+				LOG.warn(e, "load spi error");
 			}
 		});
     }
@@ -96,7 +119,7 @@ public class InstanceManage {
             }
             return spiClasses;
         } catch (IOException e) {
-        	log.error("read resources failure.", e);
+        	LOG.error("read resources failure.", e);
         }
         return null;
     }
@@ -122,7 +145,7 @@ public class InstanceManage {
 	@SuppressWarnings("unchecked")
 	public static <T> List<T> listSpiInstance(Class<T> cls) {
 		List<T> instances = new ArrayList<>();
-		for(Object api : spis) {
+		for(Object api : loadedInstance) {
 			if(cls.isAssignableFrom(api.getClass())) {
 				instances.add((T) api);
 			}
@@ -138,7 +161,7 @@ public class InstanceManage {
 	 * @return
 	 */
 	public static List<SPI> getSpis() {
-		return spis.stream().filter(instance -> instance instanceof SPI)
+		return loadedInstance.stream().filter(instance -> instance instanceof SPI)
 				.map(instance -> (SPI)instance)
 				.collect(Collectors.toList());
 	}
@@ -149,42 +172,182 @@ public class InstanceManage {
 	 * @return
 	 */
 	public static boolean removeSpi(SPI spi) {
-		return spis.remove(spi);
+		return loadedInstance.remove(spi);
+	}
+	
+	/**
+	 * 是否为需要初始化的实例
+	 * @return
+	 */
+	private static boolean isInitInstance(Object obj) {
+		for(Class<?> cls : initStatus.keySet()) {
+			if(cls.isAssignableFrom(obj.getClass())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
+	/**
+	 * 注册需要init的实例，如果不需要init，则不注册
+	 * @param instance
+	 * @return
+	 */
+	public static boolean registryInit(Object instance) {
+		if(!isInitInstance(instance)) {
+			return false;
+		}
+		return registry(instance);
+	}
+	
+	/**
+	 * 注册一个托管实例
+	 * @param spi
+	 */
+	public static boolean registry(Object instance) {
+		return registry(instance, true);
+	}
+	
+	/**
+	 * 
+	 * @param instance	托管实例
+	 * @param reload	true：注册时执行一次初始化（用于在premain init之后托管的实例）；false：不执行初始化（用于在premain init之前托管的实例）；
+	 */
+	public static synchronized boolean registry(Object instance, boolean reload) {
+		if(instance == null) {
+			return false;
+		}
+		if(loadedInstance.size() > MAX_INSTANCE) {
+			LOG.warn("注册实例失败，管理的实例个数已超过{}", MAX_INSTANCE);
+			return false;
+		}
+		if(loadedInstance.contains(instance)) {
+			return true;
+		}
+		loadedInstance.add(instance);
+		if(!reload) {
+			return false;
+		}
+		if(instance instanceof IConfigLoader && Boolean.TRUE.equals(initStatus.get(IConfigLoader.class))) {
+			loaderInit((IConfigLoader)instance, arguments);
+		}
+		if(instance instanceof IConfigReader && Boolean.TRUE.equals(initStatus.get(IConfigReader.class))) {
+			readerInit((IConfigReader)instance);
+		}
+		if(instance instanceof IAppStatusListener && Boolean.TRUE.equals(initStatus.get(IAppStatusListener.class))) {
+			beforeRunInit((IAppStatusListener)instance);
+		}
+		if(instance instanceof ISchedule && Boolean.TRUE.equals(initStatus.get(ISchedule.class))) {
+			scheduleInit((ISchedule)instance);
+		}
+		return true;
+	}
+	
 	/**
 	 * 注册IConfigReader实例，并执行一次配置通知
 	 * @param configReader
 	 */
-	public static void registryConfigReaderInstance(IConfigReader configReader) {
-		registryConfigReaderInstance(configReader, true);
-	}
+//	public static void registryConfigReaderInstance(IConfigReader configReader) {
+//		registryConfigReaderInstance(configReader, true);
+//	}
 	/**
 	 * 注册IConfigReader实例，根据needNotify确认是否执行通知
 	 * @param configReader
 	 * @param needNotifyConfig	true：注册时执行一次配置通知（用于在全局通知(InstanceManage.notifyReaders)之后调用该方法）；false：不执行配置通知（用于在全局通知之前调用该方法）；
 	 */
-	public static void registryConfigReaderInstance(IConfigReader configReader, boolean needNotifyConfig) {
-		spis.add(configReader);
-		if(needNotifyConfig) {
-			notifyReader(configReader);
+//	public static void registryConfigReaderInstance(IConfigReader configReader, boolean needNotifyConfig) {
+//		loadedInstance.add(configReader);
+//		if(needNotifyConfig) {
+//			readerInit(configReader);
+//		}
+//	}
+	
+	private static void init(Class<?> cls, Runnable runnable) {
+		if(Boolean.TRUE.equals(initStatus.get(cls))) {
+			LOG.warn("禁止重复执行");
+			return;
+		}
+		initStatus.put(cls, true);// 要放到runnable.run()之前，防止在run的过程中调用registry时无法正常调用init；EventMatcherInit.configKeyValue就会导致这个问题
+		runnable.run();
+	}
+	
+	 /**
+     * 	初始化配置
+     * @throws Exception 
+     */
+	public static synchronized void loadConfig(String arguments) {
+		init(IConfigLoader.class, () -> {
+			InstanceManage.arguments = arguments;
+	    	for(IConfigLoader loader: InstanceManage.listSpiInstance(IConfigLoader.class)) {
+	    		loaderInit(loader, arguments);
+	    	}
+		});
+    }
+	
+	private static void loaderInit(IConfigLoader loader, String arguments) {
+		try {
+			loader.load(arguments);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 	
 	/**
 	 * 下发配置给各个插件，不管配置有没变化都全量通知订阅的key（这个逻辑不要改，会影响订阅者）
 	 */
-	public static void notifyReader() {
-		for (IConfigReader configReader : listSpiInstance(IConfigReader.class)) {
-			notifyReader(configReader);
-		}
+	public static synchronized void notifyReader() {
+		init(IConfigReader.class, () -> {
+			for (IConfigReader configReader : listSpiInstance(IConfigReader.class)) {
+				readerInit(configReader);
+			}
+		});
 	}
 	
+	/**
+     * 	初始化逻辑
+     */
+	public static synchronized void beforeRun() {
+		init(IAppStatusListener.class, () -> InstanceManage.listSpiInstance(IAppStatusListener.class).forEach(InstanceManage::beforeRunInit));
+    }
+	
+	private static void beforeRunInit(IAppStatusListener listener) {
+		listener.beforeRun();
+	}
+	
+    /**
+     * 开启定时调度
+     */
+	public static synchronized void startSchedule() {
+		init(ISchedule.class, () -> {
+			service = Executors.newScheduledThreadPool(Config.SCHEDULE_CORE_POOL_SIZE.getValue(), new CustomThreadFactory("agent-schedule", true));
+			InstanceManage.listSpiInstance(ISchedule.class).forEach(schedule -> {
+				if(schedule.initialDelay() == 0) {
+					schedule.execute();
+				}
+			});// 执行一次定时任务，防止多线程类加载死锁
+			InstanceManage.listSpiInstance(ISchedule.class).forEach(InstanceManage::scheduleInit);
+		});
+	}
+	
+	private static void scheduleInit(ISchedule schedule) {
+		int delay = schedule.initialDelay();
+		if(delay == 0) {
+			delay += schedule.interval();
+		}
+		service.scheduleAtFixedRate(() -> {
+			try {
+				schedule.execute();
+			} catch(Exception e) {
+				LOG.warn(e, "执行定时任务异常：{}", schedule.getClass());
+			}
+		} , delay, schedule.interval(), schedule.timeUnit());
+	}
+    
 	/**
 	 * 单个IConfigReader实例下发（刷新）配置
 	 * @param configReader
 	 */
-	private static void notifyReader(IConfigReader configReader) {
+	private static void readerInit(IConfigReader configReader) {
 		Set<String> keys = configReader.configKey();
 		if (keys == null) {
 			keys = new HashSet<>();
@@ -204,4 +367,10 @@ public class InstanceManage {
 		}
 		configReader.configKeyValue(kvs);
 	}
+	
+	public static void stop() throws InterruptedException {
+		service.shutdown();
+		service.awaitTermination(5, TimeUnit.SECONDS);
+	}
+	
 }

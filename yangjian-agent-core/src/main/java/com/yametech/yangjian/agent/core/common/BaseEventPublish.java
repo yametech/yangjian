@@ -50,15 +50,17 @@ import com.yametech.yangjian.agent.util.eventbus.process.EventBus;
  */
 public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedule, IConfigReader {
     private static final ILogger log = LoggerFactory.getLogger(BaseEventPublish.class);
-    private static final int MIN_BUFFER_SIZE = 1 << 6;
+    private static final int MIN_BUFFER_SIZE = 1;
     private static final String BUFFER_SIZE_KEY_PREFIX = "bufferSize.";
     private static final String INTERVAL_KEY_PREFIX = "metricOutput.interval.publish.";
+    private static final String DISCARD_KEY_PREFIX = "eventPublish.discard.";
     private IReportData report;
     private EventBus<T> eventBus;
     private String metricType;
     private String configKeySuffix;
-    private int bufferSize = MIN_BUFFER_SIZE;
+    private int bufferSize = 1 << 6;
     private int interval = 5;
+    private boolean discard = true;
     
     public BaseEventPublish(String metricType, String configKeySuffix, IReportData report) {
     	this.metricType = metricType;
@@ -68,7 +70,9 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
     
     @Override
     public Set<String> configKey() {
-    	return new HashSet<>(Arrays.asList(BUFFER_SIZE_KEY_PREFIX + configKeySuffix, INTERVAL_KEY_PREFIX + configKeySuffix));
+    	return new HashSet<>(Arrays.asList(BUFFER_SIZE_KEY_PREFIX.replaceAll("\\.", "\\\\.") + configKeySuffix, 
+    			INTERVAL_KEY_PREFIX.replaceAll("\\.", "\\\\.") + configKeySuffix, 
+    			DISCARD_KEY_PREFIX.replaceAll("\\.", "\\\\.") + configKeySuffix));
     }
     
     @Override
@@ -96,6 +100,15 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
             	log.warn("{}配置错误：{}", INTERVAL_KEY_PREFIX + configKeySuffix, intervalStr);
             }
     	}
+    	
+    	String discardStr = kv.get(DISCARD_KEY_PREFIX + configKeySuffix);
+    	if(discardStr != null) {
+    		try {
+    			discard = Boolean.parseBoolean(discardStr);
+            } catch(Exception e) {
+            	log.warn("{}配置错误：{}", DISCARD_KEY_PREFIX + configKeySuffix, discardStr);
+            }
+    	}
     }
     
     protected abstract List<ConsumeConfig<T>> consumes();
@@ -111,7 +124,7 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
                 .bufferSize(bufferSize)
                 .waitStrategy(new BlockingWaitStrategy())
 //				.waitStrategy(new YieldingWaitStrategy())
-                .setDiscardFull(true)
+                .setDiscardFull(discard)
                 .build(cls, new ExceptionHandler<T>() {
                     @Override
                     public void handleEventException(Throwable e, long sequence, T callEvent) {

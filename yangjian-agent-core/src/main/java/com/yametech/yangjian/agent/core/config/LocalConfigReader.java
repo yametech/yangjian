@@ -84,7 +84,7 @@ public class LocalConfigReader implements IConfigLoader {
 	private void readLocalConfigFile() throws Exception {
 		String configPath = System.getProperty(Constants.CONFIG_PATH);
 		if(StringUtil.isEmpty(configPath)) {
-			configPath = AgentPath.getPath().getPath() + File.separator + "config" + File.separator + DEFAULT_CONFIG_FILE;
+			configPath = AgentPath.getCompatiblePath().getPath() + File.separator + "config" + File.separator + DEFAULT_CONFIG_FILE;
 //			String basePath = AgentPath.getFile().getPath();
 //			if(basePath.endsWith("target\\classes")) {// 兼容研发环境
 //				configPath = basePath + File.separator + DEFAULT_CONFIG_FILE;

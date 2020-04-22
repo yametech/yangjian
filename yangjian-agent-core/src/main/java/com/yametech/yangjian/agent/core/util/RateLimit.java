@@ -18,10 +18,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class RateLimit {
-	public static RateLimit create(int tracesPerSecond) {
-		if (tracesPerSecond < 0)
-			throw new IllegalArgumentException("tracesPerSecond < 0");
-		return new RateLimit(tracesPerSecond);
+	public static RateLimit create(int qps) {
+		if (qps < 0)
+			throw new IllegalArgumentException("qps < 0");
+		return new RateLimit(qps);
 	}
 
 	static final long NANOS_PER_SECOND = TimeUnit.SECONDS.toNanos(1);

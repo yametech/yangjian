@@ -15,14 +15,21 @@
  */
 package com.yametech.yangjian.agent.api.common;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.yametech.yangjian.agent.api.bean.ClassDefined;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.bean.MethodInfo;
 
 public class MethodUtil {
+	private MethodUtil() {}
+	
 	private static Map<Method, String> cacheMethod = new ConcurrentHashMap<>();
 	private static Map<MethodInfo, String> cacheMethodInfo = new ConcurrentHashMap<>();
 	
@@ -119,4 +126,93 @@ public class MethodUtil {
 		return methodId;
 	}
 	
+	public static MethodDefined getMethodDefined(Method method) {
+		Class<?> cls = method.getDeclaringClass();
+		return new MethodDefined(getClassDefined(cls), getAnnotations(method.getAnnotations()), 
+				method.toString(), method.getName(), getMethodParamsType(method), method.getReturnType().getTypeName(), 
+				Modifier.isStatic(method.getModifiers()), false, !Modifier.isStatic(method.getModifiers()));
+	}
+	
+	public static ClassDefined getClassDefined(Class<?> cls) {
+		return new ClassDefined(getInterface(cls), getSuperClass(cls), getAnnotations(cls.getDeclaredAnnotations()), cls.getTypeName());
+	}
+	
+	public static String[] getMethodParamsType(Method method) {
+		if(method.getParameterTypes() == null || method.getParameterTypes().length == 0) {
+			return new String[0];
+		}
+		String[] types = new String[method.getParameterTypes().length];
+		for(int i = 0; i < method.getParameterTypes().length; i++) {
+			types[i] = method.getParameterTypes()[i].getTypeName();
+		}
+    	return types;
+    }
+	
+	/**
+	 * 获取类注解
+	 * @param thisClass
+	 * @return
+	 */
+	public static Set<String> getAnnotations(Annotation[] annotations) {
+		Set<String> anns = new HashSet<>();
+		for(Annotation ann : annotations) {
+			anns.add(ann.getClass().getTypeName());
+		}
+    	return anns;
+    }
+	
+	/**
+     * 获取类的父类及祖类，不包含Object
+     * @param cls
+     * @return
+     */
+    public static Set<String> getSuperClass(Class<?> cls) {
+    	Set<String> clsList = new HashSet<>();
+    	while(cls.getSuperclass() != null) {
+    		String superCls = cls.getSuperclass().getTypeName();
+    		if("java.lang.Object".equals(superCls)) {
+    			break;
+    		}
+    		clsList.add(superCls);
+    		cls = cls.getSuperclass();
+        }
+    	return clsList;
+    }
+	
+	/**
+	 * 获取类的所有接口
+	 * @param cls
+	 * @return
+	 */
+	public static Set<String> getInterface(Class<?> cls) {
+    	Set<String> interfaces = new HashSet<>();
+    	while(cls != null) {
+    		if("java.lang.Object".equals(cls.getTypeName())) {
+    			break;
+    		}
+    		interfaces.addAll(getClassInterface(cls));
+    		if(cls.getSuperclass() == null) {
+    			break;
+    		}
+    		cls = cls.getSuperclass();
+        }
+    	return interfaces;
+    }
+	
+	/**
+	 * 获取直接接口
+	 * @param cls
+	 * @return
+	 */
+	public static Set<String> getClassInterface(Class<?> cls) {
+    	Set<String> clsList = new HashSet<>();
+    	if(cls.getInterfaces() == null || cls.getInterfaces().length == 0) {
+    		return clsList;
+    	}
+    	for(Class<?> inter : cls.getInterfaces()) {
+    		clsList.add(inter.getName());
+			clsList.addAll(getClassInterface(inter));
+    	}
+    	return clsList;
+    }
 }

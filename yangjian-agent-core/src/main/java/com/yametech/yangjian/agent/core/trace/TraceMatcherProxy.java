@@ -25,6 +25,7 @@ import java.util.Set;
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
+import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.api.trace.ICustomLoad;
@@ -51,6 +52,11 @@ import brave.Tracing;
 public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<?>> implements IConfigReader {
 	private static ILogger log = LoggerFactory.getLogger(TraceMatcherProxy.class);
 //	private static AsyncReporter<Span> report = AsyncReporter.builder(OkHttpSender.newBuilder().endpoint("http://localhost:9411/api/v2/spans").compressionEnabled(false).build()).build();
+	private static final String KEY_QPS_GLOBAL = "trace.sample.qps.global";
+	private static final String KEY_QPS_DEFAULT = "trace.sample.qps.default";
+	private static final String KEY_PREFIX_TYPE_STRATEGY = "trace.sample.strategy.";
+	private static final String KEY_PREFIX_TYPE_QPS = "trace.sample.qps.";
+	
 	private static ISpanSample globalSample;
 	private ISpanSample spanSample;
 	private TraceEventBus traceCache;
@@ -61,14 +67,14 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 	}
 	
 	@Override
-	public LoadClassKey loadClass(MethodType type) {
-		return new LoadClassKey(TraceAOP.class.getName(), "TraceAOP:" + matcher.loadClass(type).getCls());
+	public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
+		return new LoadClassKey(TraceAOP.class.getName(), "TraceAOP:" + matcher.loadClass(type, methodDefined).getCls());
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public void init(TraceAOP aop, ClassLoader classLoader, MethodType type) {
-		LoadClassKey loadClassKey = matcher.loadClass(type);
+	public void init(TraceAOP aop, ClassLoader classLoader, MethodType type, MethodDefined methodDefined) {
+		LoadClassKey loadClassKey = matcher.loadClass(type, methodDefined);
 		if(loadClassKey == null) {
 			return;
 		}
@@ -78,9 +84,7 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 			if(!(instance instanceof ISpanCreater)) {
 				throw new RuntimeException("loadClass配置错误，必须为ISpanCreater的子类");
 			}
-			if(instance instanceof IConfigReader) {
-				InstanceManage.registryConfigReaderInstance((IConfigReader)instance);
-			}
+			InstanceManage.registryInit(instance);
 			if(instance instanceof ICustomLoad) {// 指定了定制tag接口，加载实现类
 				ICustomLoad customLoad = (ICustomLoad)instance;
 				List<ISpanCustom> spanCustoms = getCustomInstance(customLoad, classLoader);
@@ -127,8 +131,9 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 	
 	@Override
 	public Set<String> configKey() {
-		return new HashSet<>(Arrays.asList("trace.sample.qps.global", "trace.sample.qps.default", 
-				"trace.sample.strategy." + matcher.type().getKey(), "trace.sample.qps." + matcher.type().getKey()));
+		return new HashSet<>(Arrays.asList(KEY_QPS_GLOBAL.replaceAll("\\.", "\\\\."), KEY_QPS_DEFAULT.replaceAll("\\.", "\\\\."), 
+				KEY_PREFIX_TYPE_STRATEGY.replaceAll("\\.", "\\\\.") + matcher.type().getKey(), 
+				KEY_PREFIX_TYPE_QPS.replaceAll("\\.", "\\\\.") + matcher.type().getKey()));
 	}
 
 	/**
@@ -140,7 +145,7 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 			return;
 		}
 		SampleStrategy sampleStrategy = SampleStrategy.FOLLOWER;
-		String sampleStrategyConfig = kv.get("trace.sample.strategy." + matcher.type().getKey());
+		String sampleStrategyConfig = kv.get(KEY_PREFIX_TYPE_STRATEGY + matcher.type().getKey());
 		if(sampleStrategyConfig != null) {
 			sampleStrategy = SampleStrategy.getOrDefault(sampleStrategyConfig);
 		}
@@ -158,7 +163,7 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 			return;
 		}
 		
-		String globalQPSConfig = kv.get("trace.sample.qps.global");
+		String globalQPSConfig = kv.get(KEY_QPS_GLOBAL);
 		if(globalQPSConfig != null) {
 			int globalQPS = Integer.parseInt(globalQPSConfig);
 			synchronized (TraceMatcherProxy.class) {
@@ -171,11 +176,11 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 		}
 		
 		int sampleQPS = 10;
-		String sampleQPSConfig = kv.get("trace.sample.qps." + matcher.type().getKey());
+		String sampleQPSConfig = kv.get(KEY_PREFIX_TYPE_QPS + matcher.type().getKey());
 		if(sampleQPSConfig != null) {
 			sampleQPS = Integer.parseInt(sampleQPSConfig);
 		} else {
-			String defaultQPSConfig = kv.get("trace.sample.qps.default");
+			String defaultQPSConfig = kv.get(KEY_QPS_DEFAULT);
 			if(defaultQPSConfig != null) {
 				sampleQPS = Integer.parseInt(defaultQPSConfig);
 			}

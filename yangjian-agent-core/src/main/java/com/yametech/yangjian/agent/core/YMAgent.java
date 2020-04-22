@@ -23,18 +23,12 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.yametech.yangjian.agent.api.IAppStatusListener;
-import com.yametech.yangjian.agent.api.IConfigLoader;
-import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
-import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.IReportData;
@@ -55,7 +49,6 @@ import com.yametech.yangjian.agent.core.core.elementmatch.ClassElementMatcher;
 import com.yametech.yangjian.agent.core.metric.MetricData;
 import com.yametech.yangjian.agent.core.report.ReportManage;
 import com.yametech.yangjian.agent.core.util.Util;
-import com.yametech.yangjian.agent.util.CustomThreadFactory;
 import com.yametech.yangjian.agent.util.OSUtil;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -65,7 +58,6 @@ import net.bytebuddy.matcher.ElementMatchers;
 public class YMAgent {
 	private static ILogger log = LoggerFactory.getLogger(YMAgent.class);
 	private static IReportData report = ReportManage.getReport("YMAgent");
-	private static ScheduledExecutorService service;
 	private static final String[] IGNORE_CLASS_CONFIG = new String[] {"^net\\.bytebuddy\\.", "^org\\.slf4j\\.", // ".*\\$auxiliary\\$.*", 
 			"^org\\.apache\\.logging\\.", "^org\\.groovy\\.", "^sun\\.reflect\\.", // ".*javassist.*", ".*\\.asm\\..*", 这两个会有误拦截：com.alibaba.dubbo.rpc.proxy.javassist.JavassistProxyFactory
 			"^org\\.apache\\.skywalking\\.", "^com\\.yametech\\.yangjian\\.agent\\."};
@@ -88,11 +80,13 @@ public class YMAgent {
     	System.setProperty(Constants.SYSTEM_PROPERTIES_PREFIX + Constants.SERVICE_NAME, Config.SERVICE_NAME.getValue());
     	AgentClassLoader.initDefaultLoader();
     	InstanceManage.loadSpi();
-    	InstanceManage.getSpis().forEach(spi -> log.debug("spiClassLoader:{}, {}", spi, Util.join(" > ", Util.listClassLoaders(spi.getClass()))));
-    	loadConfig(arguments);
+    	if(log.isDebugEnable()) {
+    		InstanceManage.getSpis().forEach(spi -> log.debug("spiClassLoader:{}, {}", spi, Util.join(" > ", Util.listClassLoaders(spi.getClass()))));
+    	}
+    	InstanceManage.loadConfig(arguments);
     	InstanceManage.notifyReader();
-    	beforeRun();
-    	startSchedule();// 一定要早于instrumentation
+    	InstanceManage.beforeRun();
+    	InstanceManage.startSchedule();// 一定要早于instrumentation
     	addShutdownHook();
     	instrumentation(instrumentation);
     	// 埋点日志，不允许删除
@@ -131,9 +125,7 @@ public class YMAgent {
     	}
     	try {
     		InterceptorMatcher proxyMatcher = (InterceptorMatcher) proxy.getValue().getConstructor(proxy.getKey()).newInstance(matcher);
-    		if(proxyMatcher instanceof IConfigReader) {
-    			InstanceManage.registryConfigReaderInstance((IConfigReader)proxyMatcher);
-    		}
+			InstanceManage.registryInit(proxyMatcher);
     		log.info("{} proxy {}", matcher.getClass(),proxyMatcher.getClass());
     		return proxyMatcher;
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
@@ -159,48 +151,6 @@ public class YMAgent {
     }
     
     /**
-     * 初始化配置
-     * @throws Exception 
-     */
-    private static void loadConfig(String arguments) throws Exception {
-    	for(IConfigLoader loader: InstanceManage.listSpiInstance(IConfigLoader.class)) {
-    		loader.load(arguments);
-    	}
-    }
-    
-    /**
-     * 初始化逻辑
-     */
-    private static void beforeRun() {
-    	InstanceManage.listSpiInstance(IAppStatusListener.class).forEach(IAppStatusListener::beforeRun);
-    }
-
-    /**
-     * 开启定时调度
-     */
-    private static void startSchedule() {
-    	service = Executors.newScheduledThreadPool(Config.SCHEDULE_CORE_POOL_SIZE.getValue(), new CustomThreadFactory("agent-schedule", true));
-    	InstanceManage.listSpiInstance(ISchedule.class).forEach(schedule -> {
-    		if(schedule.initialDelay() == 0) {
-    			schedule.execute();
-    		}
-    	});// 执行一次定时任务，防止多线程类加载死锁
-    	InstanceManage.listSpiInstance(ISchedule.class).forEach(schedule -> {
-    		int delay = schedule.initialDelay();
-    		if(delay == 0) {
-    			delay += schedule.interval();
-    		}
-    		service.scheduleAtFixedRate(() -> {
-    			try {
-    				schedule.execute();
-    			} catch(Exception e) {
-    				log.warn(e, "执行定时任务异常：{}", schedule.getClass());
-    			}
-    		} , delay, schedule.interval(), schedule.timeUnit());
-    	});
-	}
-    
-    /**
      * 注册关闭通知
      */
     private static void addShutdownHook() {
@@ -215,8 +165,7 @@ public class YMAgent {
 	            	for(IAppStatusListener spi : shutdowns) {
 	        			spi.shutdown(Duration.ofSeconds(10));
 	            	}
-	            	service.shutdown();
-					service.awaitTermination(5, TimeUnit.SECONDS);
+	            	InstanceManage.stop();
 				} catch (Exception e) {
 					log.warn(e, "关闭服务异常，可能丢失数据");
 				}

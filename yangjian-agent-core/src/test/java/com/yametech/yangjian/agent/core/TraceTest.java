@@ -15,17 +15,34 @@
  */
 package com.yametech.yangjian.agent.core;
 
+import java.lang.reflect.Method;
+
 import org.junit.Assert;
 
 import com.yametech.yangjian.agent.core.trace.sample.RateLimitSampler;
 
 public class TraceTest {
 	
+	public TraceTest() {
+	}
+	
 	@org.junit.Test
 	public void test() throws Exception {
+		System.err.println(1 << 14);
+		
 		System.err.println(System.currentTimeMillis() + ": " + ResourceHolder.print());
 		Thread.sleep(1300);
 		System.err.println(System.currentTimeMillis() + ": " + ResourceHolder.resource.print());
+		
+		for(Method method : TraceTest.class.getMethods()){
+			System.err.println(method);
+		}
+		
+		System.err.println("---------------------------------");
+		StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        for (StackTraceElement element : stackTraceElements) {
+        	System.err.println(element.getClassName() + "." + element.getMethodName());
+        }
 	}
 	
 	private static class ResourceHolder {

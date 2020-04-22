@@ -34,7 +34,7 @@ public class AgentPath {
     /**
      *   获取agent根目录，子目录为：config、lib、logs、plugins
      */
-    public static File getPath(){
+    public static File getBasePath(){
         if(file != null) return file;
 //        System.err.println(YMAgent.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         String classPath = YMAgent.class.getName().replaceAll("\\.", "/") + ".class";
@@ -56,4 +56,15 @@ public class AgentPath {
         }
     }
 
+    public static File getCompatiblePath() {
+    	File file = getBasePath();
+    	String replacePath = "yangjian-agent-core\\target";
+    	String oldPath = file.getAbsolutePath();
+    	if(!oldPath.endsWith(replacePath)) {
+    		return file;
+    	}
+    	String path = oldPath.substring(0, oldPath.length() - replacePath.length()) + "deploy";
+    	return new File(path);
+    }
+    
 }

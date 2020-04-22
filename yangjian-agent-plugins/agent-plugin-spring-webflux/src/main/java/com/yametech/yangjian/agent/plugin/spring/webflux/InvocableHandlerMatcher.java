@@ -19,6 +19,7 @@ import com.yametech.yangjian.agent.api.IMetricMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
+import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
 import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodArgumentIndexMatch;
@@ -44,7 +45,7 @@ public class InvocableHandlerMatcher implements IMetricMatcher {
     }
 
     @Override
-    public LoadClassKey loadClass(MethodType type) {
+    public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
         return new LoadClassKey("com.yametech.yangjian.agent.plugin.spring.webflux.InvocableHandlerInterceptor");
     }
 }

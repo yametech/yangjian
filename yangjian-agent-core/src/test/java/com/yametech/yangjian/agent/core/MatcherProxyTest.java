@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import com.yametech.yangjian.agent.api.base.IMatcherProxy;
 import com.yametech.yangjian.agent.api.base.MethodType;
+import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.trace.ITraceMatcher;
 import com.yametech.yangjian.agent.core.common.BaseEventPublish;
 import com.yametech.yangjian.agent.core.util.Util;
@@ -44,7 +45,7 @@ public class MatcherProxyTest extends BaseEventPublish<String> implements IMatch
 	}
 
 	@Override
-	public void init(String obj, ClassLoader classLoader, MethodType type) {
+	public void init(String obj, ClassLoader classLoader, MethodType type, MethodDefined methodDefined) {
 	}
 
 	@Override

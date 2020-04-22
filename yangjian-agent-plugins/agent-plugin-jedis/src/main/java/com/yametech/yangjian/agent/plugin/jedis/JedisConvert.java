@@ -98,7 +98,7 @@ public class JedisConvert implements IMethodAsyncConvert, IConfigReader {
     
     @Override
     public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList("redis.key.rule", "redis.key.rule\\..*"));
+        return new HashSet<>(Arrays.asList("redis\\.key\\.rule", "redis\\.key\\.rule\\..*"));
     }
 
     /**

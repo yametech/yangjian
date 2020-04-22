@@ -55,7 +55,8 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
     
     @Override
     public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList(THREADNUM_KEY_PREFIX + configKeySuffix, INTERVAL_KEY_PREFIX + configKeySuffix));
+        return new HashSet<>(Arrays.asList(THREADNUM_KEY_PREFIX.replaceAll("\\.", "\\\\.") + configKeySuffix, 
+        		INTERVAL_KEY_PREFIX.replaceAll("\\.", "\\\\.") + configKeySuffix));
     }
 
     @Override
