@@ -33,4 +33,8 @@ public class HttpResponse<T> {
     public void setData(T data) {
         this.data = data;
     }
+
+    public boolean is2xxSuccessful() {
+        return this.code / 100 == 2;
+    }
 }

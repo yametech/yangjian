@@ -59,7 +59,7 @@ public class HttpReporter implements IReport, IConfigReader {
         HttpResponse httpResponse = HttpClient.doHttpRequest(new HttpRequest(url, HttpRequest.HttpMethod.POST)
                 .setDatas(data.toString()));
         // 返回2XX即认为成功
-        return httpResponse != null && httpResponse.getCode() / 100 == 2;
+        return httpResponse != null && httpResponse.is2xxSuccessful();
     }
 
     @Override
