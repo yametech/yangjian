@@ -16,8 +16,9 @@ public class Listener {
 //		Thread.sleep(10000);
 	}
 	
-	public void test2(int age, String param) throws InterruptedException {
-		System.err.println("Listener.test2 : " + param);
+//	public void test2(int age, String param) throws InterruptedException {
+	public void test2(Service service, Throwable t) throws InterruptedException {
+		System.err.println("Listener.test2 : " + t);
 //		Thread.sleep(10000);
 	}
 	

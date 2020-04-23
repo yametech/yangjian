@@ -4,8 +4,6 @@ import java.util.regex.Pattern;
 
 import org.junit.Test;
 
-import com.yametech.yangjian.agent.core.trace.TraceTest;
-
 public class RegexTest {
 	
 	@Test
@@ -18,10 +16,20 @@ public class RegexTest {
 		
 		System.err.println(">>>>>>>>>>>>>>>>>>>>>>>>.");
 		
-		String name1 = TraceTest.class.getName().replaceAll("\\.", "\\\\.");
+		String name1 = RegexTest.class.getName().replaceAll("\\.", "\\\\.");
 		System.err.println(name1);
-		String methName = TraceTest.class.getMethod("test").toString();
+		String methName = RegexTest.class.getMethod("test").toString();
 		System.err.println(methName);
 		System.err.println(Pattern.compile(".*" + name1 + "\\..*").matcher(methName).matches());
+		
+		
+		System.err.println(RegexTest.class.getTypeName());
+		System.err.println(RegexTest.class.getName());
+		System.err.println(new int[1].getClass().getTypeName());
+		System.err.println(new int[1].getClass().getName());
+		System.err.println(Throwable.class.getTypeName());
+		System.err.println(Throwable.class.getName());
+		System.err.println(int.class.getTypeName());
+		System.err.println(int.class.getName());
 	}
 }

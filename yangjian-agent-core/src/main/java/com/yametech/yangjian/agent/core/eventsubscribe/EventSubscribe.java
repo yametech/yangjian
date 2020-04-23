@@ -16,10 +16,12 @@
 package com.yametech.yangjian.agent.core.eventsubscribe;
 
 import java.lang.reflect.Method;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.yametech.yangjian.agent.api.log.ILogger;
@@ -31,17 +33,21 @@ public class EventSubscribe {
 	private static final ILogger LOG = LoggerFactory.getLogger(EventSubscribe.class);
 	private static final int REGIST_MAX_NUM = 100;// 最大注册个数(subscribes的最大长度)
 	private static final RateLimit LIMITER = RateLimit.create(10);
-	private Map<Method, Entry<Object, Object[]>> subscribes = new ConcurrentHashMap<>();
+	private Map<String, Integer> extraArgumentIndex = new HashMap<>();
+	private Map<Method, SubscribeInfo> subscribes = new ConcurrentHashMap<>();
 	private boolean ignoreParams;
 	private String className;
 	private String methodName;
 	private String[] params;
 	
-	public EventSubscribe(boolean ignoreParams, String className, String methodName, String[] params) {
+	public EventSubscribe(boolean ignoreParams, String className, String methodName, String[] params, String ret) {
 		this.ignoreParams = ignoreParams;
 		this.className = className;
 		this.methodName = methodName;
 		this.params = params;
+		extraArgumentIndex.put(className, 0);
+		extraArgumentIndex.put(ret, 1);
+		extraArgumentIndex.put(Throwable.class.getTypeName(), 2);
 	}
 	
 	/**
@@ -56,7 +62,7 @@ public class EventSubscribe {
 		}
 		subscribes.forEach((subscribeMethod, instance) -> {
 			try {
-				subscribeMethod.invoke(instance.getKey(), getArguments(Arrays.copyOf(instance.getValue(), instance.getValue().length), sourceObj, subscribeMethod, allArguments, ret, t));
+				subscribeMethod.invoke(instance.getInstance(), getArguments(instance, subscribeMethod, sourceObj, allArguments, ret, t));
 			} catch (Exception e) {
 				if(LIMITER.tryAcquire()) {
 					LOG.warn(e, "事件订阅消费异常:{} {}", method, subscribeMethod);
@@ -73,40 +79,47 @@ public class EventSubscribe {
 	 * @param t
 	 * @return
 	 */
-	private Object[] getArguments(Object[] defaultArguments, Object sourceObj, Method method, Object[] arguments, Object ret, Throwable t) {
+	private Object[] getArguments(SubscribeInfo info, Method subscribeMethod, Object sourceObj, Object[] arguments, Object ret, Throwable t) {
 		if(ignoreParams) {
-			setExtraParams(0, method, defaultArguments, sourceObj, ret, t);
-			return defaultArguments;
+			return setExtraParams(info, info.getDefaultArgumentsCopy(), sourceObj, ret, t);// 注意：后三个参数的顺序不能变，必须与extraArgumentIndex中put的顺序一致
 		}
 		int argLength = arguments == null ? 0 : arguments.length;
-		if(method.getParameterCount() == argLength) {
+		if(subscribeMethod.getParameterCount() == argLength) {
 			return arguments;
 //		} else if(method.getParameterCount() < argLength) {// 注册时有检查不会发生
 //			return null;
 		}
+		Object[] newArguments = info.getDefaultArgumentsCopy();
 		if(argLength > 0) {
-			System.arraycopy(arguments, 0, defaultArguments, 0, argLength);
+			System.arraycopy(arguments, 0, newArguments, 0, argLength);
 		}
-		setExtraParams(argLength, method, defaultArguments, sourceObj, ret, t);
-		return defaultArguments;
+		return setExtraParams(info, newArguments, sourceObj, ret, t);
 	}
 	
-	private void setExtraParams(int startIndex, Method method, Object[] newArguments, Object sourceObj, Object ret, Throwable t) {
-		boolean sourceObjInit = false;
-		boolean throwableInit = false;
-		boolean returnInit = false;
-		for(int i = startIndex; i < method.getParameterCount(); i++) {
-			if(t != null && Throwable.class.isAssignableFrom(method.getParameterTypes()[i]) && !throwableInit) {
-				newArguments[i] = t;
-				throwableInit = true;
-			} else if(sourceObj.getClass().isAssignableFrom(method.getParameterTypes()[i]) && !sourceObjInit) {
-				newArguments[i] = sourceObj;
-				sourceObjInit = true;
-			} else if(ret != null && ret.getClass().isAssignableFrom(method.getParameterTypes()[i]) && !returnInit) {
-				newArguments[i] = ret;
-				returnInit = true;
-			}
+	private Object[] setExtraParams(SubscribeInfo info, Object[] newArguments, Object... extraArguments) {
+		int startIndex = params.length;
+		if(ignoreParams) {
+			startIndex = 0;
 		}
+		for(int i = startIndex; i < newArguments.length; i++) {
+			newArguments[i] = extraArguments[info.getExtraArgumentsIndex()[i - startIndex]];
+		}
+		return newArguments;
+//		boolean sourceObjInit = false;
+//		boolean throwableInit = false;
+//		boolean returnInit = false;
+//		for(int i = startIndex; i < method.getParameterCount(); i++) {
+//			if(t != null && Throwable.class.isAssignableFrom(method.getParameterTypes()[i]) && !throwableInit) {
+//				newArguments[i] = t;
+//				throwableInit = true;
+//			} else if(sourceObj.getClass().isAssignableFrom(method.getParameterTypes()[i]) && !sourceObjInit) {
+//				newArguments[i] = sourceObj;
+//				sourceObjInit = true;
+//			} else if(ret != null && ret.getClass().isAssignableFrom(method.getParameterTypes()[i]) && !returnInit) {
+//				newArguments[i] = ret;
+//				returnInit = true;
+//			}
+//		}
 	}
 	
 	/**
@@ -120,26 +133,43 @@ public class EventSubscribe {
 			return true;
 		}
 		if(!ignoreParams && method.getParameterTypes().length < params.length) {
-			LOG.info("参数个数不匹配{} - {}", method.getParameterTypes().length, params.length);
+			LOG.warn("参数个数不匹配：{} - {}", method.getParameterTypes().length, params.length);
 			return false;
 		}
+		if(method.getDeclaringClass().getTypeName().equals(className) && method.getName().equals(methodName)) {
+			LOG.warn("订阅方法与被订阅方法不能一样：{}", method);
+			return false;
+		}
+		int startCheckIndex = 0;
 		if(!ignoreParams) {
 			for(int i = 0; i < params.length; i++) {
-				if(!params[i].equals(method.getParameterTypes()[i].getName())) {
-					LOG.info("第{}个参数类型不匹配应该为{}，实际为{}", i + 1, params[i], method.getParameterTypes()[i].getName());
+				if(!params[i].equals(method.getParameterTypes()[i].getTypeName())) {
+					LOG.warn("第{}个参数类型不匹配应该为{}，实际为{}，method={}", i + 1, params[i], method.getParameterTypes()[i].getTypeName(), method);
 					return false;
 				}
 			}
+			startCheckIndex = params.length;
 		}
-		if(method.getDeclaringClass().getTypeName().equals(className) && method.getName().equals(methodName)) {
-			LOG.info("注册方法与事件源方法不能一样：{}", method);
+		if(method.getParameterCount() - startCheckIndex > 3) {
+			LOG.warn("订阅方法与被订阅方法不能一样：{}", method);
 			return false;
+		}
+		List<Integer> index = new ArrayList<>();
+		Set<String> extraParamsType = new HashSet<>(extraArgumentIndex.keySet());
+		for(int i = startCheckIndex; i < method.getParameterCount(); i++) {
+			String typeName = method.getParameterTypes()[i].getTypeName();
+			if(!extraParamsType.remove(typeName)) {
+				LOG.warn("订阅方法的第{}个参数类型不匹配：{}，{}", i, typeName, method);
+				return false;
+			}
+			index.add(extraArgumentIndex.get(typeName));
 		}
 		if(subscribes.size() > REGIST_MAX_NUM) {
-			LOG.info("注册个数超出最大值{}，无法注册", REGIST_MAX_NUM);
+			LOG.warn("订阅个数超出最大值{}，无法注册", REGIST_MAX_NUM);
 			return false;
 		}
-		subscribes.put(method, new SimpleEntry<>(instance, getDefaultArguments(method)));
+		subscribes.put(method, new SubscribeInfo(instance, getDefaultArguments(method), index.toArray(new Integer[0])));
+		LOG.info("成功订阅：{}.{} - {}", className, methodName, method);
 		return true;
 	}
 	
@@ -151,7 +181,7 @@ public class EventSubscribe {
 	private Object[] getDefaultArguments(Method method) {
 		Object[] arguments = new Object[method.getParameterCount()];
 		for(int i = 0; i < method.getParameterCount(); i++) {
-			String parameterClassName = method.getParameterTypes()[i].getName();
+			String parameterClassName = method.getParameterTypes()[i].getTypeName();
 			if("byte".equals(parameterClassName)) {
 				arguments[i] = (byte)0;
 			} else if("short".equals(parameterClassName)) {
@@ -185,7 +215,7 @@ public class EventSubscribe {
 		return params;
 	}
 	
-	public Map<Method, Entry<Object, Object[]>> getSubscribes() {
+	public Map<Method, SubscribeInfo> getSubscribes() {
 		return subscribes;
 	}
 }
