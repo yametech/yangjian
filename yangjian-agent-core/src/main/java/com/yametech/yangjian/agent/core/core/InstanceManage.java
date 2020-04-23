@@ -129,8 +129,8 @@ public class InstanceManage {
 	 * @param cls
 	 * @return
 	 */
-	public static <T> T getSpiInstance(Class<T> cls) {
-		List<T> instances = listSpiInstance(cls);
+	public static <T> T getInstance(Class<T> cls) {
+		List<T> instances = listInstance(cls);
 		if(!instances.isEmpty()) {
 			return instances.get(0);
 		}
@@ -143,7 +143,7 @@ public class InstanceManage {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> List<T> listSpiInstance(Class<T> cls) {
+	public static <T> List<T> listInstance(Class<T> cls) {
 		List<T> instances = new ArrayList<>();
 		for(Object api : loadedInstance) {
 			if(cls.isAssignableFrom(api.getClass())) {
@@ -278,7 +278,7 @@ public class InstanceManage {
 	public static synchronized void loadConfig(String arguments) {
 		init(IConfigLoader.class, () -> {
 			InstanceManage.arguments = arguments;
-	    	for(IConfigLoader loader: InstanceManage.listSpiInstance(IConfigLoader.class)) {
+	    	for(IConfigLoader loader: InstanceManage.listInstance(IConfigLoader.class)) {
 	    		loaderInit(loader, arguments);
 	    	}
 		});
@@ -297,7 +297,7 @@ public class InstanceManage {
 	 */
 	public static synchronized void notifyReader() {
 		init(IConfigReader.class, () -> {
-			for (IConfigReader configReader : listSpiInstance(IConfigReader.class)) {
+			for (IConfigReader configReader : listInstance(IConfigReader.class)) {
 				readerInit(configReader);
 			}
 		});
@@ -307,7 +307,7 @@ public class InstanceManage {
      * 	初始化逻辑
      */
 	public static synchronized void beforeRun() {
-		init(IAppStatusListener.class, () -> InstanceManage.listSpiInstance(IAppStatusListener.class).forEach(InstanceManage::beforeRunInit));
+		init(IAppStatusListener.class, () -> InstanceManage.listInstance(IAppStatusListener.class).forEach(InstanceManage::beforeRunInit));
     }
 	
 	private static void beforeRunInit(IAppStatusListener listener) {
@@ -320,12 +320,12 @@ public class InstanceManage {
 	public static synchronized void startSchedule() {
 		init(ISchedule.class, () -> {
 			service = Executors.newScheduledThreadPool(Config.SCHEDULE_CORE_POOL_SIZE.getValue(), new CustomThreadFactory("agent-schedule", true));
-			InstanceManage.listSpiInstance(ISchedule.class).forEach(schedule -> {
+			InstanceManage.listInstance(ISchedule.class).forEach(schedule -> {
 				if(schedule.initialDelay() == 0) {
 					schedule.execute();
 				}
 			});// 执行一次定时任务，防止多线程类加载死锁
-			InstanceManage.listSpiInstance(ISchedule.class).forEach(InstanceManage::scheduleInit);
+			InstanceManage.listInstance(ISchedule.class).forEach(InstanceManage::scheduleInit);
 		});
 	}
 	

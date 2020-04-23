@@ -36,7 +36,7 @@ public class MetricMatcherProxy extends BaseMatcherProxy<IMetricMatcher, BaseCon
 	
 	public MetricMatcherProxy(IMetricMatcher metricMatcher) {
 		super(metricMatcher);
-		this.metricEventBus = InstanceManage.getSpiInstance(MetricEventBus.class);
+		this.metricEventBus = InstanceManage.getInstance(MetricEventBus.class);
 	}
 	
 	@Override

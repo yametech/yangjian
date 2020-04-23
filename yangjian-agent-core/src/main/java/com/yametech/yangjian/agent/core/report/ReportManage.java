@@ -102,7 +102,7 @@ public class ReportManage implements IReportData, IConfigReader {
 		}
 		List<String> types = Arrays.asList(typeConfig.split(","));
 		List<IReport> myReports = new ArrayList<>();
-		for(IReport report : InstanceManage.listSpiInstance(IReport.class)) {
+		for(IReport report : InstanceManage.listInstance(IReport.class)) {
 			if(types.contains(report.type())) {
 				myReports.add(report);
 			}

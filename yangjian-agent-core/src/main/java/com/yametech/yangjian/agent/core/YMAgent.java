@@ -94,11 +94,11 @@ public class YMAgent {
     }
     
     private static void instrumentation(Instrumentation instrumentation) {
-    	List<InterceptorMatcher> interceptorMatchers = InstanceManage.listSpiInstance(InterceptorMatcher.class).stream().collect(Collectors.toList());
+    	List<InterceptorMatcher> interceptorMatchers = InstanceManage.listInstance(InterceptorMatcher.class).stream().collect(Collectors.toList());
     	List<IConfigMatch> matches = interceptorMatchers.stream().filter(aop -> aop.match() != null)
     			.map(InterceptorMatcher::match).collect(Collectors.toList());
     	interceptorMatchers = interceptorMatchers.stream().map(YMAgent::getMatcherProxy).collect(Collectors.toList());// 转换IMetricMatcher为MetricMatcherProxy
-    	List<IEnhanceClassMatch> classMatches = InstanceManage.listSpiInstance(IEnhanceClassMatch.class);
+    	List<IEnhanceClassMatch> classMatches = InstanceManage.listInstance(IEnhanceClassMatch.class);
     	matches.addAll(classMatches.stream().filter(aop -> aop.classMatch() != null).map(IEnhanceClassMatch::classMatch).collect(Collectors.toList()));
     	log.info("match class:{}", matches);
     	IConfigMatch ignoreMatch = getOrRegexMatch(Config.IGNORE_CLASS.getValue(), IGNORE_CLASS_CONFIG);
@@ -159,7 +159,7 @@ public class YMAgent {
     		public void run() {
             	// 埋点日志，不允许删除
             	report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.CLOSING));
-            	List<IAppStatusListener> shutdowns = InstanceManage.listSpiInstance(IAppStatusListener.class);
+            	List<IAppStatusListener> shutdowns = InstanceManage.listInstance(IAppStatusListener.class);
             	Collections.reverse(shutdowns);// 启动时顺序init，关闭时倒序showdown
             	try {
 	            	for(IAppStatusListener spi : shutdowns) {

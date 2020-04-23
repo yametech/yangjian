@@ -38,9 +38,7 @@ import com.yametech.yangjian.agent.core.common.BaseMatcherProxy;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
 import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
-import com.yametech.yangjian.agent.core.trace.base.BraveHelper;
 import com.yametech.yangjian.agent.core.trace.base.ITraceDepend;
-import com.yametech.yangjian.agent.core.trace.base.TraceEventBus;
 import com.yametech.yangjian.agent.core.trace.sample.FollowerRateLimitSampler;
 import com.yametech.yangjian.agent.core.trace.sample.FollowerSampler;
 import com.yametech.yangjian.agent.core.trace.sample.RateLimitSampler;
@@ -59,11 +57,11 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 	
 	private static ISpanSample globalSample;
 	private ISpanSample spanSample;
-	private TraceEventBus traceCache;
+//	private TraceEventBus traceCache;
 	
 	public TraceMatcherProxy(ITraceMatcher matcher) {
 		super(matcher);
-		this.traceCache = InstanceManage.getSpiInstance(TraceEventBus.class);
+//		this.traceCache = InstanceManage.getSpiInstance(TraceEventBus.class);
 	}
 	
 	@Override
@@ -95,7 +93,8 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 
 			// 测试上报到zipkin后端
 //			Tracing tracing = BraveHelper.getTracing(report, null);
-			Tracing tracing = BraveHelper.getTracing(span -> traceCache.publish(t -> t.setSpan(span)), null);
+//			Tracing tracing = BraveHelper.getTracing(span -> traceCache.publish(t -> t.setSpan(span)), null);
+			Tracing tracing = InstanceManage.getInstance(Tracing.class);
 			if(spanSample instanceof ITraceDepend) {
 				((ITraceDepend)spanSample).tracer(tracing.tracer());
 			}

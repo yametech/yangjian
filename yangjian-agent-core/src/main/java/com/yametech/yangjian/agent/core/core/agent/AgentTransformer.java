@@ -107,7 +107,7 @@ public class AgentTransformer implements AgentBuilder.Transformer {
      * @return
      */
     private DynamicType.Builder<?> enhanceMethod(TypeDescription typeDescription, DynamicType.Builder<?> builder, ClassLoader classLoader) {
-    	List<IMatch> matches = InstanceManage.listSpiInstance(IMatch.class);
+    	List<IMatch> matches = InstanceManage.listInstance(IMatch.class);
 //    	log.info("{}:matches", typeDescription);
         // builder针对同一个类方法设置多次intercept，仅最后一次生效，所以多个MethodInterceptor拦截同一个方法时需合并到一个intercept中
         for(MethodDescription.InDefinedShape inDefinedShape : typeDescription.getDeclaredMethods()) {

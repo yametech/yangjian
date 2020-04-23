@@ -9,3 +9,4 @@ com.yametech.yangjian.agent.core.report.LogReport
 com.yametech.yangjian.agent.core.trace.SpanListener
 com.yametech.yangjian.agent.core.trace.base.TraceEventBus
 com.yametech.yangjian.agent.core.eventsubscribe.EventMatcherInit
+com.yametech.yangjian.agent.core.trace.TraceInit
