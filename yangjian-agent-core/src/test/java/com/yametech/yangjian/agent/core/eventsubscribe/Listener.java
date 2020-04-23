@@ -16,7 +16,7 @@ public class Listener {
 //		Thread.sleep(10000);
 	}
 	
-	public void test2(String param) throws InterruptedException {
+	public void test2(int age, String param) throws InterruptedException {
 		System.err.println("Listener.test2 : " + param);
 //		Thread.sleep(10000);
 	}

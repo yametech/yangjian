@@ -1,5 +1,6 @@
 package com.yametech.yangjian.agent.core.eventsubscribe;
 
+import java.lang.reflect.Method;
 import java.util.regex.Pattern;
 
 import com.yametech.yangjian.agent.api.IConfigReader;
@@ -14,6 +15,13 @@ public class TestSubscribe {
 		System.err.println(EventDispatcher.CONFIG_KEY_CALL_ASYNC.replaceAll("\\.", "\\\\."));
 		
 		System.err.println(Pattern.matches(EventDispatcher.CONFIG_KEY_CALL_ASYNC.replaceAll("\\.", "\\\\."), EventDispatcher.CONFIG_KEY_CALL_ASYNC));
+	
+		for(Method method : Listener.class.getMethods()) {
+			System.err.println(method);
+			for(Class<?> cls : method.getParameterTypes()) {
+				System.err.println(cls.getName());
+			}
+		}
 	}
 	
 	/**
@@ -25,10 +33,6 @@ public class TestSubscribe {
 	public void test1() throws InterruptedException {
 		Service service = new Service();
 		new Listener();
-		service.test1();
-		service.test1();
-		service.test1();
-		service.test1();
 		service.test1();
 		service.test2("2222");
 		service.test3("3333");

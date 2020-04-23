@@ -32,7 +32,8 @@ public class BindManage {
 			if(events.size() > MAX_EVENT) {
 				return null;
 			}
-			return new EventSubscribe(methodDefined.getClassDefined().getClassName(), methodDefined.getMethodName(), methodDefined.getParams());
+			boolean ignoreParams = eventGroup.indexOf(".ignoreParams.") != -1;
+			return new EventSubscribe(ignoreParams, methodDefined.getClassDefined().getClassName(), methodDefined.getMethodName(), methodDefined.getParams());
 		});
 		if(eventSubscribe == null) {
 			return null;

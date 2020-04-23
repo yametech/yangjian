@@ -40,10 +40,11 @@ import com.yametech.yangjian.agent.core.eventsubscribe.eventbus.SubscribeEventBu
 public class EventMatcherInit implements IConfigReader, SPI {
 	private static final ILogger LOG = LoggerFactory.getLogger(EventMatcherInit.class);
 	private volatile boolean init = false;
+	private static final String EVENTGROUP_PREFIX = "eventSubscribe.group.";
 	
 	@Override
     public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList("eventSubscribe\\.group\\..*", EventDispatcher.CONFIG_KEY_CALL_ASYNC.replaceAll("\\.", "\\\\.")));
+        return new HashSet<>(Arrays.asList(EVENTGROUP_PREFIX.replaceAll("\\.", "\\\\.") + ".*", EventDispatcher.CONFIG_KEY_CALL_ASYNC.replaceAll("\\.", "\\\\.")));
     }
 
     /**
@@ -72,7 +73,7 @@ public class EventMatcherInit implements IConfigReader, SPI {
             }
 		}
         
-        kv.entrySet().forEach(entry -> {
+        kv.entrySet().stream().filter(config -> config.getKey().startsWith(EVENTGROUP_PREFIX)).forEach(entry -> {
         	String eventGroup = entry.getKey();
         	String[] eventInfo = entry.getValue().split(">", 2);
         	if(eventInfo.length != 2) {
