@@ -24,6 +24,8 @@ import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.SPI;
 import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
+import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodConstructorMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodRegexMatch;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
@@ -82,22 +84,39 @@ public class EventSubscribeInit implements IConfigReader, SPI {
         	}
         	String source = eventInfo[0].trim();
         	String target = eventInfo[1].trim();
-        	InstanceManage.registry(new EventMatcher(eventGroup, getMatch(source)));
-        	InstanceManage.registry(new SubscribeMatcher(eventGroup, new ClassMatch(getClass(target)), getMatch(target)));
+        	InstanceManage.registry(new EventMatcher(eventGroup, new MethodRegexMatch(source)));
+        	String className = getClass(target);
+        	if(className == null) {
+        		LOG.warn("{}中配置的订阅匹配规则有误{}，必须包含类定义", eventGroup, target);
+        		return;
+        	}
+        	InstanceManage.registry(new SubscribeMatcher(eventGroup, 
+        			new CombineAndMatch(Arrays.asList(new ClassMatch(className), new MethodConstructorMatch())), getMatch(target)));
+        	LOG.info("加载事件订阅配置：{} = {}", entry.getKey(), entry.getValue());
         });
     }
     
     private static IConfigMatch getMatch(String source) {
     	String className = getClass(source);
+    	if(className == null) {
+    		return new MethodRegexMatch(".*" + source);
+    	}
     	return new MethodRegexMatch(".*" + source.replaceFirst(className, className.replaceAll("\\.", "\\\\\\\\.") + "\\\\"));
     }
     
     private static String getClass(String source) {
     	int index = source.indexOf('(');
     	if(index == -1) {
-    		return source.substring(0, source.lastIndexOf('.'));
+    		int endIndex = source.lastIndexOf('.');
+    		if(endIndex == -1) {
+    			return null;
+    		}
+    		return source.substring(0, endIndex);
     	}
     	int pointIndex = source.substring(0, index).lastIndexOf('.');
+    	if(pointIndex == -1) {
+			return null;
+		}
     	return source.substring(0, pointIndex);
     }
     

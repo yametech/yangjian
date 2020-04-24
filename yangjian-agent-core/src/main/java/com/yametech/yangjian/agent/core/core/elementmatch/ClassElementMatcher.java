@@ -42,9 +42,9 @@ public class ClassElementMatcher extends BaseElementMatcher<TypeDescription> {
     	List<MethodDefined> matchNames = new ArrayList<>();
     	MethodList<MethodDescription.InDefinedShape> methods = typeDescription.getDeclaredMethods();
         for(MethodDescription.InDefinedShape inDefinedShape : methods) {
-            if(!inDefinedShape.isMethod()) {
-                continue;
-            }
+//            if(!inDefinedShape.isMethod()) {// 2020-04-24 去除该逻辑，防止无法匹配构造方法
+//                continue;
+//            }
 //            System.out.println(convert(inDefinedShape).toString());
             matchNames.add(ElementMatcherConvert.convert(inDefinedShape));
         }
