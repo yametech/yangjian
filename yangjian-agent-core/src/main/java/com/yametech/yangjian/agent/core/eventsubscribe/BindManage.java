@@ -26,7 +26,7 @@ public class BindManage {
 	 * @return
 	 */
 	public static EventSubscribe registEvent(String eventGroup, MethodDefined methodDefined) {
-		LOG.debug("registEvent:{} - {}", eventGroup, methodDefined);
+		LOG.info("registEvent:{} - {}", eventGroup, methodDefined);
 		String methodKey = methodDefined.getMethodDes();
 		EventSubscribe eventSubscribe = events.computeIfAbsent(methodKey, key -> {
 			if(events.size() > MAX_EVENT) {
@@ -52,7 +52,7 @@ public class BindManage {
 	 * @param instance
 	 */
 	public static void registSubscribe(String eventGroup, Method method, Object instance) {
-		LOG.debug("registSubscribe:{} - {} - {}", eventGroup, method, instance);
+		LOG.info("registSubscribe:{} - {} - {}", eventGroup, method, instance);
 		Map<Method, Object> groupSubscribe = subscribes.computeIfAbsent(eventGroup, key -> new ConcurrentHashMap<>());
 		Object value = groupSubscribe.computeIfAbsent(method, key -> {
 			if(groupSubscribe.size() > MAX_SUBSCRIBES_EACH_GROUP) {

@@ -37,8 +37,8 @@ import com.yametech.yangjian.agent.core.eventsubscribe.eventbus.SubscribeEventBu
  * @author liuzhao
  * @date 2020年4月21日 下午3:14:22
  */
-public class EventMatcherInit implements IConfigReader, SPI {
-	private static final ILogger LOG = LoggerFactory.getLogger(EventMatcherInit.class);
+public class EventSubscribeInit implements IConfigReader, SPI {
+	private static final ILogger LOG = LoggerFactory.getLogger(EventSubscribeInit.class);
 	private volatile boolean init = false;
 	private static final String EVENTGROUP_PREFIX = "eventSubscribe.group.";
 	

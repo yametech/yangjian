@@ -41,7 +41,9 @@ public class TraceEventBus extends BaseEventPublish<TraceSpan> {
     @Override
 	public List<ConsumeConfig<TraceSpan>> consumes() {
 		List<ConsumeConfig<TraceSpan>> consumes = new ArrayList<>();
-		consumes.add(InstanceManage.getInstance(SpanListener.class));
+		SpanListener listener = new SpanListener();
+    	InstanceManage.registryInit(listener);
+		consumes.add(listener);
 		return consumes;
 	}
     

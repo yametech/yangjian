@@ -38,7 +38,9 @@ public class MetricEventBus extends BaseEventPublish<ConvertTimeEvent> {
     @Override
 	public List<ConsumeConfig<ConvertTimeEvent>> consumes() {
 		List<ConsumeConfig<ConvertTimeEvent>> consumes = new ArrayList<>();
-		consumes.add(InstanceManage.getInstance(RTEventListener.class));
+		RTEventListener listener = new RTEventListener();
+    	InstanceManage.registryInit(listener);
+		consumes.add(listener);
 		return consumes;
 	}
     

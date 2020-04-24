@@ -11,8 +11,8 @@ public class TraceInit implements IAppStatusListener {
 
 	@Override
 	public void beforeRun() {
-		TraceEventBus traceCache = InstanceManage.getInstance(TraceEventBus.class);
-		InstanceManage.registry(BraveHelper.getTracing(span -> traceCache.publish(t -> t.setSpan(span)), null));
+		InstanceManage.registry(new TraceEventBus());
+		InstanceManage.registry(BraveHelper.getTracing(span -> InstanceManage.getInstance(TraceEventBus.class).publish(t -> t.setSpan(span)), null));
 	}
 
 	@Override
