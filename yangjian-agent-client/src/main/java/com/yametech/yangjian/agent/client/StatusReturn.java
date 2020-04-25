@@ -1,20 +1,20 @@
 package com.yametech.yangjian.agent.client;
 
 public class StatusReturn {
-	private StatusType type;
+	private MonitorLevel level;
 	private String reason;
 
-	public StatusReturn(StatusType type, String reason) {
-		this.type = type;
+	public StatusReturn(MonitorLevel level, String reason) {
+		this.level = level;
 		this.reason = reason;
 	}
 	
-	public StatusType getType() {
-		return type;
+	public MonitorLevel getLevel() {
+		return level;
 	}
 
-	public void setType(StatusType type) {
-		this.type = type;
+	public void setType(MonitorLevel level) {
+		this.level = level;
 	}
 
 	public String getReason() {
@@ -25,16 +25,16 @@ public class StatusReturn {
 		this.reason = reason;
 	}
 	
-	public static StatusReturn ok() {
-		return ok(null);
+	public static StatusReturn info(String reason) {
+		return new StatusReturn(MonitorLevel.INFO, reason);
 	}
 	
-	public static StatusReturn ok(String reason) {
-		return new StatusReturn(StatusType.OK, reason);
+	public static StatusReturn warn(String reason) {
+		return new StatusReturn(MonitorLevel.WARN, reason);
 	}
 	
 	public static StatusReturn error(String reason) {
-		return new StatusReturn(StatusType.ERROR, reason);
+		return new StatusReturn(MonitorLevel.ERROR, reason);
 	}
 	
 }

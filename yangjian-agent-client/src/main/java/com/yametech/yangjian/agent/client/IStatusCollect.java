@@ -20,4 +20,12 @@ public interface IStatusCollect {
 	 * @return	状态类型，长度不能超过20，不可为null
 	 */
 	String type();
+	
+	/**
+	 * collect执行间隔秒数
+	 * @return	间隔秒数
+	 */
+	default int interval() {
+		return 10;
+	}
 }
