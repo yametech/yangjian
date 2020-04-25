@@ -32,7 +32,7 @@ import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
 public class MatcherProxyTest extends BaseEventPublish<String> implements IMatcherProxy<String> {
 	
 	public MatcherProxyTest() {
-		super(null, null, null);
+		super(null, null);
 	}
 	
 	@Test

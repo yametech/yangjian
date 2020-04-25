@@ -34,6 +34,7 @@ import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.metric.MetricData;
+import com.yametech.yangjian.agent.core.report.ReportManage;
 import com.yametech.yangjian.agent.core.util.Util;
 import com.yametech.yangjian.agent.util.CustomThreadFactory;
 import com.yametech.yangjian.agent.util.eventbus.EventBusBuilder;
@@ -54,7 +55,7 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
     private static final String BUFFER_SIZE_KEY_PREFIX = "bufferSize.";
     private static final String INTERVAL_KEY_PREFIX = "metricOutput.interval.publish.";
     private static final String DISCARD_KEY_PREFIX = "eventPublish.discard.";
-    private IReportData report;
+    private IReportData report = ReportManage.getReport("EventPublish");
     private EventBus<T> eventBus;
     private String metricType;
     private String configKeySuffix;
@@ -62,10 +63,9 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
     private int interval = 5;
     private boolean discard = true;
     
-    public BaseEventPublish(String metricType, String configKeySuffix, IReportData report) {
+    public BaseEventPublish(String metricType, ConfigSuffix configKeySuffix) {
     	this.metricType = metricType;
-    	this.configKeySuffix = configKeySuffix;
-		this.report = report;
+    	this.configKeySuffix = configKeySuffix.getSuffix();
 	}
     
     @Override
@@ -144,8 +144,8 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
         log.info("{} eventPublish inited.", metricType);
     }
 
-    public void publish(Consumer<T> consumer) {
-        eventBus.publish(event -> {
+    public boolean publish(Consumer<T> consumer) {
+        return eventBus.publish(event -> {
         	incrTotalNum();
         	if (event == null) {
             	incrDiscardNum();
@@ -188,6 +188,11 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
     @Override
     public int interval() {
         return interval;
+    }
+    
+    @Override
+    public int weight() {
+    	return IAppStatusListener.super.weight() + 10;
     }
 
     private AtomicLong discardNum = new AtomicLong(0);// 总共丢弃的数据量

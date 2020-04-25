@@ -48,8 +48,8 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
     private String type;
     private int interval = 5;
     
-    public BaseEventListener(String type, String configKeySuffix) {
-		this.configKeySuffix = configKeySuffix;
+    public BaseEventListener(String type, ConfigSuffix configKeySuffix) {
+		this.configKeySuffix = configKeySuffix.getSuffix();
 		this.type = type;
 	}
     
@@ -137,6 +137,11 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
 			return null;
 		}
 	}
+	
+	@Override
+    public int weight() {
+    	return IAppStatusListener.super.weight() + 20;// 要高于BaseEventPublish中的权重
+    }
 	
     protected abstract long getTotalNum();
     protected abstract long getPeriodNum();

@@ -368,9 +368,13 @@ public class InstanceManage {
 		configReader.configKeyValue(kvs);
 	}
 	
-	public static void stop() throws InterruptedException {
+	public static void stop() {
 		service.shutdown();
-		service.awaitTermination(5, TimeUnit.SECONDS);
+		try {
+			service.awaitTermination(5, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			LOG.warn(e, "关闭定时任务被打断");
+		}
 	}
 	
 }

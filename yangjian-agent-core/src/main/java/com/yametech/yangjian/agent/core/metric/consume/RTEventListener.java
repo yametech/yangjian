@@ -27,6 +27,7 @@ import com.yametech.yangjian.agent.api.convert.statistic.impl.BaseStatistic;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.common.BaseEventListener;
+import com.yametech.yangjian.agent.core.common.ConfigSuffix;
 import com.yametech.yangjian.agent.core.metric.MetricData;
 import com.yametech.yangjian.agent.core.metric.base.ConvertTimeEvent;
 import com.yametech.yangjian.agent.core.report.ReportManage;
@@ -43,7 +44,7 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
     private IReportData report = ReportManage.getReport("RTEventListener");
     
     public RTEventListener() {
-		super(Constants.ProductConsume.METRIC, "metric");
+		super(Constants.ProductConsume.METRIC, ConfigSuffix.METRIC);
 	}
 
     @Override

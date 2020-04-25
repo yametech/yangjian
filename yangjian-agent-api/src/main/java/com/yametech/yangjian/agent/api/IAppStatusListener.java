@@ -17,9 +17,10 @@ package com.yametech.yangjian.agent.api;
 
 import java.time.Duration;
 
+import com.yametech.yangjian.agent.api.base.IWeight;
 import com.yametech.yangjian.agent.api.base.SPI;
 
-public interface IAppStatusListener extends SPI {
+public interface IAppStatusListener extends IWeight, SPI {
 	
 	/**
 	 * 配置加载完成之后执行逻辑之前时执行
@@ -32,5 +33,13 @@ public interface IAppStatusListener extends SPI {
 	 * @return	是否成功关闭
 	 */
 	boolean shutdown(Duration duration);
+	
+	/**
+	 * 权重高的先执行beforeRun，后执行shutdown
+	 */
+	@Override
+	default int weight() {
+		return 0;
+	}
 	
 }

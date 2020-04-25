@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core.trace.base;
+package com.yametech.yangjian.agent.core.report.async;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.core.common.BaseEventPublish;
 import com.yametech.yangjian.agent.core.common.ConfigSuffix;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
-import com.yametech.yangjian.agent.core.trace.SpanListener;
 import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
 
 /**
@@ -32,19 +31,22 @@ import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
  * @author liuzhao
  * @date 2020年4月3日 下午4:52:21
  */
-public class TraceEventBus extends BaseEventPublish<TraceSpan> {
+public class ReportPublish extends BaseEventPublish<ReportEvent> {
     
-    public TraceEventBus() {
-		super(Constants.ProductConsume.TRACE, ConfigSuffix.TRACE);
+    public ReportPublish() {
+		super(Constants.ProductConsume.SUBCRIBE_EVENT, ConfigSuffix.REPORT);
 	}
     
     @Override
-	public List<ConsumeConfig<TraceSpan>> consumes() {
-		List<ConsumeConfig<TraceSpan>> consumes = new ArrayList<>();
-		SpanListener listener = new SpanListener();
+	public List<ConsumeConfig<ReportEvent>> consumes() {
+    	ReportListener listener = new ReportListener();
     	InstanceManage.registryInit(listener);
-		consumes.add(listener);
-		return consumes;
+    	return Arrays.asList(listener);
 	}
+    
+    @Override
+    public int weight() {
+    	return super.weight() + 50;// 要高于RunMonitor的权重
+    }
     
 }

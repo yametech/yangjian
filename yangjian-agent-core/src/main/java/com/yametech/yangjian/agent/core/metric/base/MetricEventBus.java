@@ -20,9 +20,9 @@ import java.util.List;
 
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.core.common.BaseEventPublish;
+import com.yametech.yangjian.agent.core.common.ConfigSuffix;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.metric.consume.RTEventListener;
-import com.yametech.yangjian.agent.core.report.ReportManage;
 import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
 
 /**
@@ -32,7 +32,7 @@ import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
 public class MetricEventBus extends BaseEventPublish<ConvertTimeEvent> {
     
     public MetricEventBus() {
-		super(Constants.ProductConsume.METRIC, "metric", ReportManage.getReport("MetricEventBus"));
+		super(Constants.ProductConsume.METRIC, ConfigSuffix.METRIC);
 	}
     
     @Override

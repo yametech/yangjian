@@ -31,14 +31,12 @@ import com.yametech.yangjian.agent.api.IAppStatusListener;
 import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
-import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodRegexMatch;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
-import com.yametech.yangjian.agent.core.common.CoreConstants;
 import com.yametech.yangjian.agent.core.common.MatchProxyManage;
 import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
@@ -46,8 +44,6 @@ import com.yametech.yangjian.agent.core.core.agent.AgentListener;
 import com.yametech.yangjian.agent.core.core.agent.AgentTransformer;
 import com.yametech.yangjian.agent.core.core.classloader.AgentClassLoader;
 import com.yametech.yangjian.agent.core.core.elementmatch.ClassElementMatcher;
-import com.yametech.yangjian.agent.core.metric.MetricData;
-import com.yametech.yangjian.agent.core.report.ReportManage;
 import com.yametech.yangjian.agent.core.util.Util;
 import com.yametech.yangjian.agent.util.OSUtil;
 
@@ -57,7 +53,6 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 public class YMAgent {
 	private static ILogger log = LoggerFactory.getLogger(YMAgent.class);
-	private static IReportData report = ReportManage.getReport("YMAgent");
 	private static final String[] IGNORE_CLASS_CONFIG = new String[] {"^net\\.bytebuddy\\.", "^org\\.slf4j\\.", // ".*\\$auxiliary\\$.*", 
 			"^org\\.apache\\.logging\\.", "^org\\.groovy\\.", "^sun\\.reflect\\.", // ".*javassist.*", ".*\\.asm\\..*", 这两个会有误拦截：com.alibaba.dubbo.rpc.proxy.javassist.JavassistProxyFactory
 			"^org\\.apache\\.skywalking\\.", "^com\\.yametech\\.yangjian\\.agent\\."};
@@ -89,8 +84,6 @@ public class YMAgent {
     	InstanceManage.startSchedule();// 一定要早于instrumentation
     	addShutdownHook();
     	instrumentation(instrumentation);
-    	// 埋点日志，不允许删除
-    	report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.STARTING));
     }
     
     private static void instrumentation(Instrumentation instrumentation) {
@@ -157,20 +150,19 @@ public class YMAgent {
     	Runtime.getRuntime().addShutdownHook(new Thread() {// 注意关闭应用不能使用kill -9，会导致下面的方法不执行
             @Override
     		public void run() {
-            	// 埋点日志，不允许删除
-            	report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.CLOSING));
             	List<IAppStatusListener> shutdowns = InstanceManage.listInstance(IAppStatusListener.class);
             	Collections.reverse(shutdowns);// 启动时顺序init，关闭时倒序showdown
-            	try {
-	            	for(IAppStatusListener spi : shutdowns) {
-	        			spi.shutdown(Duration.ofSeconds(10));
-	            	}
-	            	InstanceManage.stop();
-				} catch (Exception e) {
-					log.warn(e, "关闭服务异常，可能丢失数据");
-				}
-            	// 埋点日志，不允许删除
-            	report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.CLOSED));
+            	for(IAppStatusListener spi : shutdowns) {
+            		try {
+	        			boolean success = spi.shutdown(Duration.ofSeconds(10));
+	        			if(!success) {
+	        				log.warn("执行关闭逻辑失败：{}", spi);
+	        			}
+            		} catch (Exception e) {
+            			log.warn(e, "关闭服务异常，可能丢失数据");
+            		}
+            	}
+            	InstanceManage.stop();
             }
         });
     }

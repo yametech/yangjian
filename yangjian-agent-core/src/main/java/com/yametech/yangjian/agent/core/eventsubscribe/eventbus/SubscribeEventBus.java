@@ -20,8 +20,8 @@ import java.util.List;
 
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.core.common.BaseEventPublish;
+import com.yametech.yangjian.agent.core.common.ConfigSuffix;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
-import com.yametech.yangjian.agent.core.report.ReportManage;
 import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
 
 /**
@@ -34,7 +34,7 @@ import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
 public class SubscribeEventBus extends BaseEventPublish<EventBean> {
     
     public SubscribeEventBus() {
-		super(Constants.ProductConsume.SUBCRIBE_EVENT, "subcribeEvent", ReportManage.getReport("SubscribeEventBus"));
+		super(Constants.ProductConsume.SUBCRIBE_EVENT, ConfigSuffix.SUBCRIBE_EVENT);
 	}
     
     @Override

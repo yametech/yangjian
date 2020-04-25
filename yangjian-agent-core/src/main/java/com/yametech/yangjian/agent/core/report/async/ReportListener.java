@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core.eventsubscribe.eventbus;
+package com.yametech.yangjian.agent.core.report.async;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
@@ -28,17 +28,17 @@ import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
  * @Description
  * @date 2019年10月11日 下午4:51:45
  */
-public class EventListener extends BaseEventListener<EventBean> implements BaseConsume<EventBean> {
+public class ReportListener extends BaseEventListener<ReportEvent> implements BaseConsume<ReportEvent> {
 //	private static final ILogger log = LoggerFactory.getLogger(EventListener.class);
     private AtomicLong totalNum = new AtomicLong(0);// 总消费量
 	private AtomicLong periodTotalNum = new AtomicLong(0);// 最近一个输出周期产生的事件量
     
-	public EventListener() {
-		super(Constants.ProductConsume.SUBCRIBE_EVENT, ConfigSuffix.SUBCRIBE_EVENT);
+	public ReportListener() {
+		super(Constants.ProductConsume.SUBCRIBE_EVENT, ConfigSuffix.REPORT);
 	}
 	
     @Override
-    public BaseConsume<EventBean> getConsume() {
+    public BaseConsume<ReportEvent> getConsume() {
         // 该方法会调用parallelism次，如果返回同一个实例且parallelism>0，则实例为多线程消费
         return this;
     }
@@ -54,14 +54,14 @@ public class EventListener extends BaseEventListener<EventBean> implements BaseC
     }
 
 	@Override
-	public boolean test(EventBean t) {
+	public boolean test(ReportEvent t) {
 		totalNum.getAndIncrement();
 		periodTotalNum.getAndIncrement();
 		return true;
 	}
     
     @Override
-	public void accept(EventBean t) {
+	public void accept(ReportEvent t) {
     	t.call();
 	}
     
@@ -71,8 +71,13 @@ public class EventListener extends BaseEventListener<EventBean> implements BaseC
     }
 
     @Override
-	protected int eventHashCode(EventBean event) {
-		return Objects.hash(event.getEventSubscribe().getClassName(), event.getEventSubscribe().getMethodName());
+	protected int eventHashCode(ReportEvent event) {
+		return Objects.hash(event.getReportType());
 	}
+    
+    @Override
+    public int weight() {
+    	return super.weight() + 50;
+    }
     
 }

@@ -47,17 +47,8 @@ public class ReportManage implements IReportData, IConfigReader {
 	 * @return
 	 */
     public static IReportData getReport(String reportConfigKey) {
-    	return getReport(reportConfigKey, true);
-    }
-    /**
-     * 	根据Class获取上报实例，根据needNotify确认是否执行通知
-     * @param cls
-     * @param needNotifyConfig	true：注册时执行一次配置通知（用于在全局通知(InstanceManage.notifyReaders)之后调用该方法）；false：不执行配置通知（用于在全局通知之前调用该方法）；
-     * @return
-     */
-	private static IReportData getReport(String reportConfigKey, boolean needNotifyConfig) {
     	ReportManage report = new ReportManage(reportConfigKey);
-    	InstanceManage.registry(report, needNotifyConfig);
+    	InstanceManage.registry(report);
     	return report;
     }
 	

@@ -44,8 +44,9 @@ public class Constants {
     public static class Status {
     	public static final String STARTING = "starting";// 服务启动中
     	public static final String STARTED = "started";// 服务已启动
-    	public static final String CLOSING = "closing";// 服务关闭中
-    	public static final String CLOSED = "closed";// 服务已关闭
+    	public static final String HEARTBEAT = "heartbeat";// 服务启动心跳
+    	public static final String STOPPING = "stopping";// 服务关闭中
+    	public static final String STOPPED = "stopped";// 服务已关闭
     	public static final String RESOURCES = "resources";// 资源状态：jvm...
     }
     
