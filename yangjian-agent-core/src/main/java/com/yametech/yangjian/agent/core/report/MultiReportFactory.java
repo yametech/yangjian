@@ -13,29 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core.config;
+package com.yametech.yangjian.agent.core.report;
 
-import java.util.concurrent.TimeUnit;
+import com.yametech.yangjian.agent.api.base.IReportData;
+import com.yametech.yangjian.agent.core.config.Config;
 
-import com.yametech.yangjian.agent.core.config.RemoteConfigLoader;
-
-/**
- * @author dengliming
- * @date 2019/12/2
- */
-public class RemoteConfigTest {
-
-    public static void main(String[] args) {
-        t();
-    }
-
-    public static void t() {
-        RemoteConfigLoader remoteConfigReader = new RemoteConfigLoader();
-        remoteConfigReader.load(null);
-        try {
-            TimeUnit.SECONDS.sleep(3);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+public class MultiReportFactory {
+	private static final String ASYNC_KEY = "async";
+	private MultiReportFactory() {}
+	
+	public static IReportData getReport(String reportConfigKey) {
+		if(Config.getKv(MultiReport.CONFIG_KEY_PREFIX + "." + reportConfigKey + "." + ASYNC_KEY) != null) {
+			return AsyncMultiReport.getReport(reportConfigKey + "." + ASYNC_KEY);
+		} else {
+			return MultiReport.getReport(reportConfigKey);
+		}
     }
 }

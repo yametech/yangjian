@@ -117,7 +117,7 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 			log.warn(e, "无法识别泛型：{}，不设置customLoad", customLoad.getClass());
 			return null;
 		}
-		List<String> customClassNames = InstanceManage.getSPIClass(cls);
+		List<String> customClassNames = InstanceManage.getSpiClass(cls);
 		if(customClassNames == null || customClassNames.isEmpty()) {
 			return null;
 		}

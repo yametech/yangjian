@@ -51,54 +51,45 @@ import com.yametech.yangjian.agent.util.CustomThreadFactory;
 
 public class InstanceManage {
 	private static final ILogger LOG = LoggerFactory.getLogger(InstanceManage.class);
+	private static final Object EMPTY_VALUE = new Object();
+	private static Map<Class<?>, Object> spiInstances = new ConcurrentHashMap<>();// 加载的spi实例
     private static Set<Object> loadedInstance = new CopyOnWriteArraySet<>();// 需要托管的实例
     private static final String SPI_BASE_PATH = "META-INF/services/";
     private static final int MAX_INSTANCE = 2000;// 最大托管的实例个数
     private static ScheduledExecutorService service;
     private static Map<Class<?>, Boolean> initStatus = new ConcurrentHashMap<>();
-    private static String arguments;
 
     private InstanceManage() {}
     
     static {
-    	initStatus.put(IConfigLoader.class, false);
+//    	initStatus.put(IConfigLoader.class, false);
     	initStatus.put(IConfigReader.class, false);
     	initStatus.put(IAppStatusListener.class, false);
     	initStatus.put(ISchedule.class, false);
     }
     
 	/**
-	 * 加载所有的spi
+	 * 读取所有的spi class
 	 */
- 	public static void loadSpi() {
-//		ServiceLoader<SPI> starterLoader = ServiceLoader.load(SPI.class, AgentClassLoader.getDefault());
-//		starterLoader.forEach(spis::add);
-		
-		List<String> spiClasses = getSPIClass(SPI.class);
+ 	private static void loadSpi() {
+		List<String> spiClasses = getSpiClass(SPI.class);
 		if(spiClasses == null) {
 			return;
 		}
 		spiClasses.forEach(clsName -> {
 			try {
-				Class<?> cls = Class.forName(clsName, true, AgentClassLoader.getDefault());
+				Class<?> cls = Class.forName(clsName, false, AgentClassLoader.getDefault());
 				if(!SPI.class.isAssignableFrom(cls)) {
 					return;
 				}
-//				String enableConfig = Config.getKv("spi." + cls.getSimpleName());
-//				boolean enable = enableConfig == null || enableConfig.equals("enable");
-//				if(!enable) {
-//					log.info("disable SPI：{}", cls.getName());
-//					return;
-//				}
-//				loadedInstance.add(cls.newInstance());
-				registry(cls.newInstance(), false);
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+				spiInstances.put(cls, EMPTY_VALUE);
+			} catch (ClassNotFoundException e) {
 				LOG.warn(e, "load spi error");
 			}
 		});
     }
 	
-	public static List<String> getSPIClass(Class<?> cls) {
+	public static List<String> getSpiClass(Class<?> cls) {
         List<String> spiClasses = new ArrayList<>();
         try {
         	Enumeration<URL> urls = AgentClassLoader.getDefault().getResources(SPI_BASE_PATH + cls.getName());
@@ -168,12 +159,12 @@ public class InstanceManage {
 	}
 
 	/**
-	 * 移除指定SPI实例
+	 * 禁用SPI
 	 *
 	 * @return
 	 */
-	public static boolean removeSpi(SPI spi) {
-		return loadedInstance.remove(spi);
+	public static void removeSpi(Class<?> spiCls) {
+		spiInstances.remove(spiCls);
 	}
 	
 	/**
@@ -229,9 +220,9 @@ public class InstanceManage {
 		if(!reload) {
 			return false;
 		}
-		if(instance instanceof IConfigLoader && Boolean.TRUE.equals(initStatus.get(IConfigLoader.class))) {
-			loaderInit((IConfigLoader)instance, arguments);
-		}
+//		if(instance instanceof IConfigLoader && Boolean.TRUE.equals(initStatus.get(IConfigLoader.class))) {
+//			loaderInit((IConfigLoader)instance, arguments);
+//		}
 		if(instance instanceof IConfigReader && Boolean.TRUE.equals(initStatus.get(IConfigReader.class))) {
 			readerInit((IConfigReader)instance);
 		}
@@ -277,20 +268,38 @@ public class InstanceManage {
      * @throws Exception 
      */
 	public static synchronized void loadConfig(String arguments) {
-		init(IConfigLoader.class, () -> {
-			InstanceManage.arguments = arguments;
-	    	for(IConfigLoader loader: InstanceManage.listInstance(IConfigLoader.class)) {
-	    		loaderInit(loader, arguments);
-	    	}
-		});
+		loadSpi();
+		loadSpiInstance(IConfigLoader.class);
+    	for(IConfigLoader loader: InstanceManage.listInstance(IConfigLoader.class)) {
+    		try {
+    			loader.load(arguments);
+    		} catch (Exception e) {
+    			throw new RuntimeException(e);
+    		}
+    	}
+    	loadSpiInstance(null);// 等IConfigLoader实例加载完配置再初始化其他spi实例，避免其他spi实例创建时使用到配置
     }
 	
-	private static void loaderInit(IConfigLoader loader, String arguments) {
-		try {
-			loader.load(arguments);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+	public static Set<Class<?>> listSpiClass() {
+		return new HashSet<>(spiInstances.keySet());
+	}
+	
+	private static synchronized void loadSpiInstance(Class<?> spiCls) {
+		spiInstances.entrySet().forEach(entry -> {
+			if(entry.getValue() != EMPTY_VALUE) {
+				return;
+			}
+			if(spiCls != null && !spiCls.isAssignableFrom(entry.getKey())) {
+				return;
+			}
+			try {
+				Object spi = entry.getKey().newInstance();
+				entry.setValue(spi);
+				registry(spi, false);
+			} catch (InstantiationException | IllegalAccessException e) {
+				LOG.warn(e, "load spi instance error:{}", entry.getKey());
+			}
+		});
 	}
 	
 	/**

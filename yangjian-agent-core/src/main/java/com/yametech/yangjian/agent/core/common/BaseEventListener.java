@@ -29,7 +29,7 @@ import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.metric.MetricData;
-import com.yametech.yangjian.agent.core.report.ReportManage;
+import com.yametech.yangjian.agent.core.report.MultiReportFactory;
 import com.yametech.yangjian.agent.util.eventbus.assignor.MultiThreadAssignor;
 import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeFactory;
 
@@ -44,7 +44,7 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
     private static final String INTERVAL_KEY_PREFIX = "metricOutput.interval.consume.";
     private int threadNum = 1;
     private String configKeySuffix;
-    private IReportData report = ReportManage.getReport("EventListener");
+    private IReportData report = MultiReportFactory.getReport("eventListener");
     private String metricType;
     private int interval = 10;
     

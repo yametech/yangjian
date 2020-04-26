@@ -46,7 +46,7 @@ import com.yametech.yangjian.agent.core.jvm.metrics.MemoryPoolMetrics;
 import com.yametech.yangjian.agent.core.jvm.metrics.ProcessMetrics;
 import com.yametech.yangjian.agent.core.jvm.metrics.ThreadMetrics;
 import com.yametech.yangjian.agent.core.metric.MetricData;
-import com.yametech.yangjian.agent.core.report.ReportManage;
+import com.yametech.yangjian.agent.core.report.MultiReportFactory;
 
 /**
  * @author zcn
@@ -55,7 +55,7 @@ import com.yametech.yangjian.agent.core.report.ReportManage;
 public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfigReader {
     private static final ILogger LOG = LoggerFactory.getLogger(JVMMetricsSchedule.class);
     private static final String CONFIG_KEY = "metricOutput.interval.jvm";
-    private IReportData report = ReportManage.getReport("JVMMetricsSchedule");
+    private IReportData report = MultiReportFactory.getReport("jvmMetric");
     private BufferPoolCollector bufferPoolCollector;
     private GcCollector gcCollector;
     private ThreadCollector threadCollector;

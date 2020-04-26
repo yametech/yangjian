@@ -14,11 +14,11 @@ import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.client.IStatusCollect;
 import com.yametech.yangjian.agent.client.StatusReturn;
 import com.yametech.yangjian.agent.core.metric.MetricData;
-import com.yametech.yangjian.agent.core.report.ReportManage;
+import com.yametech.yangjian.agent.core.report.MultiReportFactory;
 
 public class CollectInstanceInterceptor implements IConstructorListener, ISchedule {
 	private static final ILogger LOG = LoggerFactory.getLogger(CollectInstanceInterceptor.class);
-	private static IReportData report = ReportManage.getReport("collectStatus");
+	private static IReportData report = MultiReportFactory.getReport("collectStatus");
 	private static Map<IStatusCollect, Long> collects = new ConcurrentHashMap<>();
 	
 	@Override

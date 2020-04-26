@@ -4,14 +4,14 @@ import java.lang.reflect.Method;
 import java.util.regex.Pattern;
 
 import com.yametech.yangjian.agent.api.IConfigReader;
-import com.yametech.yangjian.agent.core.report.ReportManage;
+import com.yametech.yangjian.agent.core.report.MultiReport;
 
 public class TestSubscribe {
 	
 	@org.junit.Test
 	public void test() {
 		System.err.println(1 << 13);
-		System.err.println(IConfigReader.class.isAssignableFrom(ReportManage.class));
+		System.err.println(IConfigReader.class.isAssignableFrom(MultiReport.class));
 		System.err.println(EventDispatcher.CONFIG_KEY_CALL_ASYNC.replaceAll("\\.", "\\\\."));
 		
 		System.err.println(Pattern.matches(EventDispatcher.CONFIG_KEY_CALL_ASYNC.replaceAll("\\.", "\\\\."), EventDispatcher.CONFIG_KEY_CALL_ASYNC));

@@ -22,14 +22,14 @@ import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.report.async.ReportPublish;
 
-public class AsyncReportManage implements IReportData {
+public class AsyncMultiReport implements IReportData {
 	private String reportType;
 	private ReportPublish publish;
 	private IReportData report;
 	
-	public AsyncReportManage(String reportConfigKey) {
+	public AsyncMultiReport(String reportConfigKey) {
 		this.reportType = reportConfigKey;
-		this.report = ReportManage.getReport(reportConfigKey);
+		this.report = MultiReport.getReport(reportConfigKey);
 		this.publish = new ReportPublish();
 		InstanceManage.registryInit(this.publish);
 	}
@@ -39,8 +39,8 @@ public class AsyncReportManage implements IReportData {
 	 * @param reportConfigKey	用于读取配置
 	 * @return
 	 */
-    public static IReportData getReport(String reportConfigKey) {
-    	return new AsyncReportManage(reportConfigKey);
+    static IReportData getReport(String reportConfigKey) {
+    	return new AsyncMultiReport(reportConfigKey);
     }
 	
 	@Override

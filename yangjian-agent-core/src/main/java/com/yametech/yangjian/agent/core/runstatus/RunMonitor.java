@@ -16,13 +16,13 @@ import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.common.CoreConstants;
 import com.yametech.yangjian.agent.core.metric.MetricData;
-import com.yametech.yangjian.agent.core.report.AsyncReportManage;
+import com.yametech.yangjian.agent.core.report.MultiReportFactory;
 import com.yametech.yangjian.agent.core.util.Util;
 
 public class RunMonitor implements ISchedule, IAppStatusListener, IConfigReader {
 	private static final ILogger LOG = LoggerFactory.getLogger(RunMonitor.class);
 	private static final String CONFIG_KEY = "metricOutput.interval.heartbeat";
-	private static IReportData report = AsyncReportManage.getReport("runStatus");
+	private static IReportData report = MultiReportFactory.getReport("runStatus");
 	private volatile boolean isStop = false;
 	private int interval = 10;
 	private Map<String, Object> params = new HashMap<>();

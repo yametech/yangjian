@@ -34,7 +34,7 @@ import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.metric.MetricData;
-import com.yametech.yangjian.agent.core.report.ReportManage;
+import com.yametech.yangjian.agent.core.report.MultiReportFactory;
 import com.yametech.yangjian.agent.core.util.Util;
 import com.yametech.yangjian.agent.util.CustomThreadFactory;
 import com.yametech.yangjian.agent.util.eventbus.EventBusBuilder;
@@ -55,7 +55,7 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
     private static final String BUFFER_SIZE_KEY_PREFIX = "bufferSize.";
     private static final String INTERVAL_KEY_PREFIX = "metricOutput.interval.publish.";
     private static final String DISCARD_KEY_PREFIX = "eventPublish.discard.";
-    private IReportData report = ReportManage.getReport("EventPublish");
+    private IReportData report = MultiReportFactory.getReport("eventPublish");
     private EventBus<T> eventBus;
     private String metricType;
     private String configKeySuffix;

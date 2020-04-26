@@ -29,19 +29,19 @@ import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
 
-public class ReportManage implements IReportData, IConfigReader {
-	private static final ILogger LOG = LoggerFactory.getLogger(ReportManage.class);
+public class MultiReport implements IReportData, IConfigReader {
+	private static final ILogger LOG = LoggerFactory.getLogger(MultiReport.class);
+	static final String CONFIG_KEY_PREFIX = "report";
 	private Set<String> configKeys;
-	private String defaultKey = "report";
 	private String myKey;
 	private List<IReport> reports;
 	
-	public ReportManage(String reportConfigKey) {
+	public MultiReport(String reportConfigKey) {
 		if(reportConfigKey == null) {
 			throw new IllegalArgumentException("reportConfigKey不能为null");
 		}
-		this.myKey = defaultKey + "." + reportConfigKey;
-		this.configKeys = new HashSet<>(Arrays.asList(defaultKey.replaceAll("\\.", "\\\\."), myKey.replaceAll("\\.", "\\\\.")));
+		this.myKey = CONFIG_KEY_PREFIX + "." + reportConfigKey;
+		this.configKeys = new HashSet<>(Arrays.asList(CONFIG_KEY_PREFIX.replaceAll("\\.", "\\\\."), myKey.replaceAll("\\.", "\\\\.")));
 	}
 	
 	/**
@@ -49,8 +49,8 @@ public class ReportManage implements IReportData, IConfigReader {
 	 * @param cls	一般为调用的类Class，用于读取配置
 	 * @return
 	 */
-    public static IReportData getReport(String reportConfigKey) {
-    	ReportManage report = new ReportManage(reportConfigKey);
+    static IReportData getReport(String reportConfigKey) {
+    	MultiReport report = new MultiReport(reportConfigKey);
     	InstanceManage.registryInit(report);
     	return report;
     }
@@ -94,7 +94,7 @@ public class ReportManage implements IReportData, IConfigReader {
 	public void configKeyValue(Map<String, String> kv) {
 		String typeConfig = kv.get(myKey);
 		if(typeConfig == null) {
-			typeConfig = kv.get(defaultKey);
+			typeConfig = kv.get(CONFIG_KEY_PREFIX);
 		}
 		List<String> types = Arrays.asList(typeConfig.split(","));
 		List<IReport> myReports = new ArrayList<>();

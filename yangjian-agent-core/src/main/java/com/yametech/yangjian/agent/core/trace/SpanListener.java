@@ -22,7 +22,7 @@ import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.common.BaseEventListener;
 import com.yametech.yangjian.agent.core.common.EventBusType;
-import com.yametech.yangjian.agent.core.report.ReportManage;
+import com.yametech.yangjian.agent.core.report.MultiReportFactory;
 import com.yametech.yangjian.agent.core.trace.base.TraceSpan;
 import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
 
@@ -35,7 +35,7 @@ public class SpanListener extends BaseEventListener<TraceSpan> implements BaseCo
 	private static final ILogger log = LoggerFactory.getLogger(SpanListener.class);
     private AtomicLong totalNum = new AtomicLong(0);// 总消费量
 	private AtomicLong periodTotalNum = new AtomicLong(0);// 最近一个输出周期产生的事件量
-	private IReportData report = ReportManage.getReport("SpanListener");
+	private IReportData report = MultiReportFactory.getReport("spanListener");
     
 	public SpanListener() {
 		super(EventBusType.TRACE);

@@ -72,7 +72,6 @@ public class YMAgent {
     	}
     	System.setProperty(Constants.SYSTEM_PROPERTIES_PREFIX + Constants.SERVICE_NAME, Config.SERVICE_NAME.getValue());
     	AgentClassLoader.initDefaultLoader();
-    	InstanceManage.loadSpi();
     	if(log.isDebugEnable()) {
     		InstanceManage.getSpis().forEach(spi -> log.debug("spiClassLoader:{}, {}", spi, Util.join(" > ", Util.listClassLoaders(spi.getClass()))));
     	}

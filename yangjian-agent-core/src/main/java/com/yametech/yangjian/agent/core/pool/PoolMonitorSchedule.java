@@ -30,7 +30,7 @@ import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.api.pool.IPoolMonitor;
 import com.yametech.yangjian.agent.core.metric.MetricData;
-import com.yametech.yangjian.agent.core.report.ReportManage;
+import com.yametech.yangjian.agent.core.report.MultiReportFactory;
 
 /**
  * @author dengliming
@@ -39,7 +39,7 @@ import com.yametech.yangjian.agent.core.report.ReportManage;
 public class PoolMonitorSchedule implements ISchedule, IConfigReader {
     private static final ILogger LOG = LoggerFactory.getLogger(PoolMonitorSchedule.class);
     private static final String CONFIG_KEY = "metricOutput.interval.pool";
-    private IReportData report = ReportManage.getReport(PoolMonitorSchedule.class.getSimpleName());
+    private IReportData report = MultiReportFactory.getReport("poolMonitor");
     private int interval = 5;
     
     @Override

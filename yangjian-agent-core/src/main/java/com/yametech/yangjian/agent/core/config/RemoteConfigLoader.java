@@ -45,9 +45,9 @@ import java.util.stream.Collectors;
  * @Description
  * @date 2019年10月6日 下午10:23:16
  */
-public class RemoteConfigReader implements IConfigLoader, ISchedule {
+public class RemoteConfigLoader implements IConfigLoader, ISchedule {
 
-    private static final ILogger logger = LoggerFactory.getLogger(RemoteConfigReader.class);
+    private static final ILogger logger = LoggerFactory.getLogger(RemoteConfigLoader.class);
     /**
      * 请求远程配置最大重试次数
      */

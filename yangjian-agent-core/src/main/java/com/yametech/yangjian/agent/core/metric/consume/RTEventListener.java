@@ -29,7 +29,7 @@ import com.yametech.yangjian.agent.core.common.BaseEventListener;
 import com.yametech.yangjian.agent.core.common.EventBusType;
 import com.yametech.yangjian.agent.core.metric.MetricData;
 import com.yametech.yangjian.agent.core.metric.base.ConvertTimeEvent;
-import com.yametech.yangjian.agent.core.report.ReportManage;
+import com.yametech.yangjian.agent.core.report.MultiReportFactory;
 import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
 
 /**
@@ -40,7 +40,7 @@ import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
 public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
 	private static ILogger log = LoggerFactory.getLogger(RTEventListener.class);
     private List<RTEventConsume> consumes = new ArrayList<>();
-    private IReportData report = ReportManage.getReport("RTEventListener");
+    private IReportData report = MultiReportFactory.getReport("statistic");
     private long previousExecuteMillis;
     private long superIntervalMillis;
     
