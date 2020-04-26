@@ -19,15 +19,12 @@ import static net.bytebuddy.matcher.ElementMatchers.isInterface;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.InvocationTargetException;
-import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.yametech.yangjian.agent.api.IAppStatusListener;
 import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
@@ -44,6 +41,7 @@ import com.yametech.yangjian.agent.core.core.agent.AgentListener;
 import com.yametech.yangjian.agent.core.core.agent.AgentTransformer;
 import com.yametech.yangjian.agent.core.core.classloader.AgentClassLoader;
 import com.yametech.yangjian.agent.core.core.elementmatch.ClassElementMatcher;
+import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
 import com.yametech.yangjian.agent.core.util.Util;
 import com.yametech.yangjian.agent.util.OSUtil;
 
@@ -64,9 +62,9 @@ public class YMAgent {
 	 * 
 	 * @param arguments		javaagent=号后的文本，例如：-javaagent:E:\eclipse-workspace\tool-ecpark-monitor\ecpark-agent\target\ecpark-agent.jar=arg=123，此时arguments=arg=123
 	 * @param instrumentation
-	 * @throws Exception
+	 * @throws AgentPackageNotFoundException 
 	 */
-    public static void premain(String arguments, Instrumentation instrumentation) throws Exception{
+    public static void premain(String arguments, Instrumentation instrumentation) throws AgentPackageNotFoundException {
     	log.info("os: {}, {}, {}", OSUtil.OS, arguments, YMAgent.class.getClassLoader().getClass());
     	if(StringUtil.isEmpty(Config.SERVICE_NAME.getValue())) {
     		log.warn("未配置应用名称，跳过代理");
@@ -144,25 +142,13 @@ public class YMAgent {
     }
     
     /**
-     * 注册关闭通知
+     *	 注册关闭通知，注意关闭应用不能使用kill -9，会导致下面的方法不执行
      */
     private static void addShutdownHook() {
-    	Runtime.getRuntime().addShutdownHook(new Thread() {// 注意关闭应用不能使用kill -9，会导致下面的方法不执行
+    	Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
     		public void run() {
-            	List<IAppStatusListener> shutdowns = InstanceManage.listInstance(IAppStatusListener.class);
-            	Collections.reverse(shutdowns);// 启动时顺序init，关闭时倒序showdown
-            	for(IAppStatusListener spi : shutdowns) {
-            		try {
-	        			boolean success = spi.shutdown(Duration.ofSeconds(10));
-	        			if(!success) {
-	        				log.warn("执行关闭逻辑失败：{}", spi);
-	        			}
-            		} catch (Exception e) {
-            			log.warn(e, "关闭服务异常，可能丢失数据");
-            		}
-            	}
-            	InstanceManage.stop();
+            	InstanceManage.afterStop();
             }
         });
     }

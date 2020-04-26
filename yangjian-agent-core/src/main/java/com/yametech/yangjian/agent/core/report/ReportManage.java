@@ -25,9 +25,12 @@ import java.util.Set;
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.IReport;
 import com.yametech.yangjian.agent.api.base.IReportData;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
 
 public class ReportManage implements IReportData, IConfigReader {
+	private static final ILogger LOG = LoggerFactory.getLogger(ReportManage.class);
 	private Set<String> configKeys;
 	private String defaultKey = "report";
 	private String myKey;
@@ -48,7 +51,7 @@ public class ReportManage implements IReportData, IConfigReader {
 	 */
     public static IReportData getReport(String reportConfigKey) {
     	ReportManage report = new ReportManage(reportConfigKey);
-    	InstanceManage.registry(report);
+    	InstanceManage.registryInit(report);
     	return report;
     }
 	
@@ -56,6 +59,7 @@ public class ReportManage implements IReportData, IConfigReader {
 	public boolean report(Object data) {
 		List<IReport> useReports = reports;
 		if(useReports == null || useReports.isEmpty()) {
+			LOG.warn("{}不存在report", myKey);
 			return false;
 		}
 		for(IReport report : useReports) {
@@ -70,6 +74,7 @@ public class ReportManage implements IReportData, IConfigReader {
 	public boolean batchReport(List<Object> datas) {
 		List<IReport> useReports = reports;
 		if(useReports == null || useReports.isEmpty()) {
+			LOG.warn("{}不存在report", myKey);
 			return false;
 		}
 		for(IReport report : useReports) {

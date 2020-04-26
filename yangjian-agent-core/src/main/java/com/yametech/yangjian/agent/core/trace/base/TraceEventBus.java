@@ -18,9 +18,8 @@ package com.yametech.yangjian.agent.core.trace.base;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.core.common.BaseEventPublish;
-import com.yametech.yangjian.agent.core.common.ConfigSuffix;
+import com.yametech.yangjian.agent.core.common.EventBusType;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.trace.SpanListener;
 import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
@@ -35,7 +34,7 @@ import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
 public class TraceEventBus extends BaseEventPublish<TraceSpan> {
     
     public TraceEventBus() {
-		super(Constants.ProductConsume.TRACE, ConfigSuffix.TRACE);
+		super(EventBusType.TRACE);
 	}
     
     @Override

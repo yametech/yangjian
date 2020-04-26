@@ -60,12 +60,12 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
     private String metricType;
     private String configKeySuffix;
     private int bufferSize = 1 << 6;
-    private int interval = 5;
+    private int interval = 10;
     private boolean discard = true;
     
-    public BaseEventPublish(String metricType, ConfigSuffix configKeySuffix) {
-    	this.metricType = metricType;
-    	this.configKeySuffix = configKeySuffix.getSuffix();
+    public BaseEventPublish(EventBusType configKeySuffix) {
+    	this.metricType = configKeySuffix.getMetricType();
+    	this.configKeySuffix = configKeySuffix.getConfigKeySuffix();
 	}
     
     @Override
@@ -167,22 +167,24 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
 
     @Override
     public boolean shutdown(Duration duration) {
+    	boolean success = true;
         long currentTotal = 0;
-        while (currentTotal < totalNum.get()) {// 500毫秒内无调用事件则关闭，避免因关闭服务导致事件丢失
+        while (currentTotal < totalNum.get()) {// N毫秒内无调用事件则关闭，避免因关闭服务导致事件丢失
             try {
                 currentTotal = totalNum.get();
-                Thread.sleep(interval() * 1002L);
+                Thread.sleep(602L);
             } catch (InterruptedException e) {
                 log.warn(e, "shutdown interrupted");
                 Thread.currentThread().interrupt();
+                success = false;
                 break;
             }
         }
         duration = duration == null ? Duration.ofSeconds(10) : duration;
         if (eventBus != null) {
-            return eventBus.shutdown(duration);
+            return eventBus.shutdown(duration) && success;
         }
-        return true;
+        return success;
     }
 
     @Override
@@ -206,7 +208,7 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
         long periodDiscard = periodDiscardNum.getAndSet(0);
         Map<String, Object> params = new HashMap<>();
         params.put("total_num", totalNum.get());
-        params.put("period_seconds", interval());
+        params.put("period_seconds", interval);
         params.put("period_num", periodTotal);
         params.put("total_discard_num", discardNum.get());
         params.put("period_discard_num", periodDiscard);

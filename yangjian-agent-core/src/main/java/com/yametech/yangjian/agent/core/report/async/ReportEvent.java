@@ -3,6 +3,7 @@ package com.yametech.yangjian.agent.core.report.async;
 import java.util.List;
 
 import com.yametech.yangjian.agent.api.base.IReportData;
+import com.yametech.yangjian.agent.core.util.Util;
 
 public class ReportEvent {
 	private String reportType;
@@ -21,6 +22,11 @@ public class ReportEvent {
 	
 	public String getReportType() {
 		return reportType;
+	}
+	
+	@Override
+	public String toString() {
+		return reportType + "[" + Util.join(",", datas) + "]";
 	}
 
 }

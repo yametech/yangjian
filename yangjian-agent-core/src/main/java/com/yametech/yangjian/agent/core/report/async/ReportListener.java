@@ -18,9 +18,8 @@ package com.yametech.yangjian.agent.core.report.async;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.core.common.BaseEventListener;
-import com.yametech.yangjian.agent.core.common.ConfigSuffix;
+import com.yametech.yangjian.agent.core.common.EventBusType;
 import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
 
 /**
@@ -34,7 +33,7 @@ public class ReportListener extends BaseEventListener<ReportEvent> implements Ba
 	private AtomicLong periodTotalNum = new AtomicLong(0);// 最近一个输出周期产生的事件量
     
 	public ReportListener() {
-		super(Constants.ProductConsume.SUBCRIBE_EVENT, ConfigSuffix.REPORT);
+		super(EventBusType.REPORT);
 	}
 	
     @Override

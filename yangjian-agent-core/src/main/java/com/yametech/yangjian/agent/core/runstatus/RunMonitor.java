@@ -80,7 +80,7 @@ public class RunMonitor implements ISchedule, IAppStatusListener, IConfigReader 
 		synchronized (this) {
 			isStop = true;
 			// 异步上报队列一定放到最后关闭防止此处发布失败
-			boolean success = report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.STARTING));
+			boolean success = report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.STOPPING));
 			if(!success) {
 				LOG.warn("启动状态上报失败");
 			}
@@ -90,7 +90,7 @@ public class RunMonitor implements ISchedule, IAppStatusListener, IConfigReader 
 	
 	@Override
 	public int weight() {
-		return IAppStatusListener.super.weight() + 30;// 此处加大权重为了后关闭，不是必须
+		return IAppStatusListener.super.weight() + 5;// 此处加大权重为了后关闭（不是必须），但必须小于AsyncReportManage.publish的权重，保证beforeRun执行前AsyncReportManage.publish已执行beforeRun
 	}
 	
 }

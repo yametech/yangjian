@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.yametech.yangjian.agent.api.base.IReportData;
+import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.report.async.ReportPublish;
 
 public class AsyncReportManage implements IReportData {
@@ -30,6 +31,7 @@ public class AsyncReportManage implements IReportData {
 		this.reportType = reportConfigKey;
 		this.report = ReportManage.getReport(reportConfigKey);
 		this.publish = new ReportPublish();
+		InstanceManage.registryInit(this.publish);
 	}
 	
 	/**

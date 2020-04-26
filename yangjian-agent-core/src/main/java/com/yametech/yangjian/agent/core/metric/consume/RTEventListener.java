@@ -22,12 +22,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.yametech.yangjian.agent.api.base.IReportData;
-import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.convert.statistic.impl.BaseStatistic;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.common.BaseEventListener;
-import com.yametech.yangjian.agent.core.common.ConfigSuffix;
+import com.yametech.yangjian.agent.core.common.EventBusType;
 import com.yametech.yangjian.agent.core.metric.MetricData;
 import com.yametech.yangjian.agent.core.metric.base.ConvertTimeEvent;
 import com.yametech.yangjian.agent.core.report.ReportManage;
@@ -42,9 +41,11 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
 	private static ILogger log = LoggerFactory.getLogger(RTEventListener.class);
     private List<RTEventConsume> consumes = new ArrayList<>();
     private IReportData report = ReportManage.getReport("RTEventListener");
+    private long previousExecuteMillis;
+    private long superIntervalMillis;
     
     public RTEventListener() {
-		super(Constants.ProductConsume.METRIC, ConfigSuffix.METRIC);
+		super(EventBusType.METRIC);
 	}
 
     @Override
@@ -56,10 +57,19 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
     }
 
     // 注意interval的执行间隔要低于RTEventConsume.STATISTICS_SECOND_SIZE，否则会丢失
-
+    @Override
+    public int interval() {
+    	superIntervalMillis = super.interval() * 1000L;
+    	return 1;
+    }
+    
     @Override
     public void execute() {
-    	super.execute();
+    	long now = System.currentTimeMillis();
+    	if(now - previousExecuteMillis >= superIntervalMillis) {
+    		super.execute();
+    		previousExecuteMillis = now;
+    	}
         // 循环consumes输出累加统计值，或者直接输出每个的统计值，ecpark-monitor做聚合
         for (RTEventConsume consume : consumes) {
             for (BaseStatistic statistic : consume.getReportStatistics()) {

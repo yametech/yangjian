@@ -18,9 +18,8 @@ package com.yametech.yangjian.agent.core.report.async;
 import java.util.Arrays;
 import java.util.List;
 
-import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.core.common.BaseEventPublish;
-import com.yametech.yangjian.agent.core.common.ConfigSuffix;
+import com.yametech.yangjian.agent.core.common.EventBusType;
 import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
 
@@ -34,7 +33,7 @@ import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
 public class ReportPublish extends BaseEventPublish<ReportEvent> {
     
     public ReportPublish() {
-		super(Constants.ProductConsume.SUBCRIBE_EVENT, ConfigSuffix.REPORT);
+		super(EventBusType.REPORT);
 	}
     
     @Override

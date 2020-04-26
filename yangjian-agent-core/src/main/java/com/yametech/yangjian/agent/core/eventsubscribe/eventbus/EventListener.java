@@ -18,9 +18,8 @@ package com.yametech.yangjian.agent.core.eventsubscribe.eventbus;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.core.common.BaseEventListener;
-import com.yametech.yangjian.agent.core.common.ConfigSuffix;
+import com.yametech.yangjian.agent.core.common.EventBusType;
 import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
 
 /**
@@ -34,7 +33,7 @@ public class EventListener extends BaseEventListener<EventBean> implements BaseC
 	private AtomicLong periodTotalNum = new AtomicLong(0);// 最近一个输出周期产生的事件量
     
 	public EventListener() {
-		super(Constants.ProductConsume.SUBCRIBE_EVENT, ConfigSuffix.SUBCRIBE_EVENT);
+		super(EventBusType.SUBCRIBE_EVENT);
 	}
 	
     @Override

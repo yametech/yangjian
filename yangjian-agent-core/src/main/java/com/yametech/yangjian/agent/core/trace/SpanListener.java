@@ -18,11 +18,10 @@ package com.yametech.yangjian.agent.core.trace;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.yametech.yangjian.agent.api.base.IReportData;
-import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.common.BaseEventListener;
-import com.yametech.yangjian.agent.core.common.ConfigSuffix;
+import com.yametech.yangjian.agent.core.common.EventBusType;
 import com.yametech.yangjian.agent.core.report.ReportManage;
 import com.yametech.yangjian.agent.core.trace.base.TraceSpan;
 import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
@@ -39,7 +38,7 @@ public class SpanListener extends BaseEventListener<TraceSpan> implements BaseCo
 	private IReportData report = ReportManage.getReport("SpanListener");
     
 	public SpanListener() {
-		super(Constants.ProductConsume.TRACE, ConfigSuffix.TRACE);
+		super(EventBusType.TRACE);
 	}
 	
     @Override

@@ -45,12 +45,12 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
     private int threadNum = 1;
     private String configKeySuffix;
     private IReportData report = ReportManage.getReport("EventListener");
-    private String type;
-    private int interval = 5;
+    private String metricType;
+    private int interval = 10;
     
-    public BaseEventListener(String type, ConfigSuffix configKeySuffix) {
-		this.configKeySuffix = configKeySuffix.getSuffix();
-		this.type = type;
+    public BaseEventListener(EventBusType configKeySuffix) {
+    	this.metricType = configKeySuffix.getMetricType();
+    	this.configKeySuffix = configKeySuffix.getConfigKeySuffix();
 	}
     
     @Override
@@ -100,9 +100,9 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
     public void execute() {
     	Map<String, Object> params = new HashMap<>();
     	params.put("total_num", getTotalNum());
-    	params.put("period_seconds", interval());
+    	params.put("period_seconds", interval);
     	params.put("period_num", getPeriodNum());
-    	MetricData metricData = MetricData.get(null, "consume/" + type, params);
+    	MetricData metricData = MetricData.get(null, "consume/" + metricType, params);
     	if(!report.report(metricData)) {
     		log.warn("上报失败：{}", metricData);
     	}
@@ -114,11 +114,11 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
         while (previousNum < getTotalNum()) {// N毫秒内无调用事件则关闭，避免因关闭服务导致事件丢失
             try {
                 previousNum = getTotalNum();
-                Thread.sleep(interval() * 1002L);
+                Thread.sleep(502L);
             } catch (InterruptedException e) {
                 log.warn(e, "shutdown interrupted");
                 Thread.currentThread().interrupt();
-                break;
+                return false;
             }
         }
         return true;

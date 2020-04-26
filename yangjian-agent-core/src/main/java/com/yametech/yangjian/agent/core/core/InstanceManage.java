@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -213,7 +214,7 @@ public class InstanceManage {
 	 * @param instance	托管实例
 	 * @param reload	true：注册时执行一次初始化（用于在premain init之后托管的实例）；false：不执行初始化（用于在premain init之前托管的实例）；
 	 */
-	public static synchronized boolean registry(Object instance, boolean reload) {
+	private static synchronized boolean registry(Object instance, boolean reload) {
 		if(instance == null) {
 			return false;
 		}
@@ -368,13 +369,32 @@ public class InstanceManage {
 		configReader.configKeyValue(kvs);
 	}
 	
-	public static void stop() {
-		service.shutdown();
-		try {
-			service.awaitTermination(5, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			LOG.warn(e, "关闭定时任务被打断");
-		}
+	/**
+	 * 关闭通知
+	 */
+	public static void afterStop() {
+		List<IAppStatusListener> shutdowns = InstanceManage.listInstance(IAppStatusListener.class);
+    	Collections.reverse(shutdowns);// 启动时顺序init，关闭时倒序showdown
+    	for(IAppStatusListener spi : shutdowns) {
+    		long startMillis = System.currentTimeMillis();
+    		try {
+    			boolean success = spi.shutdown(Duration.ofSeconds(10));// TODO 此处增加异步关闭，避免同步关闭时耗时太久
+    			if(!success) {
+    				LOG.warn("执行关闭逻辑失败：{}", spi);
+    			}
+    		} catch (Exception e) {
+    			LOG.warn(e, "关闭服务异常，可能丢失数据");
+    		} finally {
+				LOG.info("{}关闭耗时：{}毫秒", spi.getClass(), System.currentTimeMillis() - startMillis);
+			}
+    	}
+    	service.shutdown();
+    	try {
+    		service.awaitTermination(5, TimeUnit.SECONDS);
+    	} catch (InterruptedException e) {
+    		LOG.warn(e, "关闭定时任务被打断");
+    		Thread.currentThread().interrupt();
+    	}
 	}
 	
 }
