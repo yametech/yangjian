@@ -2,6 +2,7 @@ package com.yametech.yangjian.agent.core.runstatus;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +17,7 @@ import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.common.CoreConstants;
 import com.yametech.yangjian.agent.core.metric.MetricData;
 import com.yametech.yangjian.agent.core.report.AsyncReportManage;
+import com.yametech.yangjian.agent.core.util.Util;
 
 public class RunMonitor implements ISchedule, IAppStatusListener, IConfigReader {
 	private static final ILogger LOG = LoggerFactory.getLogger(RunMonitor.class);
@@ -23,6 +25,7 @@ public class RunMonitor implements ISchedule, IAppStatusListener, IConfigReader 
 	private static IReportData report = AsyncReportManage.getReport("runStatus");
 	private volatile boolean isStop = false;
 	private int interval = 10;
+	private Map<String, Object> params = new HashMap<>();
 	
 	@Override
     public Set<String> configKey() {
@@ -56,7 +59,7 @@ public class RunMonitor implements ISchedule, IAppStatusListener, IConfigReader 
 			if(isStop) {
 				return;
 			}
-			if(!report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.HEARTBEAT))) {
+			if(!report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.RUNNING, params))) {
 				LOG.warn("心跳上报失败");
 			}
 		}
@@ -67,7 +70,8 @@ public class RunMonitor implements ISchedule, IAppStatusListener, IConfigReader 
 	 */
 	@Override
 	public void beforeRun() {
-		if(!report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.STARTING))) {
+		params.put("ip", Util.getIpAddress(null, null));// TODO 检测线上多IP获取是否正确
+		if(!report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.STARTING, params))) {
 			LOG.warn("启动状态上报失败");
 		}
 	}
@@ -80,7 +84,7 @@ public class RunMonitor implements ISchedule, IAppStatusListener, IConfigReader 
 		synchronized (this) {
 			isStop = true;
 			// 异步上报队列一定放到最后关闭防止此处发布失败
-			boolean success = report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.STOPPING));
+			boolean success = report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.STOPPING, params));
 			if(!success) {
 				LOG.warn("启动状态上报失败");
 			}

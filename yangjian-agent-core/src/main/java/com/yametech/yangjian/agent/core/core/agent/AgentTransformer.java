@@ -27,7 +27,6 @@ import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.base.IMatch;
 import com.yametech.yangjian.agent.api.base.IMatcherProxy;
 import com.yametech.yangjian.agent.api.base.MethodType;
-import com.yametech.yangjian.agent.api.base.SPI;
 import com.yametech.yangjian.agent.api.bean.ClassDefined;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
@@ -135,9 +134,9 @@ public class AgentTransformer implements AgentBuilder.Transformer {
 							obj = InterceptorInstanceLoader.load(loadClass.getKey(), loadClass.getCls(), null);
 						}
 //						Object obj = InterceptorInstanceLoader.load(loadClass.getKey(), loadClass.getCls(), classLoader);
-						if(obj instanceof SPI) {
-							throw new IllegalStateException("不能实现SPI接口");
-						}
+//						if(obj instanceof SPI) {
+//							throw new IllegalStateException("不能实现SPI接口");
+//						}
 						InstanceManage.registryInit(obj);
 //						log.info("{}:map load", inDefinedShape);
 						if(matcher instanceof IMatcherProxy) {

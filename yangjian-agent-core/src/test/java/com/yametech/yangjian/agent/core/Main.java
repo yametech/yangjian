@@ -15,6 +15,8 @@
  */
 package com.yametech.yangjian.agent.core;
 
+import com.yametech.yangjian.agent.core.inter.TestService;
+
 public class Main {
 	
 	/**

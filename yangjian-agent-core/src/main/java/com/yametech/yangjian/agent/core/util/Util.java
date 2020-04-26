@@ -17,7 +17,11 @@ package com.yametech.yangjian.agent.core.util;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 public class Util {
@@ -121,6 +125,53 @@ public class Util {
 			}
 		}
 		throw new RuntimeException("无法获取泛型类型：" + clazz + "	" + inter + "	" + index);
+	}
+	
+	/**
+	 * 获取本机IP
+	 * @param includeStart	包含的前缀匹配，可为null
+	 * @param excludeStart	排除的前缀匹配，可为null
+	 * @return
+	 */
+	public static String getIpAddress(String[] includeStart, String[] excludeStart) {
+		try {
+			Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+			InetAddress ip = null;
+			while (allNetInterfaces.hasMoreElements()) {
+				NetworkInterface netInterface = allNetInterfaces.nextElement();
+				if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {
+					continue;
+				}
+				Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
+				while (addresses.hasMoreElements()) {
+					ip = addresses.nextElement();
+					if (!(ip instanceof Inet4Address)) {
+						continue;
+					}
+					if(excludeStart != null) {
+						boolean isContinue = false;
+						for(String start : excludeStart) {
+							if(ip.getHostAddress().startsWith(start)) {
+								isContinue = true;
+								break;
+							}
+						}
+						if(isContinue) {
+							continue;
+						}
+					}
+					if(includeStart == null) {
+						return ip.getHostAddress();
+					}
+					for(String start : includeStart) {
+						if(ip.getHostAddress().startsWith(start)) {
+							return ip.getHostAddress();
+						}
+					}
+				}
+			}
+		} catch (Exception e) {}
+		return null;
 	}
 	
 }

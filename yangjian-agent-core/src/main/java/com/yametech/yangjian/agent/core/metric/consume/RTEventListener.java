@@ -83,7 +83,7 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
                 }
                 MetricData metricData = MetricData.get(statistic.getSecond(), "statistic/" + statistic.getType() + "/" + statistic.statisticType(), thisParams);
                 if(!report.report(metricData)) {
-                	log.warn("上报异常： {}", metricData);
+                	log.warn("上报失败： {}", metricData);
                 }
             }
         }

@@ -79,6 +79,31 @@ public class MapTest {
 		}
 	}
 	
+	/**
+	 * 多线程读取ConcurrentHashMap并更新value是否有问题
+	 * 结果：无异常抛出
+	 */
+	@org.junit.Test
+	public void test4() {
+		Map<String, String> map = new ConcurrentHashMap<>();
+		map.put("key1", "value1");
+		map.put("key2", "value2");
+		map.put("key3", "value3");
+		map.put("key4", "value4");
+		map.put("key5", "value5");
+		map.put("key6", "value6");
+		
+		map.entrySet().parallelStream().forEach(entry -> {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			entry.setValue("value");
+			print(entry.toString());
+		});
+	}
+	
 	
 	private static void print(String msg) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");

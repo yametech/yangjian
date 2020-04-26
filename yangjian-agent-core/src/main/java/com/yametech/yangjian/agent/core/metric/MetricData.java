@@ -74,6 +74,10 @@ public class MetricData {
 		return get(second, metricType, null);
 	}
 	
+	public static MetricData get(String metricType, Map<String, Object> params) {
+		return get(null, metricType, params);
+	}
+	
 	public static MetricData get(Long second, String metricType, Map<String, Object> params) {
 		if(second == null) {
 			second = Instant.now().getEpochSecond();

@@ -8,3 +8,4 @@ com.yametech.yangjian.agent.core.report.LogReport
 com.yametech.yangjian.agent.core.eventsubscribe.EventSubscribeInit
 com.yametech.yangjian.agent.core.trace.TraceInit
 com.yametech.yangjian.agent.core.runstatus.RunMonitor
+com.yametech.yangjian.agent.core.runstatus.custom.CustomMatcher
