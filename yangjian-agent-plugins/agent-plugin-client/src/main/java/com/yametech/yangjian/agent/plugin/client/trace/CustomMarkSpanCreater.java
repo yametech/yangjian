@@ -56,9 +56,9 @@ public class CustomMarkSpanCreater implements ISpanCreater<SpanInfo> {
 	}
 	
 	@Override
-	public void after(Object thisObj, Object[] allArguments, Method method, Object ret, Throwable t, BeforeResult<SpanInfo> beforeResult) {
+	public Object after(Object thisObj, Object[] allArguments, Method method, Object ret, Throwable t, BeforeResult<SpanInfo> beforeResult) {
 		if(beforeResult == null || beforeResult.getLocalVar() == null || beforeResult.getLocalVar().getSpan() == null) {
-			return;
+			return ret;
 		}
 		SpanInfo span = beforeResult.getLocalVar();
 	    if(t != null) {
@@ -68,6 +68,7 @@ public class CustomMarkSpanCreater implements ISpanCreater<SpanInfo> {
 		if(span.getScope() != null) {
 			span.getScope().close();
 		}
+		return ret;
 	}
 	
 }
