@@ -52,9 +52,9 @@ import com.yametech.yangjian.agent.core.util.AgentPath;
  */
 public class AgentClassLoader extends ClassLoader {
 
-//    static {
-//        tryRegisterAsParallelCapable();
-//    }
+    static {
+        tryRegisterAsParallelCapable();
+    }
 
     private static final ILogger log = LoggerFactory.getLogger(AgentClassLoader.class);
     /**

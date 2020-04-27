@@ -25,8 +25,10 @@ public enum TraceType {
 	DUBBO_SERVER("dubbo-server"),
 	MQ_PUBLISH("mq-publish"),
 	MQ_CONSUME("mq-consume"),
-	CUSTOM_MARK("custom-mark");
-	
+	CUSTOM_MARK("custom-mark"),
+	HTTP_SERVER("http-server"),
+	HTTP_CLIENT("http-client");
+
 	private String key;
 	private TraceType(String key) {
 		this.key = key;

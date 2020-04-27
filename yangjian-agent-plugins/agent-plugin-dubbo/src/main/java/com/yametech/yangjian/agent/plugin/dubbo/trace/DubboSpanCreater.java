@@ -64,9 +64,9 @@ public abstract class DubboSpanCreater<T extends ISpanCustom> implements ISpanCr
 	}
 	
 	@Override
-	public void after(Object thisObj, Object[] allArguments, Method method, Object ret, Throwable t, BeforeResult<SpanInfo> beforeResult) {
+	public Object after(Object thisObj, Object[] allArguments, Method method, Object ret, Throwable t, BeforeResult<SpanInfo> beforeResult) {
 		if(beforeResult == null || beforeResult.getLocalVar() == null || beforeResult.getLocalVar().getSpan() == null) {
-			return;
+			return ret;
 		}
 		SpanInfo span = beforeResult.getLocalVar();
 	    Throwable exception = t;
@@ -86,6 +86,7 @@ public abstract class DubboSpanCreater<T extends ISpanCustom> implements ISpanCr
 		if(span.getScope() != null) {
 			span.getScope().close();
 		}
+		return ret;
 	}
 	
 	/**

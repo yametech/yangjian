@@ -87,4 +87,11 @@ public class Constants {
     public static String serviceName() {
     	return System.getProperty(SYSTEM_PROPERTIES_PREFIX + SERVICE_NAME);
     }
+
+    public static class Tags {
+        public static final String STATUS_CODE = "status_code";
+        public static final String URL = "url";
+        public static final String HTTP_METHOD = "http.method";
+        public static final String KAFKA_TOPIC = "kafka.topic";
+    }
 }

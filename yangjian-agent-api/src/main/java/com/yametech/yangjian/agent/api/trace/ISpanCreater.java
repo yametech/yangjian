@@ -52,6 +52,7 @@ public interface ISpanCreater<T> {
 	 * @param ret	方法返回值
 	 * @param t	方法抛出的异常，如果无异常则为null
 	 * @param beforeResult	before的返回值
+	 * @return 方法真正的返回值（如果不对原返回值处理默认直接返回ret即可）
 	 */
-	void after(Object thisObj, Object[] allArguments, Method method, Object ret, Throwable t, BeforeResult<T> beforeResult);
+	Object after(Object thisObj, Object[] allArguments, Method method, Object ret, Throwable t, BeforeResult<T> beforeResult);
 }

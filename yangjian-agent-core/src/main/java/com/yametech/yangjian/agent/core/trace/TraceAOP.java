@@ -52,8 +52,7 @@ public class TraceAOP<T> implements IMethodAOP<T>, IStaticMethodAOP<T> {
 	@Override
 	public Object after(Object[] allArguments, Method method, BeforeResult<T> beforeResult, Object ret, Throwable t,
 			Map<Class<?>, Object> globalVar) throws Throwable {
-		spanCreater.after(null, allArguments, method, ret, t, beforeResult);
-		return ret;
+		return spanCreater.after(null, allArguments, method, ret, t, beforeResult);
 	}
 
 	@Override
@@ -64,8 +63,7 @@ public class TraceAOP<T> implements IMethodAOP<T>, IStaticMethodAOP<T> {
 	@Override
 	public Object after(Object thisObj, Object[] allArguments, Method method, BeforeResult<T> beforeResult,
 			Object ret, Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
-		spanCreater.after(thisObj, allArguments, method, ret, t, beforeResult);
-		return ret;
+		return spanCreater.after(thisObj, allArguments, method, ret, t, beforeResult);
 	}
 	
 }

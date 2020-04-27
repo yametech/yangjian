@@ -15,7 +15,6 @@
 		<curator-recipes.version>4.1.0</curator-recipes.version>
 		<zkclient.version>0.1</zkclient.version>
 		<zookeeper.version>3.4.13</zookeeper.version>
-		<brave.version>5.10.2</brave.version>
     </properties>
 
     <dependencies>

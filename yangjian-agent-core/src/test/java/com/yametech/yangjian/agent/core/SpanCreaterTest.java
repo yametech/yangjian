@@ -45,8 +45,8 @@ public class SpanCreaterTest implements ISpanCreater<Object>, ICustomLoad<IDubbo
 	}
 
 	@Override
-	public void after(Object thisObj, Object[] allArguments, Method method, Object ret, Throwable t, BeforeResult<Object> beforeResult) {
-		
+	public Object after(Object thisObj, Object[] allArguments, Method method, Object ret, Throwable t, BeforeResult<Object> beforeResult) {
+		return ret;
 	}
 	
 	@Test
