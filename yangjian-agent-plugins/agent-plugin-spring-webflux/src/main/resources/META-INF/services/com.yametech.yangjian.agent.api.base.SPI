@@ -2,3 +2,4 @@ com.yametech.yangjian.agent.plugin.spring.webflux.context.ServerWebExchangeMatch
 com.yametech.yangjian.agent.plugin.spring.webflux.DispatcherHandlerResultMatcher
 com.yametech.yangjian.agent.plugin.spring.webflux.DispatcherHandlerMatcher
 com.yametech.yangjian.agent.plugin.spring.webflux.InvocableHandlerMatcher
+com.yametech.yangjian.agent.plugin.spring.webflux.trace.DispatcherHandlerTraceMatcher

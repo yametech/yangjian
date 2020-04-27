@@ -1,1 +1,2 @@
 com.yametech.yangjian.agent.plugin.spring.ControllerMatcher
+com.yametech.yangjian.agent.plugin.spring.trace.ControllerTraceMatcher
