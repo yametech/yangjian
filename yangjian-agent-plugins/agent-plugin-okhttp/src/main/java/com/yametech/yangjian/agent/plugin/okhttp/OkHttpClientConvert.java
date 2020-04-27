@@ -20,6 +20,7 @@ import com.yametech.yangjian.agent.api.bean.TimeEvent;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.convert.IMethodConvert;
 import com.yametech.yangjian.agent.plugin.okhttp.context.ContextConstants;
+import okhttp3.Request;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -43,7 +44,11 @@ public class OkHttpClientConvert implements IMethodConvert {
             return null;
         }
 
-        String requestUrl = (String) ((IContext) thisObj)._getAgentContext(ContextConstants.HTTP_REQUEST_URL_CONTEXT_KEY);
+        Request request = (Request) ((IContext) thisObj)._getAgentContext(ContextConstants.HTTP_REQUEST_CONTEXT_KEY);
+        if (request == null) {
+            return null;
+        }
+        String requestUrl = request.url().toString();
         if (StringUtil.isEmpty(requestUrl)) {
             return null;
         }

@@ -1,2 +1,8 @@
 com.yametech.yangjian.agent.plugin.okhttp.context.OkHttpClientMatcher
 com.yametech.yangjian.agent.plugin.okhttp.OkHttpClientMatcher
+com.yametech.yangjian.agent.plugin.okhttp.trace.RealCallTraceMatcher
+com.yametech.yangjian.agent.plugin.okhttp.trace.AsyncCallTraceMatcher
+com.yametech.yangjian.agent.plugin.okhttp.trace.CallbackTraceMatcher
+com.yametech.yangjian.agent.plugin.okhttp.context.CallbackMatcher
+com.yametech.yangjian.agent.plugin.okhttp.context.AsyncCallMatcher
+com.yametech.yangjian.agent.plugin.okhttp.EnqueueMatcher

@@ -30,6 +30,6 @@ public class OkHttpClientInterceptor implements IConstructorListener {
     @Override
     public void constructor(Object thisObj, Object[] allArguments) {
         Request originalRequest = (Request) allArguments[1];
-        ((IContext) thisObj)._setAgentContext(ContextConstants.HTTP_REQUEST_URL_CONTEXT_KEY, originalRequest.url().toString());
+        ((IContext) thisObj)._setAgentContext(ContextConstants.HTTP_REQUEST_CONTEXT_KEY, originalRequest);
     }
 }

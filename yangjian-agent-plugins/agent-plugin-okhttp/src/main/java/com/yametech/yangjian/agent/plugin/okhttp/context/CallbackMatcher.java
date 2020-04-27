@@ -15,6 +15,21 @@
  */
 package com.yametech.yangjian.agent.plugin.okhttp.context;
 
-public abstract class ContextConstants {
-	public static final String HTTP_REQUEST_CONTEXT_KEY = "__http_request_";
+import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
+import com.yametech.yangjian.agent.api.base.IConfigMatch;
+import com.yametech.yangjian.agent.api.base.SPI;
+import com.yametech.yangjian.agent.api.configmatch.InterfaceMatch;
+
+/**
+ * 增强Callback类主要为了传输Request实例
+ *
+ * @author dengliming
+ * @date 2020/4/23
+ */
+public class CallbackMatcher implements IEnhanceClassMatch, SPI {
+
+    @Override
+    public IConfigMatch classMatch() {
+        return new InterfaceMatch("okhttp3.Callback");
+    }
 }

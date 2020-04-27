@@ -15,6 +15,20 @@
  */
 package com.yametech.yangjian.agent.plugin.okhttp.context;
 
-public abstract class ContextConstants {
-	public static final String HTTP_REQUEST_CONTEXT_KEY = "__http_request_";
+import com.yametech.yangjian.agent.api.base.IContext;
+import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
+
+/**
+ * 获取Callback的Request实例设置到AsyncCall实例中
+ *
+ * @author dengliming
+ * @date 2020/4/23
+ */
+public class AsyncCallInterceptor implements IConstructorListener {
+
+    @Override
+    public void constructor(Object thisObj, Object[] allArguments) {
+        ((IContext) thisObj)._setAgentContext(ContextConstants.HTTP_REQUEST_CONTEXT_KEY,
+                ((IContext) allArguments[0])._getAgentContext(ContextConstants.HTTP_REQUEST_CONTEXT_KEY));
+    }
 }
