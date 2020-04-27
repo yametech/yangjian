@@ -26,6 +26,7 @@ import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.BraveUtil;
 import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
+import com.yametech.yangjian.agent.api.trace.SpanInfo;
 import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
 import com.yametech.yangjian.agent.api.trace.custom.IDubboServerCustom;
 

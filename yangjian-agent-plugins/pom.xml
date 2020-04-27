@@ -24,6 +24,7 @@
         <module>agent-plugin-hikaricp</module>
         <module>agent-plugin-reporter-http</module>
         <module>agent-plugin-spring-webflux</module>
+        <module>agent-plugin-client</module>
     </modules>
 
     <properties>

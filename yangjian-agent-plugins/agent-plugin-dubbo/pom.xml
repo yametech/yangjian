@@ -57,6 +57,11 @@
 	        <version>${zookeeper.version}</version>
 	        <scope>provided</scope>
 		</dependency>
-        
+        <dependency>
+            <groupId>com.github.yametech</groupId>
+            <artifactId>yangjian-agent-client</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

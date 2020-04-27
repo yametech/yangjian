@@ -22,8 +22,6 @@ import org.apache.dubbo.config.MonitorConfig;
 import org.apache.dubbo.config.ProtocolConfig;
 import org.apache.dubbo.config.ServiceConfig;
 
-import com.yametech.yangjian.agent.plugin.dubbo.Utils;
-
 public class RpcServer extends Rpc<RpcServer> {
 	
 	private static RpcServer server = new RpcServer();

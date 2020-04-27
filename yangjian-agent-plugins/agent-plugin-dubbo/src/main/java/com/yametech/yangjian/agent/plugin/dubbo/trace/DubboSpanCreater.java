@@ -30,6 +30,7 @@ import com.yametech.yangjian.agent.api.trace.ICustomLoad;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanCustom;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
+import com.yametech.yangjian.agent.api.trace.SpanInfo;
 import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
 
 import brave.Span;

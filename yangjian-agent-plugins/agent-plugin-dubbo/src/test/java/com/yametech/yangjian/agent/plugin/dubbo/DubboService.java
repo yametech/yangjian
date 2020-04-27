@@ -15,6 +15,11 @@
  */
 package com.yametech.yangjian.agent.plugin.dubbo;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.yametech.yangjian.agent.client.TraceUtil;
+
 public class DubboService implements IDubboService {
 
 	@Override
@@ -27,6 +32,20 @@ public class DubboService implements IDubboService {
 	@Override
 	public String hello(String name, Integer age) {
 		System.err.println("call hello age");
+		Map<String, String> tags = new HashMap<>();
+		tags.put("tag-1", "value-1");
+		tags.put("tag-2", "value-2");
+		tags.put("tag-3", "value-3");
+		TraceUtil.mark("test-name", tags, () -> {
+			System.err.println("mark start");
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.err.println("mark end");
+			return null;
+		});
 		return "hello " + name + " - " + age;
 	}
 	

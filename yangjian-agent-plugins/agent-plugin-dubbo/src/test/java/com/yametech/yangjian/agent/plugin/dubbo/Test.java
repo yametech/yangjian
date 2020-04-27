@@ -15,6 +15,7 @@
  */
 package com.yametech.yangjian.agent.plugin.dubbo;
 
+import com.yametech.yangjian.agent.plugin.dubbo.base.Utils;
 import com.yametech.yangjian.agent.plugin.dubbo.trace.DubboServerSpanCreater;
 
 public class Test {

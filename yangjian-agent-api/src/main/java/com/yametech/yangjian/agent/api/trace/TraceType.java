@@ -24,7 +24,8 @@ public enum TraceType {
 	DUBBO_CLIENT("dubbo-client"),
 	DUBBO_SERVER("dubbo-server"),
 	MQ_PUBLISH("mq-publish"),
-	MQ_CONSUME("mq-consume");
+	MQ_CONSUME("mq-consume"),
+	CUSTOM_MARK("custom-mark");
 	
 	private String key;
 	private TraceType(String key) {

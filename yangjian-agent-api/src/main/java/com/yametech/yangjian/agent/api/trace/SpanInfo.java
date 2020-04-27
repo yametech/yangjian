@@ -1,4 +1,4 @@
-package com.yametech.yangjian.agent.plugin.dubbo.trace;
+package com.yametech.yangjian.agent.api.trace;
 
 import brave.Span;
 import brave.Tracer.SpanInScope;

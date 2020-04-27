@@ -21,8 +21,6 @@ import java.util.Map;
 import org.apache.dubbo.config.ReferenceConfig;
 import org.apache.dubbo.config.RegistryConfig;
 
-import com.yametech.yangjian.agent.plugin.dubbo.Utils;
-
 public class RpcClient extends Rpc<RpcClient> {
 //	private static Logger log = Logger.getLogger(RpcClient.class);
 //	private static final int DEFAULT_TIMEOUT_MILLIS = 15000;
