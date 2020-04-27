@@ -57,7 +57,6 @@
 			 -->
         </plugins>
     </build>
-    <!-- 
 	<distributionManagement>
 		<snapshotRepository>
 			<id>sonatype_snapshots</id>
@@ -67,18 +66,5 @@
 			<id>sonatype_releases</id>
 			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
-	</distributionManagement>
-	 -->
-	 <distributionManagement>
-		<repository>
-			<id>releases</id>
-			<name>Yame Repository</name>
-			<url>http://repo.hq.in.ecpark.cn:8081/nexus/content/repositories/releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>snapshots</id>
-			<name>Yame Repository</name>
-			<url>http://repo.hq.in.ecpark.cn:8081/nexus/content/repositories/snapshots/</url>
-		</snapshotRepository>
 	</distributionManagement>
 </project>
