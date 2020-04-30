@@ -4,3 +4,5 @@ com.yametech.yangjian.agent.plugin.kafka.context.PublishAddressMatcher
 com.yametech.yangjian.agent.plugin.kafka.KafkaPublishMatcher
 com.yametech.yangjian.agent.plugin.kafka.KafkaQpsEventMatcher
 com.yametech.yangjian.agent.plugin.kafka.KafkaRTEventMatcher
+com.yametech.yangjian.agent.plugin.kafka.trace.KafkaConsumerTraceMatcher
+com.yametech.yangjian.agent.plugin.kafka.trace.KafkaProducerTraceMatcher

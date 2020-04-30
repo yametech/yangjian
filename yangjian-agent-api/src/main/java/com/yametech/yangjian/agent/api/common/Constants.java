@@ -92,6 +92,8 @@ public class Constants {
         public static final String STATUS_CODE = "status_code";
         public static final String URL = "url";
         public static final String HTTP_METHOD = "http.method";
-        public static final String KAFKA_TOPIC = "kafka.topic";
+        public static final String MQ_TOPIC = "mq.topic";
+        public static final String MQ_SERVER = "mq.broker";
+        public static final String MQ_CONSUMER = "mq.consumer";
     }
 }
