@@ -13,20 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core.report;
+package com.yametech.yangjian.agent.api.common;
 
-import com.yametech.yangjian.agent.api.base.IReportData;
-import com.yametech.yangjian.agent.core.config.Config;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 
-public class MultiReportFactory {
-	private static final String ASYNC_KEY = "async";
-	private MultiReportFactory() {}
-	
-	public static IReportData getReport(String reportConfigKey) {
-		if(Config.getKv(MultiReport.CONFIG_KEY_PREFIX + "." + reportConfigKey + "." + ASYNC_KEY) != null) {
-			return AsyncMultiReport.getReport(reportConfigKey + "." + ASYNC_KEY);
-		} else {
-			return MultiReport.getReport(reportConfigKey);
-		}
+public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
+    private static final ILogger logger = LoggerFactory.getLogger(ExceptionHandler.class);
+
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+        logger.error(e, "Uncaught Exception in Thread:({}/{}/{}).", t.getId(), t.getName(), t.getState());
     }
 }

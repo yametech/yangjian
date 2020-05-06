@@ -18,6 +18,8 @@ package com.yametech.yangjian.agent.api;
 import java.util.Map;
 import java.util.Set;
 
+import com.yametech.yangjian.agent.api.bean.ConfigNotifyType;
+
 public interface IConfigReader {
 	
 	/**
@@ -33,5 +35,30 @@ public interface IConfigReader {
 	 * @param kv	配置数据
 	 */
 	void configKeyValue(Map<String, String> kv);
+	
+	/**
+	 * 配置通知类型
+	 * @return	ONCE：仅通知一次；CHANGE：当前实例订阅的任何一个key有变更，则订阅的全部key-value都通知一次；ALWAYS：可接收重复通知；
+	 */
+	default ConfigNotifyType notifyType() {
+		return ConfigNotifyType.ONCE;
+	}
+	
+	/**
+	 * 获取Int型配置值
+	 * @param configValue
+	 * @param defaultValue
+	 * @return
+	 */
+	public static Integer getIntValue(String configValue, Integer defaultValue) {
+		if(configValue == null) {
+			return defaultValue;
+		}
+		try {
+			return Integer.parseInt(configValue);
+        } catch(Exception e) {
+        	return defaultValue;
+        }
+	}
 	
 }

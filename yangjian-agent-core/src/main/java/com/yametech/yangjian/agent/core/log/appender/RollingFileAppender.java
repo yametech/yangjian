@@ -33,15 +33,15 @@ import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.InsufficientCapacityException;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
+import com.yametech.yangjian.agent.api.common.Config;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.CustomThreadFactory;
 import com.yametech.yangjian.agent.api.log.ILogger;
-import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.log.AppenderFactory;
 import com.yametech.yangjian.agent.core.log.IAppender;
 import com.yametech.yangjian.agent.core.log.LogEvent;
 import com.yametech.yangjian.agent.core.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.log.impl.LogMessageHolder;
-import com.yametech.yangjian.agent.util.CustomThreadFactory;
 
 /**
  * @author zcn

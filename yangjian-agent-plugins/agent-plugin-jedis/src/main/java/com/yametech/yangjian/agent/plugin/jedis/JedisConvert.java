@@ -26,6 +26,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import com.yametech.yangjian.agent.api.IConfigReader;
+import com.yametech.yangjian.agent.api.bean.ConfigNotifyType;
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.convert.IMethodAsyncConvert;
@@ -113,6 +114,11 @@ public class JedisConvert implements IMethodAsyncConvert, IConfigReader {
         }
         keyRules.clear();// 此处没有原子的方法可以直接替换其中的元素，所以在有更新时可能导致短暂的无配置数据
         keyRules.addAll(kv.values());
+    }
+    
+    @Override
+    public ConfigNotifyType notifyType() {
+    	return ConfigNotifyType.CHANGE;
     }
     
 }

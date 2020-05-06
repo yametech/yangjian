@@ -15,9 +15,28 @@
  */
 package com.yametech.yangjian.agent.core.config;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import com.yametech.yangjian.agent.api.IConfigLoader;
 import com.yametech.yangjian.agent.api.ISchedule;
+import com.yametech.yangjian.agent.api.common.Config;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.InstanceManage;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
@@ -25,17 +44,6 @@ import com.yametech.yangjian.agent.util.HttpClient;
 import com.yametech.yangjian.agent.util.HttpRequest;
 import com.yametech.yangjian.agent.util.HttpResponse;
 import com.yametech.yangjian.agent.util.json.JSONUtils;
-
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 通过http加载远程配置
@@ -122,6 +130,9 @@ public class RemoteConfigLoader implements IConfigLoader, ISchedule {
             if (configMap != null) {
                 Properties properties = new Properties();
                 properties.putAll(configMap);
+                if(!first) {
+                	InstanceManage.refreshConfig(new HashMap<>(configMap));
+                }
                 Config.refreshRemoteConfig(configMap);
                 storeLocalCacheFile(properties);
                 return;

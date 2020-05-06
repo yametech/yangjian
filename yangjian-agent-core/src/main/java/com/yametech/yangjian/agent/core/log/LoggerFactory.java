@@ -18,11 +18,11 @@ package com.yametech.yangjian.agent.core.log;
 import java.io.File;
 import java.io.IOException;
 
+import com.yametech.yangjian.agent.api.common.Config;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.ILoggerFactory;
-import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.log.impl.PatternLogger;
 import com.yametech.yangjian.agent.core.util.AgentPath;
 import com.yametech.yangjian.agent.util.OSUtil;

@@ -1,4 +1,4 @@
-package com.yametech.yangjian.agent.core;
+package com.yametech.yangjian.agent.plugin.client;
 
 import com.yametech.yangjian.agent.client.IStatusCollect;
 import com.yametech.yangjian.agent.client.StatusReturn;
@@ -8,7 +8,7 @@ public class TestCustomMetric {
 	@org.junit.Test
 	public void test() throws Exception {
 		new MyCustom();
-		Thread.sleep(10000);
+		Thread.sleep(15000);
 	}
 	
 	class MyCustom implements IStatusCollect {

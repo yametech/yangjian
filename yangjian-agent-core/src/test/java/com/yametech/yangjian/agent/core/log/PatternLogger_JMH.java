@@ -30,8 +30,8 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import com.yametech.yangjian.agent.api.common.Config;
 import com.yametech.yangjian.agent.api.common.Constants;
-import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.log.impl.PatternLogger;
 
 /**

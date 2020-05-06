@@ -19,9 +19,16 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.yametech.yangjian.agent.api.base.IReportData;
-import com.yametech.yangjian.agent.core.core.InstanceManage;
+import com.yametech.yangjian.agent.api.common.InstanceManage;
 import com.yametech.yangjian.agent.core.report.async.ReportPublish;
 
+/**
+ * 注意不要修改路径、类名、构造方法，api中有使用反射获取类实例
+ * @Description 
+ * 
+ * @author liuzhao
+ * @date 2020年5月6日 下午10:47:06
+ */
 public class AsyncMultiReport implements IReportData {
 	private String reportType;
 	private ReportPublish publish;
@@ -39,9 +46,9 @@ public class AsyncMultiReport implements IReportData {
 	 * @param reportConfigKey	用于读取配置
 	 * @return
 	 */
-    static IReportData getReport(String reportConfigKey) {
-    	return new AsyncMultiReport(reportConfigKey);
-    }
+//    static IReportData getReport(String reportConfigKey) {
+//    	return new AsyncMultiReport(reportConfigKey);
+//    }
 	
 	@Override
 	public boolean report(Object data) {

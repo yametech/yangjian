@@ -25,13 +25,21 @@ import java.util.Set;
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.IReport;
 import com.yametech.yangjian.agent.api.base.IReportData;
+import com.yametech.yangjian.agent.api.bean.ConfigNotifyType;
+import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.InstanceManage;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
-import com.yametech.yangjian.agent.core.core.InstanceManage;
 
+/**
+ * 注意不要修改路径、类名、构造方法，api中有使用反射获取类实例
+ * @Description 
+ * 
+ * @author liuzhao
+ * @date 2020年5月6日 下午10:46:21
+ */
 public class MultiReport implements IReportData, IConfigReader {
 	private static final ILogger LOG = LoggerFactory.getLogger(MultiReport.class);
-	static final String CONFIG_KEY_PREFIX = "report";
 	private Set<String> configKeys;
 	private String myKey;
 	private List<IReport> reports;
@@ -40,8 +48,8 @@ public class MultiReport implements IReportData, IConfigReader {
 		if(reportConfigKey == null) {
 			throw new IllegalArgumentException("reportConfigKey不能为null");
 		}
-		this.myKey = CONFIG_KEY_PREFIX + "." + reportConfigKey;
-		this.configKeys = new HashSet<>(Arrays.asList(CONFIG_KEY_PREFIX.replaceAll("\\.", "\\\\."), myKey.replaceAll("\\.", "\\\\.")));
+		this.myKey = Constants.REPORT_CONFIG_KEY_PREFIX + "." + reportConfigKey;
+		this.configKeys = new HashSet<>(Arrays.asList(Constants.REPORT_CONFIG_KEY_PREFIX.replaceAll("\\.", "\\\\."), myKey.replaceAll("\\.", "\\\\.")));
 	}
 	
 	/**
@@ -94,7 +102,7 @@ public class MultiReport implements IReportData, IConfigReader {
 	public void configKeyValue(Map<String, String> kv) {
 		String typeConfig = kv.get(myKey);
 		if(typeConfig == null) {
-			typeConfig = kv.get(CONFIG_KEY_PREFIX);
+			typeConfig = kv.get(Constants.REPORT_CONFIG_KEY_PREFIX);
 		}
 		List<String> types = Arrays.asList(typeConfig.split(","));
 		List<IReport> myReports = new ArrayList<>();
@@ -104,6 +112,11 @@ public class MultiReport implements IReportData, IConfigReader {
 			}
 		}
 		this.reports = myReports;
+	}
+	
+	@Override
+	public ConfigNotifyType notifyType() {
+		return ConfigNotifyType.CHANGE;
 	}
 	
 }

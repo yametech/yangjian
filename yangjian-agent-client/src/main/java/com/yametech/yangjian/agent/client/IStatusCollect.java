@@ -38,6 +38,18 @@ public interface IStatusCollect {
 	String type();
 	
 	/**
+	 * 状态，
+	 * 		-1 - 关闭；
+	 * 		0 - 禁用；
+	 * 		1 - 启用；
+	 * -1状态的对象不会再执行collect；0、1状态可以多次变更，禁用时不执行collect，启用时会定时志聪collect；
+	 * @return
+	 */
+	default int status() {
+		return 1;
+	}
+	
+	/**
 	 * collect执行间隔秒数
 	 * @return	间隔秒数
 	 */

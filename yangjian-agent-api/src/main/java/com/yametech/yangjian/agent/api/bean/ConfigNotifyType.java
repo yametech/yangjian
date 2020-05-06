@@ -13,20 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.util;
+package com.yametech.yangjian.agent.api.bean;
 
-import com.yametech.yangjian.agent.api.log.ILogger;
-import com.yametech.yangjian.agent.api.log.LoggerFactory;
-
-/**
- * @author dengliming
- * @date 2020/1/2
- */
-public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
-    private static final ILogger logger = LoggerFactory.getLogger(ExceptionHandler.class);
-
-    @Override
-    public void uncaughtException(Thread t, Throwable e) {
-        logger.error(e, "Uncaught Exception in Thread:({}/{}/{}).", t.getId(), t.getName(), t.getState());
-    }
+public enum ConfigNotifyType {
+	ONCE,// 仅执行一次通知
+	CHANGE,// 变更时通知
+	ALWAYS;// 可接收任何时候通知
 }

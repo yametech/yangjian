@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core.config;
+package com.yametech.yangjian.agent.api.common;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,11 +29,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.yametech.yangjian.agent.api.common.StringUtil;
-import com.yametech.yangjian.agent.core.core.InstanceManage;
 
 public class Config {
 	private static final List<ConfigValue<?>> CONFIG_VALUES = new ArrayList<>();
@@ -61,9 +61,9 @@ public class Config {
 	public static final ConfigValue<String> SERVICE_NAME = new ConfigValue<>("service.name", "", String::toString);
 
     // 动态配置，key/value的配置方式，本地默认配置
-    private static Map<String, String> defaultKvs = new HashMap<>();
+    private static Map<String, String> defaultKvs = new ConcurrentHashMap<>();
 	// 动态配置，key/value的配置方式，远程配置
-    private static Map<String, String> remoteKvs = new HashMap<>();
+    private static Map<String, String> remoteKvs = new ConcurrentHashMap<>();
 
     static {
     	CONFIG_VALUES.add(IGNORE_CLASS);
@@ -101,7 +101,6 @@ public class Config {
 	public static void refreshRemoteConfig(Map<String, String> config) {
     	remoteKvs.clear();
 		config.entrySet().forEach(entry -> Config.setConfig(entry.getKey(), entry.getValue(), false));
-		InstanceManage.notifyReader();
 	}
 
 	public static void setConfig(String key, String value) {
@@ -143,5 +142,8 @@ public class Config {
 				.collect(Collectors.toCollection(HashSet::new));
 	}
 	
+	public static Map<String, String> defaultConfig() {
+		return new HashMap<>(defaultKvs);
+	}
 	
 }

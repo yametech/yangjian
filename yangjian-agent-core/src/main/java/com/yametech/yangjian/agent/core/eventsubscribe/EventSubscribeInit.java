@@ -23,14 +23,13 @@ import java.util.Set;
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.SPI;
+import com.yametech.yangjian.agent.api.common.InstanceManage;
 import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
 import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodConstructorMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodRegexMatch;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
-import com.yametech.yangjian.agent.core.core.InstanceManage;
-import com.yametech.yangjian.agent.core.eventsubscribe.eventbus.SubscribeEventBus;
 
 /**
  * 
@@ -46,7 +45,7 @@ public class EventSubscribeInit implements IConfigReader, SPI {
 	
 	@Override
     public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList(EVENTGROUP_PREFIX.replaceAll("\\.", "\\\\.") + ".*", EventDispatcher.CONFIG_KEY_CALL_ASYNC.replaceAll("\\.", "\\\\.")));
+        return new HashSet<>(Arrays.asList(EVENTGROUP_PREFIX.replaceAll("\\.", "\\\\.") + ".*"));
     }
 
     /**
@@ -63,18 +62,6 @@ public class EventSubscribeInit implements IConfigReader, SPI {
         if (kv == null) {
             return;
         }
-        if(kv.containsKey(EventDispatcher.CONFIG_KEY_CALL_ASYNC)) {
-			try {
-    			if(Boolean.parseBoolean(kv.get(EventDispatcher.CONFIG_KEY_CALL_ASYNC))) {
-    				SubscribeEventBus subscribeEventBus = new SubscribeEventBus();
-    				EventDispatcher.setSubscribeEventBus(subscribeEventBus);
-    				InstanceManage.registryInit(subscribeEventBus);
-    			}
-            } catch(Exception e) {
-            	LOG.warn("{}配置错误：{}", EventDispatcher.CONFIG_KEY_CALL_ASYNC, kv.get(EventDispatcher.CONFIG_KEY_CALL_ASYNC));
-            }
-		}
-        
         kv.entrySet().stream().filter(config -> config.getKey().startsWith(EVENTGROUP_PREFIX)).forEach(entry -> {
         	String eventGroup = entry.getKey();
         	String[] eventInfo = entry.getValue().split(">", 2);

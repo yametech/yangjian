@@ -1,1 +1,2 @@
 com.yametech.yangjian.agent.plugin.client.trace.CustomMarkTraceMatcher
+com.yametech.yangjian.agent.plugin.client.metric.CollectInstanceMatcher

@@ -23,6 +23,8 @@ import java.util.Set;
 
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
+import com.yametech.yangjian.agent.api.bean.ConfigNotifyType;
+import com.yametech.yangjian.agent.api.common.InstanceManage;
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
 import com.yametech.yangjian.agent.api.interceptor.IMethodAOP;
 import com.yametech.yangjian.agent.api.interceptor.IStaticMethodAOP;
@@ -39,10 +41,6 @@ public class EventDispatcher implements IMethodAOP<Object>, IConstructorListener
 	private int minCheckStackSize = 10;// 死循环检测最小调用栈大小
 	private boolean callAsync = true;// 是否异步通知
 	private EventSubscribe eventSubscribe;
-	
-	static void setSubscribeEventBus(SubscribeEventBus subscribeEventBus) {
-		EventDispatcher.subscribeEventBus = subscribeEventBus;
-	}
 	
 	@Override
 	public Set<String> configKey() {
@@ -65,6 +63,11 @@ public class EventDispatcher implements IMethodAOP<Object>, IConstructorListener
             	LOG.warn("{}配置错误：{}", CONFIG_KEY_CALL_ASYNC, kv.get(CONFIG_KEY_CALL_ASYNC));
             }
 		}
+	}
+	
+	@Override
+	public ConfigNotifyType notifyType() {
+		return ConfigNotifyType.ALWAYS;
 	}
 
 	void init(EventSubscribe eventSubscribe) {
@@ -93,10 +96,24 @@ public class EventDispatcher implements IMethodAOP<Object>, IConstructorListener
 	private void notify(Object sourceObj, Object[] allArguments, Method method, Object ret, Throwable t) {
 		if(eventSubscribe != null && !check()) {
 			if(callAsync) {
-				subscribeEventBus.publish(event -> event.reset(eventSubscribe, sourceObj, allArguments, method, ret, t));
+				getEventBus().publish(event -> event.reset(eventSubscribe, sourceObj, allArguments, method, ret, t));
 			} else {
 				eventSubscribe.notify(sourceObj, allArguments, method, ret, t);
 			}
+		}
+	}
+	
+	private SubscribeEventBus getEventBus() {
+		if(subscribeEventBus != null) {
+			return subscribeEventBus;
+		}
+		synchronized (EventDispatcher.class) {
+			if(subscribeEventBus != null) {
+				return subscribeEventBus;
+			}
+			subscribeEventBus = new SubscribeEventBus();
+			InstanceManage.registryInit(subscribeEventBus);
+			return subscribeEventBus;
 		}
 	}
 	

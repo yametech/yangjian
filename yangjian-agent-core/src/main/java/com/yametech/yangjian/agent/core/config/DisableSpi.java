@@ -16,10 +16,11 @@
 package com.yametech.yangjian.agent.core.config;
 
 import com.yametech.yangjian.agent.api.IConfigLoader;
+import com.yametech.yangjian.agent.api.common.Config;
+import com.yametech.yangjian.agent.api.common.InstanceManage;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.common.CoreConstants;
-import com.yametech.yangjian.agent.core.core.InstanceManage;
 
 /**
  * 禁用spi，晚于其他IConfigLoader实例加载

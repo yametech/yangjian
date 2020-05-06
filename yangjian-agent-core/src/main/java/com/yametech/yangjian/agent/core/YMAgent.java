@@ -28,18 +28,19 @@ import java.util.stream.Collectors;
 import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
+import com.yametech.yangjian.agent.api.common.Config;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.InstanceManage;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodRegexMatch;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.common.MatchProxyManage;
-import com.yametech.yangjian.agent.core.config.Config;
-import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.core.agent.AgentListener;
 import com.yametech.yangjian.agent.core.core.agent.AgentTransformer;
 import com.yametech.yangjian.agent.core.core.classloader.AgentClassLoader;
+import com.yametech.yangjian.agent.core.core.classloader.SpiLoader;
 import com.yametech.yangjian.agent.core.core.elementmatch.ClassElementMatcher;
 import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
 import com.yametech.yangjian.agent.core.util.Util;
@@ -75,6 +76,7 @@ public class YMAgent {
     	if(log.isDebugEnable()) {
     		InstanceManage.getSpis().forEach(spi -> log.debug("spiClassLoader:{}, {}", spi, Util.join(" > ", Util.listClassLoaders(spi.getClass()))));
     	}
+    	SpiLoader.loadSpi();
     	InstanceManage.loadConfig(arguments);
     	InstanceManage.notifyReader();
     	InstanceManage.beforeRun();

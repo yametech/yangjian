@@ -18,8 +18,8 @@ package com.yametech.yangjian.agent.core.log;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.yametech.yangjian.agent.api.common.Config;
 import com.yametech.yangjian.agent.api.common.Constants;
-import com.yametech.yangjian.agent.core.config.Config;
 import com.yametech.yangjian.agent.core.log.impl.PatternLogger;
 
 /**

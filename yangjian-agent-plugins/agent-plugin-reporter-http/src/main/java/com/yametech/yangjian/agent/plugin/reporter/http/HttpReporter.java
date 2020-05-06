@@ -21,10 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.net.ssl.HttpsURLConnection;
-
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.IReport;
+import com.yametech.yangjian.agent.api.bean.ConfigNotifyType;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.util.HttpClient;
@@ -83,6 +82,11 @@ public class HttpReporter implements IReport, IConfigReader {
         if (kv.containsKey(URL_CONFIG_KEY)) {
             url = kv.get(URL_CONFIG_KEY);
         }
+    }
+    
+    @Override
+    public ConfigNotifyType notifyType() {
+    	return ConfigNotifyType.ALWAYS;
     }
 
 }

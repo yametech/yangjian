@@ -13,21 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core.core;
+package com.yametech.yangjian.agent.api.common;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -43,18 +38,16 @@ import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.base.IWeight;
 import com.yametech.yangjian.agent.api.base.SPI;
+import com.yametech.yangjian.agent.api.bean.ConfigNotifyType;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
-import com.yametech.yangjian.agent.core.config.Config;
-import com.yametech.yangjian.agent.core.core.classloader.AgentClassLoader;
-import com.yametech.yangjian.agent.util.CustomThreadFactory;
 
 public class InstanceManage {
 	private static final ILogger LOG = LoggerFactory.getLogger(InstanceManage.class);
-	private static final Object EMPTY_VALUE = new Object();
+	public static final Object EMPTY_VALUE = new Object();
 	private static Map<Class<?>, Object> spiInstances = new ConcurrentHashMap<>();// 加载的spi实例
     private static Set<Object> loadedInstance = new CopyOnWriteArraySet<>();// 需要托管的实例
-    private static final String SPI_BASE_PATH = "META-INF/services/";
+    
     private static final int MAX_INSTANCE = 2000;// 最大托管的实例个数
     private static ScheduledExecutorService service;
     private static Map<Class<?>, Boolean> initStatus = new ConcurrentHashMap<>();
@@ -67,59 +60,11 @@ public class InstanceManage {
     	initStatus.put(IAppStatusListener.class, false);
     	initStatus.put(ISchedule.class, false);
     }
-    
-	/**
-	 * 读取所有的spi class
-	 */
- 	private static void loadSpi() {
-		List<String> spiClasses = getSpiClass(SPI.class);
-		if(spiClasses == null) {
-			return;
-		}
-		spiClasses.forEach(clsName -> {
-			try {
-				Class<?> cls = Class.forName(clsName, false, AgentClassLoader.getDefault());
-				if(!SPI.class.isAssignableFrom(cls)) {
-					return;
-				}
-				spiInstances.put(cls, EMPTY_VALUE);
-			} catch (ClassNotFoundException e) {
-				LOG.warn(e, "load spi error");
-			}
-		});
-    }
-	
-	public static List<String> getSpiClass(Class<?> cls) {
-        List<String> spiClasses = new ArrayList<>();
-        try {
-        	Enumeration<URL> urls = AgentClassLoader.getDefault().getResources(SPI_BASE_PATH + cls.getName());
-            while (urls.hasMoreElements()) {
-            	URL url = urls.nextElement();
-            	if("file".equals(url.getProtocol())) {// 开发环境，在ecpark-agent调试时会重复加载，所以使用protocol过滤
-            		continue;
-            	}
-            	try (InputStream input = url.openStream()) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                    String pluginDefine = null;
-                    while ((pluginDefine = reader.readLine()) != null) {
-                        if (pluginDefine.trim().length() == 0 || pluginDefine.startsWith("#")) {
-                            continue;
-                        }
-                        spiClasses.add(pluginDefine);
-                    }
-                }
-            }
-            return spiClasses;
-        } catch (IOException e) {
-        	LOG.error("read resources failure.", e);
-        }
-        return null;
-    }
 	
 	/**
 	 * 按照Class获取对应Class单个实例
-	 * @param cls
-	 * @return
+	 * @param cls	实例类型
+	 * @return	cls的实例
 	 */
 	public static <T> T getInstance(Class<T> cls) {
 		List<T> instances = listInstance(cls);
@@ -131,8 +76,8 @@ public class InstanceManage {
 	
 	/**
 	 * 按照Class获取对应Class实例列表
-	 * @param cls
-	 * @return
+	 * @param cls	实例类型
+	 * @return	cls的实例列表
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> List<T> listInstance(Class<T> cls) {
@@ -149,8 +94,7 @@ public class InstanceManage {
 	}
 	
 	/**
-	 * 获取所有实现SPI的实例
-	 * @return
+	 * @return	所有实现SPI的实例
 	 */
 	public static List<SPI> getSpis() {
 		return loadedInstance.stream().filter(instance -> instance instanceof SPI)
@@ -159,17 +103,19 @@ public class InstanceManage {
 	}
 
 	/**
-	 * 禁用SPI
-	 *
-	 * @return
+	 * 删除禁用的SPI
+	 * @param spiCls	删除的spi类
 	 */
 	public static void removeSpi(Class<?> spiCls) {
 		spiInstances.remove(spiCls);
 	}
 	
+	public static void addSpi(Class<?> spiCls) {
+		spiInstances.put(spiCls, EMPTY_VALUE);
+	}
+	
 	/**
-	 * 是否为需要初始化的实例
-	 * @return
+	 * @return	是否为需要初始化的实例
 	 */
 	private static boolean isInitInstance(Object obj) {
 		for(Class<?> cls : initStatus.keySet()) {
@@ -181,9 +127,9 @@ public class InstanceManage {
 	}
 
 	/**
-	 * 注册需要init的实例，如果不需要init，则不注册
+	 * 如果实例需要init则注册，降低托管实例数
 	 * @param instance
-	 * @return
+	 * @return	是否执行init
 	 */
 	public static boolean registryInit(Object instance) {
 		if(!isInitInstance(instance)) {
@@ -193,8 +139,8 @@ public class InstanceManage {
 	}
 	
 	/**
-	 * 注册一个托管实例
-	 * @param spi
+	 *
+	 * @param instance	 注册一个托管实例
 	 */
 	public static boolean registry(Object instance) {
 		return registry(instance, true);
@@ -235,25 +181,6 @@ public class InstanceManage {
 		return true;
 	}
 	
-	/**
-	 * 注册IConfigReader实例，并执行一次配置通知
-	 * @param configReader
-	 */
-//	public static void registryConfigReaderInstance(IConfigReader configReader) {
-//		registryConfigReaderInstance(configReader, true);
-//	}
-	/**
-	 * 注册IConfigReader实例，根据needNotify确认是否执行通知
-	 * @param configReader
-	 * @param needNotifyConfig	true：注册时执行一次配置通知（用于在全局通知(InstanceManage.notifyReaders)之后调用该方法）；false：不执行配置通知（用于在全局通知之前调用该方法）；
-	 */
-//	public static void registryConfigReaderInstance(IConfigReader configReader, boolean needNotifyConfig) {
-//		loadedInstance.add(configReader);
-//		if(needNotifyConfig) {
-//			readerInit(configReader);
-//		}
-//	}
-	
 	private static void init(Class<?> cls, Runnable runnable) {
 		if(Boolean.TRUE.equals(initStatus.get(cls))) {
 			LOG.warn("禁止重复执行");
@@ -265,10 +192,9 @@ public class InstanceManage {
 	
 	 /**
      * 	初始化配置
-     * @throws Exception 
+     * @param arguments	配置参数
      */
 	public static synchronized void loadConfig(String arguments) {
-		loadSpi();
 		loadSpiInstance(IConfigLoader.class);
     	for(IConfigLoader loader: InstanceManage.listInstance(IConfigLoader.class)) {
     		try {
@@ -314,6 +240,61 @@ public class InstanceManage {
 	}
 	
 	/**
+	 * 刷新配置
+	 * @param config	最新获取的配置信息
+	 */
+	public static void refreshConfig(Map<String, String> config) {
+		if(config == null) {
+			return;
+		}
+		Map<String, String> allConfig = Config.defaultConfig();
+		allConfig.putAll(config);
+		for (IConfigReader configReader : listInstance(IConfigReader.class)) {
+			if(configReader.notifyType().equals(ConfigNotifyType.ONCE)) {
+				continue;
+			}
+			Set<String> keys = getReaderConfigKey(configReader);
+			Map<String, String> newKVs = new HashMap<>();
+			for (Entry<String, String> entry : allConfig.entrySet()) {
+				boolean match = keys.stream().anyMatch(keyRegex -> Pattern.matches(keyRegex, entry.getKey()));
+				if (match) {
+					newKVs.put(entry.getKey(), entry.getValue());
+				}
+			}
+			if(configReader.notifyType().equals(ConfigNotifyType.ALWAYS)) {
+				configReader.configKeyValue(newKVs);
+				continue;
+			}
+			if(configReader.notifyType().equals(ConfigNotifyType.CHANGE) && !mapEqual(configKVs(keys), newKVs)) {
+				configReader.configKeyValue(newKVs);
+			}
+		}
+	}
+	
+	/**
+	 * 比较两个Map数据是否相同
+	 * @param oldKVs	旧kv
+	 * @param newKVs	新kv
+	 * @return	是否相同
+	 */
+	private static boolean mapEqual(Map<String, String> oldKVs, Map<String, String> newKVs) {
+		if((oldKVs == null || oldKVs.isEmpty()) && 
+				(newKVs == null || newKVs.isEmpty())) {
+			return true;
+		}
+		if(oldKVs == null || newKVs == null || oldKVs.size() != newKVs.size()) {
+			return false;
+		}
+		for(Entry<String, String> entry : oldKVs.entrySet()) {
+			if(!newKVs.containsKey(entry.getKey()) || (entry.getValue() == null && newKVs.get(entry.getKey()) != null)
+					|| (entry.getValue() != null && !entry.getValue().equals(newKVs.get(entry.getKey())))) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
      * 	初始化逻辑
      */
 	public static synchronized void beforeRun() {
@@ -354,10 +335,26 @@ public class InstanceManage {
 	}
     
 	/**
-	 * 单个IConfigReader实例下发（刷新）配置
-	 * @param configReader
+	 * 单个IConfigReader实例下发配置
+	 * @param configReader	下发配置的实例
 	 */
 	private static void readerInit(IConfigReader configReader) {
+		Set<String> keys = getReaderConfigKey(configReader);
+		configReader.configKeyValue(configKVs(keys));
+	}
+	
+	private static Map<String, String> configKVs(Set<String> keys) {
+		Map<String, String> kvs = new HashMap<>();
+		for (String key : Config.configKeys()) {
+			boolean match = keys.stream().anyMatch(keyRegex -> Pattern.matches(keyRegex, key));
+			if (match) {
+				kvs.put(key, Config.getKv(key));
+			}
+		}
+		return kvs;
+	}
+	
+	private static Set<String> getReaderConfigKey(IConfigReader configReader) {
 		Set<String> keys = configReader.configKey();
 		if (keys == null) {
 			keys = new HashSet<>();
@@ -367,15 +364,7 @@ public class InstanceManage {
 			keys.add(defaultConfigKeyPrefix);
 			keys.add(defaultConfigKeyPrefix + "\\..*");
 		}
-		Map<String, String> kvs = new HashMap<>();
-		for (String key : Config.configKeys()) {
-			boolean match = keys.stream().anyMatch(keyRegex -> Pattern.matches(keyRegex, key));
-			if (match) {
-				kvs.put(key, Config.getKv(key));
-			}
-
-		}
-		configReader.configKeyValue(kvs);
+		return keys;
 	}
 	
 	/**

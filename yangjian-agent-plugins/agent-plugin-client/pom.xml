@@ -11,11 +11,8 @@
     <artifactId>agent-plugin-client</artifactId>
 
     <properties>
-		<dubbo.version>2.7.3</dubbo.version>
-		<curator-recipes.version>4.1.0</curator-recipes.version>
-		<zkclient.version>0.1</zkclient.version>
-		<zookeeper.version>3.4.13</zookeeper.version>
 		<brave.version>5.10.2</brave.version>
+		<agent-client.version>1.0.0-SNAPSHOT</agent-client.version>
     </properties>
 
     <dependencies>
@@ -23,6 +20,12 @@
 		    <groupId>io.zipkin.brave</groupId>
 		    <artifactId>brave</artifactId>
 		    <version>${brave.version}</version>
+		    <scope>provided</scope>
+		</dependency>
+		<dependency>
+		    <groupId>com.github.yametech</groupId>
+		    <artifactId>yangjian-agent-client</artifactId>
+		    <version>${agent-client.version}</version>
 		    <scope>provided</scope>
 		</dependency>
         

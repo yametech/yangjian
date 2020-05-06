@@ -26,6 +26,7 @@ import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
+import com.yametech.yangjian.agent.api.common.InstanceManage;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.api.trace.ICustomLoad;
@@ -35,8 +36,8 @@ import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.ITraceMatcher;
 import com.yametech.yangjian.agent.api.trace.SampleStrategy;
 import com.yametech.yangjian.agent.core.common.BaseMatcherProxy;
-import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
+import com.yametech.yangjian.agent.core.core.classloader.SpiLoader;
 import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
 import com.yametech.yangjian.agent.core.trace.base.ITraceDepend;
 import com.yametech.yangjian.agent.core.trace.sample.FollowerRateLimitSampler;
@@ -117,7 +118,7 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 			log.warn(e, "无法识别泛型：{}，不设置customLoad", customLoad.getClass());
 			return null;
 		}
-		List<String> customClassNames = InstanceManage.getSpiClass(cls);
+		List<String> customClassNames = SpiLoader.getSpiClass(cls);
 		if(customClassNames == null || customClassNames.isEmpty()) {
 			return null;
 		}

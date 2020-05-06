@@ -18,9 +18,9 @@ package com.yametech.yangjian.agent.core.eventsubscribe.eventbus;
 import java.util.Arrays;
 import java.util.List;
 
+import com.yametech.yangjian.agent.api.common.InstanceManage;
 import com.yametech.yangjian.agent.core.common.BaseEventPublish;
 import com.yametech.yangjian.agent.core.common.EventBusType;
-import com.yametech.yangjian.agent.core.core.InstanceManage;
 import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
 
 /**

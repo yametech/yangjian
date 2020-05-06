@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.Properties;
 
 import com.yametech.yangjian.agent.api.IConfigLoader;
+import com.yametech.yangjian.agent.api.common.Config;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.log.ILogger;

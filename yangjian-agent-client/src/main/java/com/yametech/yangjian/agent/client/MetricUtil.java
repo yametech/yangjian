@@ -14,24 +14,10 @@
  * limitations under the License.
  */
 
-package com.yametech.yangjian.agent.core.metric;
+package com.yametech.yangjian.agent.client;
 
-import java.time.Duration;
-
-import com.yametech.yangjian.agent.api.IAppStatusListener;
-import com.yametech.yangjian.agent.api.common.InstanceManage;
-import com.yametech.yangjian.agent.core.metric.base.MetricEventBus;
-
-public class MetricInit implements IAppStatusListener {
-
-	@Override
-	public void beforeRun() {
-		InstanceManage.registry(new MetricEventBus());
-	}
-
-	@Override
-	public boolean shutdown(Duration duration) {
-		return true;
-	}
+public class MetricUtil {
+	private MetricUtil() {}
+	
 	
 }
