@@ -18,7 +18,6 @@ package com.yametech.yangjian.agent.core.core.interceptor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.interceptor.IMethodAOP;
@@ -29,7 +28,7 @@ import com.yametech.yangjian.agent.core.util.RateLimit;
 import net.bytebuddy.implementation.bind.annotation.AllArguments;
 import net.bytebuddy.implementation.bind.annotation.Origin;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
-import net.bytebuddy.implementation.bind.annotation.SuperCall;
+import net.bytebuddy.implementation.bind.annotation.Morph;
 import net.bytebuddy.implementation.bind.annotation.This;
 
 public class YmInstanceInterceptor {
@@ -43,7 +42,7 @@ public class YmInstanceInterceptor {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@RuntimeType
-	public Object intercept(@This Object thisObj, @AllArguments Object[] allArguments, @SuperCall Callable<?> callable, @Origin Method method) throws Throwable {
+	public Object intercept(@This Object thisObj, @AllArguments Object[] allArguments, @Morph OverrideCallable callable, @Origin Method method) throws Throwable {
 		InterceptBean<IMethodAOP<?>>[] interceptBeans = new InterceptBean[interceptors.length];
 		int index = 0;
 		Object ret = null;
@@ -73,7 +72,7 @@ public class YmInstanceInterceptor {
 		Throwable methodThrowable = null;
 		if (ret == null && callable != null) {
 			try {
-				ret = callable.call();
+				ret = callable.call(allArguments);
 			} catch (Throwable t) {
 //				log.warn(t, "interceptor call");// 增加打印速率限制(每秒N条)，不需要打印业务异常日志
 				methodThrowable = t;
