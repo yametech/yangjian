@@ -4,3 +4,5 @@ com.yametech.yangjian.agent.plugin.rabbitmq.context.ExchangeMatcher
 com.yametech.yangjian.agent.plugin.rabbitmq.context.QueueNameMatcher
 com.yametech.yangjian.agent.plugin.rabbitmq.ConsumeMatcher
 com.yametech.yangjian.agent.plugin.rabbitmq.PublishMatcher
+com.yametech.yangjian.agent.plugin.rabbitmq.trace.ProducerTraceMatcher
+com.yametech.yangjian.agent.plugin.rabbitmq.trace.ConsumerTraceMatcher

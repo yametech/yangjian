@@ -95,5 +95,10 @@ public class Constants {
         public static final String MQ_TOPIC = "mq.topic";
         public static final String MQ_SERVER = "mq.broker";
         public static final String MQ_CONSUMER = "mq.consumer";
+        // rabbitmq使用
+        public static final String MQ_QUEUE = "mq.queue";
+
+        public static final String DB_INSTANCE = "db.instance";
+        public static final String DB_STATEMENT = "db.statement";
     }
 }
