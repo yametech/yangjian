@@ -43,6 +43,7 @@ import com.yametech.yangjian.agent.core.core.interceptor.ContextInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmInstanceConstructorInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmInstanceInterceptor;
 import com.yametech.yangjian.agent.core.core.interceptor.YmStaticInterceptor;
+import com.yametech.yangjian.agent.core.core.interceptor.OverrideCallable;
 import com.yametech.yangjian.agent.core.util.Util;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -52,6 +53,7 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.implementation.SuperMethodCall;
+import net.bytebuddy.implementation.bind.annotation.Morph;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
@@ -178,6 +180,7 @@ public class AgentTransformer implements AgentBuilder.Transformer {
             } else if(inDefinedShape.isMethod()) {// 实例方法
         		builder = builder.method(getMethodMatch(inDefinedShape))
         				.intercept(MethodDelegation.withDefaultConfiguration()
+								.withBinders(Morph.Binder.install(OverrideCallable.class))
         						.to(new YmInstanceInterceptor(interceptors.stream().toArray(IMethodAOP[]::new))));
 //        						.to(new YmInstanceInterceptor(interceptors, classLoader, inDefinedShape)));
             }

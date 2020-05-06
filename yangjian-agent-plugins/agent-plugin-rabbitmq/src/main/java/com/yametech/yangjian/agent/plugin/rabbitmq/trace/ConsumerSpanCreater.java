@@ -1,0 +1,66 @@
+package com.yametech.yangjian.agent.plugin.rabbitmq.trace;
+
+import brave.Span;
+import brave.Tracing;
+import brave.propagation.TraceContext;
+import brave.propagation.TraceContextOrSamplingFlags;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Envelope;
+import com.yametech.yangjian.agent.api.base.IContext;
+import com.yametech.yangjian.agent.api.bean.BeforeResult;
+import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.TraceUtil;
+import com.yametech.yangjian.agent.api.trace.ISpanSample;
+import com.yametech.yangjian.agent.api.trace.SpanInfo;
+import com.yametech.yangjian.agent.plugin.rabbitmq.bean.MqInfo;
+import com.yametech.yangjian.agent.plugin.rabbitmq.context.ContextConstants;
+
+import java.lang.reflect.Method;
+import java.util.Map;
+
+/**
+ * @author dengliming
+ * @date 2020/4/30
+ */
+public class ConsumerSpanCreater extends AbstractSpanCreater {
+    private TraceContext.Extractor<Map<String, Object>> extractor;
+    private static final String SPAN_NAME = "RabbitMQ/Consumer";
+
+    @Override
+    public void init(Tracing tracing, ISpanSample spanSample) {
+        super.init(tracing, spanSample);
+        this.extractor = tracing.propagation().extractor((carrier, key) -> {
+            if (carrier.containsKey(key)) {
+                return carrier.get(key).toString();
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public BeforeResult<SpanInfo> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
+        if (!(thisObj instanceof IContext)) {
+            return null;
+        }
+        MqInfo mqInfo = (MqInfo) ((IContext) thisObj)._getAgentContext(ContextConstants.RABBITMQ_CONTEXT_KEY);
+        if (mqInfo == null) {
+            return null;
+        }
+
+        if (!spanSample.sample()) {
+            return null;
+        }
+
+        Envelope envelope = (Envelope) allArguments[1];
+        AMQP.BasicProperties properties = (AMQP.BasicProperties) allArguments[2];
+        TraceContextOrSamplingFlags traceContextOrSamplingFlags = extractor.extract(properties.getHeaders());
+        Span span = traceContextOrSamplingFlags != null ? tracer.nextSpan(traceContextOrSamplingFlags) : tracer.nextSpan();
+        span.kind(Span.Kind.CONSUMER)
+                .name(SPAN_NAME)
+                .tag(Constants.Tags.MQ_TOPIC, envelope.getExchange())
+                .tag(Constants.Tags.MQ_QUEUE, envelope.getRoutingKey())
+                .tag(Constants.Tags.MQ_SERVER, mqInfo.getIpPorts())
+                .start(TraceUtil.nowMicros());
+        return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
+    }
+}

@@ -27,7 +27,9 @@ public enum TraceType {
 	MQ_CONSUME("mq-consume"),
 	CUSTOM_MARK("custom-mark"),
 	HTTP_SERVER("http-server"),
-	HTTP_CLIENT("http-client");
+	HTTP_CLIENT("http-client"),
+	MYSQL("mysql"),
+	REDIS("redis");
 
 	private String key;
 	private TraceType(String key) {
