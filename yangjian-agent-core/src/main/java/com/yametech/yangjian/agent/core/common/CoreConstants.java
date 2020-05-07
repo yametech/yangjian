@@ -20,4 +20,7 @@ import com.yametech.yangjian.agent.api.common.Constants;
 public class CoreConstants extends Constants {
 	public static final String CONFIG_KEY_ENABLE = "enable";
 	public static final String BASE_PATH_STATUS = "status/";
+
+	public static final String CONFIG_KEY_DISABLE = "disable";
+	public static final String SPI_PLUGIN_KEY = "spi.plugin";
 }

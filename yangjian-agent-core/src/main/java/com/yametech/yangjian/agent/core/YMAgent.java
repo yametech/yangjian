@@ -36,6 +36,7 @@ import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodRegexMatch;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.common.CoreConstants;
 import com.yametech.yangjian.agent.core.common.MatchProxyManage;
 import com.yametech.yangjian.agent.core.core.agent.AgentListener;
 import com.yametech.yangjian.agent.core.core.agent.AgentTransformer;
@@ -78,6 +79,11 @@ public class YMAgent {
     		InstanceManage.listSpiClass().forEach(spi -> log.debug("spiClassLoader:{}, {}", spi, Util.join(" > ", Util.listClassLoaders(spi))));
     	}
     	InstanceManage.loadConfig(arguments);
+    	// 如果禁用了所有插件则直接返回不执行下面拦截逻辑
+    	if (CoreConstants.CONFIG_KEY_DISABLE.equals(Config.getKv(CoreConstants.SPI_PLUGIN_KEY))) {
+			log.warn("已配置成禁用所有插件，跳过代理");
+    		return;
+		}
     	InstanceManage.notifyReader();
     	InstanceManage.beforeRun();
     	InstanceManage.startSchedule();// 一定要早于instrumentation
