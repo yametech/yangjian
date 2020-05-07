@@ -51,6 +51,10 @@ public class JedisMethodSpanCreater implements ISpanCreater<SpanInfo> {
         if (!(thisObj instanceof IContext)) {
             return null;
         }
+
+        if (!spanSample.sample()) {
+            return null;
+        }
         String url = (String) ((IContext) thisObj)._getAgentContext(ContextConstants.REDIS_URL_CONTEXT_KEY);
         if (StringUtil.isEmpty(url)) {
             return null;
