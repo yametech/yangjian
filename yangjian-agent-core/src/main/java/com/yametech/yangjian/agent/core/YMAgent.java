@@ -73,10 +73,10 @@ public class YMAgent {
     	}
     	System.setProperty(Constants.SYSTEM_PROPERTIES_PREFIX + Constants.SERVICE_NAME, Config.SERVICE_NAME.getValue());
     	AgentClassLoader.initDefaultLoader();
-    	if(log.isDebugEnable()) {
-    		InstanceManage.getSpis().forEach(spi -> log.debug("spiClassLoader:{}, {}", spi, Util.join(" > ", Util.listClassLoaders(spi.getClass()))));
-    	}
     	SpiLoader.loadSpi();
+    	if(log.isDebugEnable()) {
+    		InstanceManage.listSpiClass().forEach(spi -> log.debug("spiClassLoader:{}, {}", spi, Util.join(" > ", Util.listClassLoaders(spi))));
+    	}
     	InstanceManage.loadConfig(arguments);
     	InstanceManage.notifyReader();
     	InstanceManage.beforeRun();
@@ -86,6 +86,7 @@ public class YMAgent {
     }
     
     private static void instrumentation(Instrumentation instrumentation) {
+    	InstanceManage.loadSpiInstance(null);// 加载未初始化实例的SPI
     	List<InterceptorMatcher> interceptorMatchers = InstanceManage.listInstance(InterceptorMatcher.class).stream().collect(Collectors.toList());
     	List<IConfigMatch> matches = interceptorMatchers.stream().filter(aop -> aop.match() != null)
     			.map(InterceptorMatcher::match).collect(Collectors.toList());

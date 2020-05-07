@@ -29,6 +29,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -181,13 +182,14 @@ public class InstanceManage {
 		return true;
 	}
 	
-	private static void init(Class<?> cls, Runnable runnable) {
+	private static <T> void init(Class<T> cls, Consumer<List<T>> consumer) {
 		if(Boolean.TRUE.equals(initStatus.get(cls))) {
 			LOG.warn("禁止重复执行");
 			return;
 		}
 		initStatus.put(cls, true);// 要放到runnable.run()之前，防止在run的过程中调用registry时无法正常调用init；EventMatcherInit.configKeyValue就会导致这个问题
-		runnable.run();
+		loadSpiInstance(cls);// 初始化对应的SPI实例
+		consumer.accept(InstanceManage.listInstance(cls));
 	}
 	
 	 /**
@@ -203,14 +205,13 @@ public class InstanceManage {
     			throw new RuntimeException(e);
     		}
     	}
-    	loadSpiInstance(null);// 等IConfigLoader实例加载完配置再初始化其他spi实例，避免其他spi实例创建时使用到配置
     }
 	
 	public static Set<Class<?>> listSpiClass() {
 		return new HashSet<>(spiInstances.keySet());
 	}
 	
-	private static synchronized void loadSpiInstance(Class<?> spiCls) {
+	public static synchronized void loadSpiInstance(Class<?> spiCls) {
 		spiInstances.entrySet().forEach(entry -> {
 			if(entry.getValue() != EMPTY_VALUE) {
 				return;
@@ -232,11 +233,7 @@ public class InstanceManage {
 	 * 下发配置给各个插件，不管配置有没变化都全量通知订阅的key（这个逻辑不要改，会影响订阅者）
 	 */
 	public static synchronized void notifyReader() {
-		init(IConfigReader.class, () -> {
-			for (IConfigReader configReader : listInstance(IConfigReader.class)) {
-				readerInit(configReader);
-			}
-		});
+		init(IConfigReader.class, instances -> instances.forEach(InstanceManage::readerInit));
 	}
 	
 	/**
@@ -298,7 +295,7 @@ public class InstanceManage {
      * 	初始化逻辑
      */
 	public static synchronized void beforeRun() {
-		init(IAppStatusListener.class, () -> InstanceManage.listInstance(IAppStatusListener.class).forEach(InstanceManage::beforeRunInit));
+		init(IAppStatusListener.class, instances -> instances.forEach(InstanceManage::beforeRunInit));
     }
 	
 	private static void beforeRunInit(IAppStatusListener listener) {
@@ -309,14 +306,14 @@ public class InstanceManage {
      * 开启定时调度
      */
 	public static synchronized void startSchedule() {
-		init(ISchedule.class, () -> {
+		init(ISchedule.class, instances -> {
 			service = Executors.newScheduledThreadPool(Config.SCHEDULE_CORE_POOL_SIZE.getValue(), new CustomThreadFactory("agent-schedule", true));
-			InstanceManage.listInstance(ISchedule.class).forEach(schedule -> {
+			instances.forEach(schedule -> {
 				if(schedule.initialDelay() == 0) {
 					schedule.execute();
 				}
 			});// 执行一次定时任务，防止多线程类加载死锁
-			InstanceManage.listInstance(ISchedule.class).forEach(InstanceManage::scheduleInit);
+			instances.forEach(InstanceManage::scheduleInit);
 		});
 	}
 	
