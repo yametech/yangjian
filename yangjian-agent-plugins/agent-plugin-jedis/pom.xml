@@ -21,5 +21,11 @@
             <version>${jedis.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.zipkin.brave</groupId>
+            <artifactId>brave</artifactId>
+            <version>${brave.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>

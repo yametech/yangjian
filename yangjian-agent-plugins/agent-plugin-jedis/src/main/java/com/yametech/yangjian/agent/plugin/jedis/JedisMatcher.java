@@ -40,14 +40,9 @@ public class JedisMatcher implements IMetricMatcher {
     public IConfigMatch match() {
         /**
          * redis.clients.jedis.Jedis
-         * redis.clients.jedis.BinaryJedis
-         * redis.clients.jedis.ShardedJedis
-         * redis.clients.jedis.BinaryShardedJedis
          */
         return new CombineAndMatch(Arrays.asList(
-                new CombineOrMatch(Arrays.asList(
-                        new ClassMatch("redis.clients.jedis.Jedis"),
-                        new ClassMatch("redis.clients.jedis.BinaryJedis"))),
+                new ClassMatch("redis.clients.jedis.Jedis"),
                 new MethodRegexMatch(".*redis\\.clients\\.jedis.*(zcount|sunionstore|zunionstore|del|zinterstore|echo|hscan|psubscribe|type|sinterstore|setex|zlexcount|brpoplpush|bitcount|llen|zscan|lpushx|bitpos|setnx|hvals|evalsha|substr|geodist|zrangeByLex|geoadd|expire|bitop|zrangeByScore|smove|lset|decrBy|pttl|scan|zrank|blpop|rpoplpush|zremrangeByLex|get|lpop|persist|scriptExists|georadius|set|srandmember|incr|setbit|hexists|expireAt|pexpire|zcard|bitfield|zrevrangeByLex|sinter|srem|getrange|rename|zrevrank|exists|setrange|zremrangeByRank|sadd|sdiff|zrevrange|getbit|scard|sdiffstore|zrevrangeByScore|zincrby|rpushx|psetex|zrevrangeWithScores|strlen|hdel|zremrangeByScore|geohash|brpop|lrem|hlen|decr|scriptLoad|lpush|lindex|zrange|incrBy|getSet|ltrim|incrByFloat|rpop|sort|zrevrangeByScoreWithScores|pfadd|linsert|pfcount|keys|hsetnx|hincrBy|hgetAll|hset|spop|zrangeWithScores|hincrByFloat|hmset|renamenx|zrem|msetnx|hmget|sunion|hget|zadd|move|subscribe|geopos|mset|zrangeByScoreWithScores|zscore|pexpireAt|georadiusByMember|ttl|lrange|smembers|pfmerge|rpush|publish|mget|sscan|append|sismember)\\(.*")
         ));
     }

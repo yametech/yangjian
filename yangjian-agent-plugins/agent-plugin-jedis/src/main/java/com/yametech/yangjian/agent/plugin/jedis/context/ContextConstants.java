@@ -13,14 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core.common;
+package com.yametech.yangjian.agent.plugin.jedis.context;
 
-import com.yametech.yangjian.agent.api.common.Constants;
-
-public class CoreConstants extends Constants {
-	public static final String CONFIG_KEY_ENABLE = "enable";
-	public static final String BASE_PATH_STATUS = "status/";
-
-	public static final String CONFIG_KEY_DISABLE = "disable";
-	public static final String SPI_PLUGIN_KEY = "spi.plugin";
+public abstract class ContextConstants {
+	public static final String REDIS_URL_CONTEXT_KEY = "__redis_url_";
 }

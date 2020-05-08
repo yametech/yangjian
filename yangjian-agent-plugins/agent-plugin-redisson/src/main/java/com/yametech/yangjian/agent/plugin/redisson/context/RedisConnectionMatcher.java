@@ -13,40 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.plugin.rabbitmq.trace;
+package com.yametech.yangjian.agent.plugin.redisson.context;
 
+import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
+import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
-import com.yametech.yangjian.agent.api.configmatch.*;
-import com.yametech.yangjian.agent.api.trace.ITraceMatcher;
-import com.yametech.yangjian.agent.api.trace.TraceType;
+import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
+import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodArgumentIndexMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodConstructorMatch;
 
 import java.util.Arrays;
 
 /**
  * @author dengliming
- * @date 2020/4/30
+ * @date 2020/5/7
  */
-public class ProducerTraceMatcher implements ITraceMatcher {
+public class RedisConnectionMatcher implements IEnhanceClassMatch, InterceptorMatcher {
 
     @Override
-    public TraceType type() {
-        return TraceType.MQ_PUBLISH;
+    public IConfigMatch classMatch() {
+        return new ClassMatch("org.redisson.client.RedisConnection");
     }
 
     @Override
     public IConfigMatch match() {
         return new CombineAndMatch(Arrays.asList(
-                new ClassMatch("com.rabbitmq.client.impl.ChannelN"),
-                new MethodNameMatch("basicPublish"),
-                new MethodArgumentIndexMatch(4, "com.rabbitmq.client.AMQP$BasicProperties")
+                classMatch(),
+                new MethodConstructorMatch(),
+                new MethodArgumentIndexMatch(0, "org.redisson.client.RedisClient")
         ));
     }
 
     @Override
     public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
-        return new LoadClassKey("com.yametech.yangjian.agent.plugin.rabbitmq.trace.ProducerSpanCreater");
+        return new LoadClassKey("com.yametech.yangjian.agent.plugin.redisson.context.RedisConnectionInterceptor");
     }
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.plugin.rabbitmq.trace;
+package com.yametech.yangjian.agent.plugin.jedis.trace;
 
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
@@ -22,31 +22,34 @@ import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.configmatch.*;
 import com.yametech.yangjian.agent.api.trace.ITraceMatcher;
 import com.yametech.yangjian.agent.api.trace.TraceType;
+import com.yametech.yangjian.agent.plugin.jedis.bean.JedisMethodMatcher;
 
 import java.util.Arrays;
 
 /**
  * @author dengliming
- * @date 2020/4/30
+ * @date 2020/5/5
  */
-public class ProducerTraceMatcher implements ITraceMatcher {
+public class JedisClusterMethodTraceMatcher implements ITraceMatcher {
 
     @Override
     public TraceType type() {
-        return TraceType.MQ_PUBLISH;
+        return TraceType.REDIS;
     }
 
     @Override
     public IConfigMatch match() {
+        /**
+         * redis.clients.jedis.JedisCluster
+         */
         return new CombineAndMatch(Arrays.asList(
-                new ClassMatch("com.rabbitmq.client.impl.ChannelN"),
-                new MethodNameMatch("basicPublish"),
-                new MethodArgumentIndexMatch(4, "com.rabbitmq.client.AMQP$BasicProperties")
+                new ClassMatch("redis.clients.jedis.JedisCluster"),
+                JedisMethodMatcher.INSTANCE.JedisClusterMethodMatch()
         ));
     }
 
     @Override
     public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
-        return new LoadClassKey("com.yametech.yangjian.agent.plugin.rabbitmq.trace.ProducerSpanCreater");
+        return new LoadClassKey("com.yametech.yangjian.agent.plugin.jedis.trace.JedisMethodSpanCreater");
     }
 }
