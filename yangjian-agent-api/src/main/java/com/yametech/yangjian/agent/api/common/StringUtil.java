@@ -82,6 +82,13 @@ public class StringUtil {
     	builder.append(']');
     	return builder.toString();
     }
+
+    public static String shorten(String original, int maxLength) {
+        if (!StringUtil.isEmpty(original) && original.length() > maxLength) {
+            return original.substring(0, maxLength) + "...";
+        }
+        return original;
+    }
     
     public static void main(String[] args) {
 		System.err.println(join(null));
