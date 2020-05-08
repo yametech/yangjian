@@ -86,7 +86,6 @@ public class YMAgent {
     }
     
     private static void instrumentation(Instrumentation instrumentation) {
-    	InstanceManage.loadSpiInstance(null);// 加载未初始化实例的SPI
     	List<InterceptorMatcher> interceptorMatchers = InstanceManage.listInstance(InterceptorMatcher.class).stream().collect(Collectors.toList());
     	List<IConfigMatch> matches = interceptorMatchers.stream().filter(aop -> aop.match() != null)
     			.map(InterceptorMatcher::match).collect(Collectors.toList());

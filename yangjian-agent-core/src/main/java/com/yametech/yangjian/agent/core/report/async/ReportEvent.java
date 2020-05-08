@@ -19,9 +19,12 @@ package com.yametech.yangjian.agent.core.report.async;
 import java.util.List;
 
 import com.yametech.yangjian.agent.api.base.IReportData;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.util.Util;
 
 public class ReportEvent {
+	private static final ILogger LOG = LoggerFactory.getLogger(ReportEvent.class);
 	private String reportType;
 	private IReportData report;
 	private List<Object> datas;
@@ -33,7 +36,10 @@ public class ReportEvent {
 	}
 	
 	public void call() {
-		report.batchReport(datas);
+		boolean success = report.batchReport(datas);
+		if(!success) {
+			LOG.warn("异步上报数据失败：{}", Util.join(" , ", datas));
+		}
 	}
 	
 	public String getReportType() {

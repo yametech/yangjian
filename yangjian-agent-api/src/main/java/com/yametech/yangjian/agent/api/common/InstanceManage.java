@@ -31,14 +31,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import com.yametech.yangjian.agent.api.IAppStatusListener;
 import com.yametech.yangjian.agent.api.IConfigLoader;
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.base.IWeight;
-import com.yametech.yangjian.agent.api.base.SPI;
 import com.yametech.yangjian.agent.api.bean.ConfigNotifyType;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
@@ -82,6 +80,7 @@ public class InstanceManage {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> List<T> listInstance(Class<T> cls) {
+		loadSpiInstance(cls);// 初始化对应的SPI实例
 		List<T> instances = new ArrayList<>();
 		for(Object api : loadedInstance) {
 			if(cls.isAssignableFrom(api.getClass())) {
@@ -97,11 +96,11 @@ public class InstanceManage {
 	/**
 	 * @return	所有实现SPI的实例
 	 */
-	public static List<SPI> getSpis() {
-		return loadedInstance.stream().filter(instance -> instance instanceof SPI)
-				.map(instance -> (SPI)instance)
-				.collect(Collectors.toList());
-	}
+//	public static List<SPI> getSpis() {
+//		return loadedInstance.stream().filter(instance -> instance instanceof SPI)
+//				.map(instance -> (SPI)instance)
+//				.collect(Collectors.toList());
+//	}
 
 	/**
 	 * 删除禁用的SPI
@@ -188,7 +187,6 @@ public class InstanceManage {
 			return;
 		}
 		initStatus.put(cls, true);// 要放到runnable.run()之前，防止在run的过程中调用registry时无法正常调用init；EventMatcherInit.configKeyValue就会导致这个问题
-		loadSpiInstance(cls);// 初始化对应的SPI实例
 		consumer.accept(InstanceManage.listInstance(cls));
 	}
 	
@@ -197,7 +195,6 @@ public class InstanceManage {
      * @param arguments	配置参数
      */
 	public static synchronized void loadConfig(String arguments) {
-		loadSpiInstance(IConfigLoader.class);
     	for(IConfigLoader loader: InstanceManage.listInstance(IConfigLoader.class)) {
     		try {
     			loader.load(arguments);
@@ -211,7 +208,7 @@ public class InstanceManage {
 		return new HashSet<>(spiInstances.keySet());
 	}
 	
-	public static synchronized void loadSpiInstance(Class<?> spiCls) {
+	private static synchronized void loadSpiInstance(Class<?> spiCls) {
 		spiInstances.entrySet().forEach(entry -> {
 			if(entry.getValue() != EMPTY_VALUE) {
 				return;
