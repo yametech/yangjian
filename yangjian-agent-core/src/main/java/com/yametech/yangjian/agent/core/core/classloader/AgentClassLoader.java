@@ -61,7 +61,7 @@ public class AgentClassLoader extends ClassLoader {
      * The default class loader for the agent.
      */
     private static AgentClassLoader DEFAULT_LOADER;
-
+    private static final String EXTEND_PLUGIN_DEFAULT_DIR = "/data/www/soft/agent-custom";
     private List<File> classpath;
     private List<Jar> allJars;
     private ReentrantLock jarScanLock = new ReentrantLock();
@@ -123,10 +123,12 @@ public class AgentClassLoader extends ClassLoader {
 //        classpath.add(new File(agentDictionary, "activations"));
         // 自定义扩展插件目录配置
         String optionPluginsDir = System.getProperty(Constants.EXTEND_PLUGINS_DIR);
-        if (StringUtil.notEmpty(optionPluginsDir)) {
-            classpath.add(new File(optionPluginsDir));
-        } else {
-            classpath.add(new File(agentDictionary, "extend-plugins"));
+        if (StringUtil.isEmpty(optionPluginsDir)) {
+            optionPluginsDir = EXTEND_PLUGIN_DEFAULT_DIR;
+        }
+        File extendPluginDir = new File(optionPluginsDir);
+        if(extendPluginDir.exists()) {
+            classpath.add(extendPluginDir);
         }
     }
 

@@ -19,6 +19,10 @@ import com.yametech.yangjian.agent.plugin.dubbo.base.RpcClient;
 import com.yametech.yangjian.agent.plugin.dubbo.base.RpcServer;
 import org.junit.After;
 import org.junit.Before;
+import zipkin2.Endpoint;
+import zipkin2.Span;
+
+import java.time.Instant;
 
 public class DubboTest {
 //	private RpcServer rpcServer;
@@ -40,7 +44,27 @@ public class DubboTest {
 		System.err.println(service.heart());
 //		Thread.sleep(5000);
 	}
-	
+
+	@org.junit.Test
+	public void test() throws InterruptedException {
+		Span span = Span.newBuilder()
+				.traceId(1L, 2L)
+				.id(1L)
+				.parentId(111L)
+				.kind(Span.Kind.CLIENT)
+				.name("name")
+				.putTag("error", "参数异常")
+				.putTag("tag-1", "tag-value-1")
+				.putTag("tag-2", "tag-value-2")
+				.localEndpoint(Endpoint.newBuilder().ip("10.10.1.1").serviceName("test-server").build())
+				.remoteEndpoint(Endpoint.newBuilder().ip("10.10.1.1").port(8080).build())
+				.timestamp(1589188711915000L)
+				.duration(100)
+				.addAnnotation(System.currentTimeMillis(), "annotation-1")
+				.addAnnotation(System.currentTimeMillis(), "annotation-2").build();
+		System.err.println(span);
+	}
+
 	@Before
 	public void before() {
 		
