@@ -42,9 +42,12 @@ public class StatementImplConvert implements IMethodAsyncConvert {
 	public List<Object> convert(Object thisObj, long startTime, Object[] allArguments, Method method, Object ret,
 			Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
         List<String> batchArgs = null;
+        String sql = null;
         if (thisObj instanceof IContext) {
             batchArgs = (List<String>) ((IContext) thisObj)._getAgentContext(ContextConstants.MYSQL_BATCH_ARGS_CONTEXT_KEY);
+            sql = (String) ((IContext) thisObj)._getAgentContext(ContextConstants.MYSQL_EXEC_SQL_CONTEXT_KEY);
         }
+
         long now = System.currentTimeMillis();
         List<SqlBean> result = new ArrayList<>();
         // 批量操作
@@ -54,6 +57,10 @@ public class StatementImplConvert implements IMethodAsyncConvert {
         } else {
             if (allArguments != null && allArguments.length > 0 && allArguments[0] instanceof String) {
                 result.add(new SqlBean((String) allArguments[0], now, now - startTime));
+            }
+            // StatementImpl.executeBatch()时不为空
+            else if (StringUtil.notEmpty(sql)) {
+                result.add(new SqlBean(sql, now, now - startTime));
             }
         }
         return Arrays.asList(result);
