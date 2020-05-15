@@ -21,7 +21,14 @@ import java.util.function.Supplier;
 public class MetricUtil {
 	private MetricUtil() {}
 
-	public static <T> T mark(Supplier<T> supplier) {
+	/**
+	 *
+	 * @param name	统计信息的命名，同名调用会聚合计算qps/rt，长度不可超过50
+	 * @param supplier
+	 * @param <T>
+	 * @return
+	 */
+	public static <T> T mark(String name, Supplier<T> supplier) {
 		return supplier.get();
 	}
 
