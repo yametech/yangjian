@@ -15,38 +15,59 @@
  */
 package com.yametech.yangjian.agent.core.core.elementmatch;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.yametech.yangjian.agent.api.bean.Annotation;
 import com.yametech.yangjian.agent.api.bean.ClassDefined;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 public class ElementMatcherConvert {
     
 	private ElementMatcherConvert() {}
-	
+
+//	public static ClassDefined convert(TypeDescription typeDescription) {
+//		return convert(typeDescription, false);
+//	}
+    public static ClassDefined convert(TypeDescription typeDescription) {
+		ClassDefined classDefined = new ClassDefined(getInterface(typeDescription), getSuperClass(typeDescription), getClassAnnotation(typeDescription), typeDescription.getActualName());
+//		if(!containsMethod) {
+//			return classDefined;
+//		}
+		List<MethodDefined> methodDefinedList = new ArrayList<>();
+		for(MethodDescription.InDefinedShape inDefinedShape : typeDescription.getDeclaredMethods()) {
+			methodDefinedList.add(convert(classDefined, inDefinedShape));
+		}
+		classDefined.setMethods(methodDefinedList);
+		return classDefined;
+    }
+
+	public static MethodDefined convert(MethodDescription.InDefinedShape inDefinedShape) {
+		TypeDescription thisClass = inDefinedShape.getDeclaringType().asErasure();
+		ClassDefined classDefined = convert(thisClass);
+		return convert(classDefined, inDefinedShape);
+	}
+
 	/**
 	 * InDefinedShape转换为MethodDefined
 	 * @param inDefinedShape
 	 * @return
 	 */
-    public static MethodDefined convert(MethodDescription.InDefinedShape inDefinedShape) {
-    	TypeDescription thisClass = inDefinedShape.getDeclaringType().asErasure();
-    	String methodName = inDefinedShape.getInternalName();
-    	if(!inDefinedShape.isMethod()) {
-    		String className = thisClass.getActualName();
-    		int beginIndex = className.lastIndexOf(".") + 1;
-    		methodName = className.substring(beginIndex);
-    	}
+	public static MethodDefined convert(ClassDefined classDefined, MethodDescription.InDefinedShape inDefinedShape) {
+		TypeDescription thisClass = inDefinedShape.getDeclaringType().asErasure();
+		String methodName = inDefinedShape.getInternalName();
+		if(!inDefinedShape.isMethod()) {
+			String className = thisClass.getActualName();
+			int beginIndex = className.lastIndexOf(".") + 1;
+			methodName = className.substring(beginIndex);
+		}
 //    	String methodName = inDefinedShape.isMethod() ? inDefinedShape.getInternalName() : inDefinedShape.getDeclaringType().asErasure().getName();
-    	return new MethodDefined(convert(thisClass), getMethodAnnotation(inDefinedShape), inDefinedShape.toString(), 
-    			methodName, getParams(inDefinedShape), inDefinedShape.getReturnType().asErasure().getActualName(), 
-    			inDefinedShape.isStatic(), inDefinedShape.isConstructor(), inDefinedShape.isMethod());
-    	
+		return new MethodDefined(classDefined, getMethodAnnotation(inDefinedShape), inDefinedShape.toString(),
+				methodName, getParams(inDefinedShape), inDefinedShape.getReturnType().asErasure().getActualName(),
+				inDefinedShape.isStatic(), inDefinedShape.isConstructor(), inDefinedShape.isMethod());
+
 //    	System.out.println("class=" + thisClass.getActualName());
 //    	System.out.println("SuperClass=" + getSuperClass(thisClass));
 //    	try {
@@ -60,28 +81,28 @@ public class ElementMatcherConvert {
 //        System.out.println("method=" + (inDefinedShape.isMethod() ? inDefinedShape.getInternalName() : inDefinedShape.getDeclaringType().asErasure().getName()));
 //        inDefinedShape.getParameters().asTypeList().asErasures().forEach(defined -> System.out.println("Parameter=" + defined.getActualName()));
 //        inDefinedShape.getDeclaredAnnotations().asTypeList().forEach(anno ->  System.out.println("annotation=" + anno.getActualName()));
-    }
-    
-    public static ClassDefined convert(TypeDescription typeDescription) {
-    	return new ClassDefined(getInterface(typeDescription), getSuperClass(typeDescription), getClassAnnotation(typeDescription), typeDescription.getActualName());
-    }
+	}
     
     public static String[] getParams(MethodDescription.InDefinedShape inDefinedShape) {
     	return inDefinedShape.getParameters().asTypeList().asErasures().stream()
-    			.flatMap(type -> Arrays.stream(new String[] {type.getActualName()}))
+    			.map(TypeDescription::getActualName)
     			.toArray(String[]::new);
     }
     
-    private static Set<String> getMethodAnnotation(MethodDescription.InDefinedShape inDefinedShape) {
-    	return inDefinedShape.getDeclaredAnnotations().asTypeList().stream()
-    			.flatMap(type -> Arrays.stream(new String[] {type.getActualName()}))
-				.collect(Collectors.toSet());
+    private static Set<Annotation> getMethodAnnotation(MethodDescription.InDefinedShape inDefinedShape) {
+		return inDefinedShape.getDeclaredAnnotations().stream().map(annotation -> {
+					Map<String, Object> values = new HashMap<>();
+					annotation.getAnnotationType().getDeclaredMethods().forEach(method -> values.put(method.getActualName(), annotation.getValue(method).resolve()));
+					return new Annotation(annotation.getAnnotationType().getActualName(), values);
+				}).collect(Collectors.toSet());
     }
     
-    public static Set<String> getClassAnnotation(TypeDescription thisClass) {
-    	return thisClass.getDeclaredAnnotations().asTypeList().stream()
-    			.flatMap(type -> Arrays.stream(new String[] {type.getActualName()}))
-				.collect(Collectors.toSet());
+    public static Set<Annotation> getClassAnnotation(TypeDescription thisClass) {
+		return thisClass.getDeclaredAnnotations().stream().map(annotation -> {
+					Map<String, Object> values = new HashMap<>();
+					annotation.getAnnotationType().getDeclaredMethods().forEach(method -> values.put(method.getActualName(), annotation.getValue(method).resolve()));
+					return new Annotation(annotation.getAnnotationType().getActualName(), values);
+				}).collect(Collectors.toSet());
     }
 
     /**

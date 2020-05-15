@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core.eventsubscribe;
+package com.yametech.yangjian.agent.core.eventsubscribe.event;
 
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
@@ -22,6 +22,7 @@ import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.common.MethodUtil;
+import com.yametech.yangjian.agent.core.eventsubscribe.base.BindManage;
 
 /**
  * 
@@ -42,7 +43,7 @@ public class EventMatcher implements IMatcherProxy<EventDispatcher>, Interceptor
 	
 	@Override
 	public void init(EventDispatcher obj, ClassLoader classLoader, MethodType type, MethodDefined methodDefined) {
-		obj.init(BindManage.registEvent(eventGroup, methodDefined));
+		obj.init(BindManage.registerEvent(eventGroup, methodDefined));
 	}
 
 	@Override
@@ -52,7 +53,7 @@ public class EventMatcher implements IMatcherProxy<EventDispatcher>, Interceptor
 
 	@Override
 	public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
-		return new LoadClassKey(EventDispatcher.class.getName(), MethodUtil.getId(methodDefined));
+		return new LoadClassKey(EventDispatcher.class.getName(), MethodUtil.getId(methodDefined));// 每个EventDispatcher实例的eventSubscribe不一样，需区分实例
 	}
 	
 }

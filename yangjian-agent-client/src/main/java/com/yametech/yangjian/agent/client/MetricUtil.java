@@ -16,8 +16,13 @@
 
 package com.yametech.yangjian.agent.client;
 
+import java.util.function.Supplier;
+
 public class MetricUtil {
 	private MetricUtil() {}
-	
-	
+
+	public static <T> T mark(Supplier<T> supplier) {
+		return supplier.get();
+	}
+
 }

@@ -15,12 +15,12 @@
  */
 package com.yametech.yangjian.agent.core.core.elementmatch;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import net.bytebuddy.description.method.MethodDescription;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * 使用正则匹配类方法
@@ -39,7 +39,7 @@ public class MethodElementMatcher extends BaseElementMatcher<MethodDescription> 
 
     @Override
     public List<MethodDefined> name(MethodDescription methodDescription) {
-        return Arrays.asList(ElementMatcherConvert.convert(methodDescription.asDefined()));
+        return Collections.singletonList(ElementMatcherConvert.convert(methodDescription.asDefined()));
     }
     
 }

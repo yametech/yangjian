@@ -15,18 +15,9 @@
  */
 package com.yametech.yangjian.agent.core.core.agent;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
-import com.yametech.yangjian.agent.api.base.IConfigMatch;
-import com.yametech.yangjian.agent.api.base.IContext;
-import com.yametech.yangjian.agent.api.base.IMatch;
-import com.yametech.yangjian.agent.api.base.IMatcherProxy;
-import com.yametech.yangjian.agent.api.base.MethodType;
+import com.yametech.yangjian.agent.api.base.*;
 import com.yametech.yangjian.agent.api.bean.ClassDefined;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
@@ -39,13 +30,8 @@ import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
 import com.yametech.yangjian.agent.core.core.elementmatch.ElementMatcherConvert;
 import com.yametech.yangjian.agent.core.core.elementmatch.MethodElementMatcher;
-import com.yametech.yangjian.agent.core.core.interceptor.ContextInterceptor;
-import com.yametech.yangjian.agent.core.core.interceptor.YmInstanceConstructorInterceptor;
-import com.yametech.yangjian.agent.core.core.interceptor.YmInstanceInterceptor;
-import com.yametech.yangjian.agent.core.core.interceptor.YmStaticInterceptor;
-import com.yametech.yangjian.agent.core.core.interceptor.OverrideCallable;
+import com.yametech.yangjian.agent.core.core.interceptor.*;
 import com.yametech.yangjian.agent.core.util.Util;
-
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -58,6 +44,12 @@ import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.utility.JavaModule;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class AgentTransformer implements AgentBuilder.Transformer {
 	public static final String OBJECT_CONTEXT_FIELD_NAME = "__context_field__";// 继承Icontext接口的对象全局变量名称
@@ -80,7 +72,6 @@ public class AgentTransformer implements AgentBuilder.Transformer {
     @Override
     public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, 
     		TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule) {
-//    	log.info("{}:transform", typeDescription);
     	if(typeDescription.isInterface()) {
     		return builder;
     	}
@@ -109,27 +100,29 @@ public class AgentTransformer implements AgentBuilder.Transformer {
      */
     private DynamicType.Builder<?> enhanceMethod(TypeDescription typeDescription, DynamicType.Builder<?> builder, ClassLoader classLoader) {
     	List<IMatch> matches = InstanceManage.listInstance(IMatch.class);
-//    	log.info("{}:matches", typeDescription);
+		Set<IMatch> enhanceMatches = new HashSet<>();
         // builder针对同一个类方法设置多次intercept，仅最后一次生效，所以多个MethodInterceptor拦截同一个方法时需合并到一个intercept中
-        for(MethodDescription.InDefinedShape inDefinedShape : typeDescription.getDeclaredMethods()) {
-            MethodDefined methodDefined = ElementMatcherConvert.convert(inDefinedShape);
+		ClassDefined classDefined = ElementMatcherConvert.convert(typeDescription);
+		for(MethodDescription.InDefinedShape inDefinedShape : typeDescription.getDeclaredMethods()) {
+            MethodDefined methodDefined = ElementMatcherConvert.convert(classDefined, inDefinedShape);
             matches.stream().filter(match -> match.match() != null && match.match().isMatch(methodDefined))
-            	.forEach(match -> match.method(methodDefined));
+            	.forEach(match -> {
+            		match.method(methodDefined);
+					enhanceMatches.add(match);
+				});
             MethodType type = getMethodType(inDefinedShape);
-//            log.info("{}:for begin", inDefinedShape);
 //    		List<InterceptorMatcher> interceptors = interceptorMatchers.stream()
             @SuppressWarnings({ "unchecked", "rawtypes" })
             Set<Object> interceptors = interceptorMatchers.stream()// 此处修改为set避免一个实例重复调用
     			.filter(aop -> aop.match() != null && aop.match().isMatch(methodDefined))
     			.map(matcher -> {
-//    				log.info("{}:map enter", inDefinedShape);
     				LoadClassKey loadClass = matcher.loadClass(type, methodDefined);
     				if(loadClass == null) {
     					return null;
     				}
 					try {
 						// 此处加载类是考虑使用InterceptorInstanceLoader在有些情况下会出现无法加载的问题（类加载器）
-						Object obj = null;
+						Object obj;
 						try {
 							obj = InterceptorInstanceLoader.load(loadClass.getKey(), loadClass.getCls(), classLoader);
 						} catch (Exception e) {
@@ -140,11 +133,9 @@ public class AgentTransformer implements AgentBuilder.Transformer {
 //							throw new IllegalStateException("不能实现SPI接口");
 //						}
 						InstanceManage.registryInit(obj);
-//						log.info("{}:map load", inDefinedShape);
 						if(matcher instanceof IMatcherProxy) {
 							((IMatcherProxy)matcher).init(obj, classLoader, type, methodDefined);
 						}
-//						log.info("{}:map init", inDefinedShape);
 						log.info("enhanceMethod:{}	{}	{}	{}	{}", obj, classLoader.getClass(), 
 								classLoader.getParent() != null ? classLoader.getParent().getClass() : "null", loadClass, inDefinedShape);
 						return obj;
@@ -152,41 +143,38 @@ public class AgentTransformer implements AgentBuilder.Transformer {
 						log.warn(e, "加载实例异常{},\n{}", loadClass, Util.join(" > ", Util.listClassLoaders(classLoader)));
 						return null;
 					}
-				}).filter(interceptor -> {
-    				return interceptor != null && (
-        						(inDefinedShape.isStatic() && interceptor instanceof IStaticMethodAOP) || 
-        						(inDefinedShape.isConstructor() && interceptor instanceof IConstructorListener) || 
-        						(inDefinedShape.isMethod() && interceptor instanceof IMethodAOP)
-    						);
-    				
-    			}).collect(Collectors.toSet());
-    		if(interceptors == null || interceptors.isEmpty()) {
+				}).filter(interceptor -> interceptor != null && (
+							(inDefinedShape.isStatic() && interceptor instanceof IStaticMethodAOP) ||
+							(inDefinedShape.isConstructor() && interceptor instanceof IConstructorListener) ||
+							(inDefinedShape.isMethod() && interceptor instanceof IMethodAOP)
+						)).collect(Collectors.toSet());
+    		if(interceptors.isEmpty()) {
     			continue;
     		}
-//    		log.info("{}:for builder", inDefinedShape);
     		if(log.isDebugEnable()) {
     			log.debug("match method:{} - {}", inDefinedShape, listClass(interceptors));
     		}
             if(inDefinedShape.isStatic()) {// 静态方法
         		builder = builder.method(getMethodMatch(inDefinedShape))
         				.intercept(MethodDelegation.withDefaultConfiguration()
-        						.to(new YmStaticInterceptor(interceptors.stream().toArray(IStaticMethodAOP[]::new))));
+        						.to(new YmStaticInterceptor(interceptors.toArray(new IStaticMethodAOP[0]))));
 //        						.to(new YmStaticInterceptor(interceptors, classLoader, inDefinedShape)));
             } else if(inDefinedShape.isConstructor()) {// 构造方法
         		builder = builder.constructor(getMethodMatch(inDefinedShape))
         				.intercept(SuperMethodCall.INSTANCE.andThen(MethodDelegation.withDefaultConfiguration()
-            					.to(new YmInstanceConstructorInterceptor(interceptors.stream().toArray(IConstructorListener[]::new)))));
+            					.to(new YmInstanceConstructorInterceptor(interceptors.toArray(new IConstructorListener[0])))));
 //        						.to(new YmInstanceConstructorInterceptor(interceptors, classLoader, inDefinedShape))));
             } else if(inDefinedShape.isMethod()) {// 实例方法
         		builder = builder.method(getMethodMatch(inDefinedShape))
         				.intercept(MethodDelegation.withDefaultConfiguration()
 								.withBinders(Morph.Binder.install(OverrideCallable.class))
-        						.to(new YmInstanceInterceptor(interceptors.stream().toArray(IMethodAOP[]::new))));
+        						.to(new YmInstanceInterceptor(interceptors.toArray(new IMethodAOP[0]))));
 //        						.to(new YmInstanceInterceptor(interceptors, classLoader, inDefinedShape)));
             }
-//            log.info("{}:for done", inDefinedShape);
         }
-//        log.info("{}:for exit", typeDescription);
+        if(enhanceMatches.size() > 0) {
+			EnhanceListener.register(typeDescription.getTypeName(), enhanceMatches);
+		}
         return builder;
     }
     

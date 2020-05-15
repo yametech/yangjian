@@ -29,4 +29,23 @@ public interface IMatch {
 	 * @param methodDefined	方法定义完整路径
 	 */
 	default void method(MethodDefined methodDefined) {}
+
+	/**
+	 * 类增强成功后通知
+	 * @param typeName	增强的类
+	 * @param classLoader	增强类使用的classLoader
+	 * @param loaded	是否已加载类
+	 */
+	default void onComplete(String typeName, ClassLoader classLoader, boolean loaded) throws Exception {}
+
+	/**
+	 * 类增强失败时通知
+	 * @param typeName	增强的类
+	 * @param classLoader	增强类使用的classLoader
+	 * @param loaded	是否已加载类
+	 * @param throwable	增强失败时的异常
+	 */
+	default void onError(String typeName, ClassLoader classLoader, boolean loaded, Throwable throwable) {}
+
+
 }

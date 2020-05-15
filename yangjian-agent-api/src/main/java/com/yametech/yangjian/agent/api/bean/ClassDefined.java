@@ -15,15 +15,17 @@
  */
 package com.yametech.yangjian.agent.api.bean;
 
+import java.util.List;
 import java.util.Set;
 
 public class ClassDefined {
 	private Set<String> interfaces;// 接口
 	private Set<String> parents;// 父类及祖类
-	private Set<String> classAnnotations;// 类注解
+	private Set<Annotation> classAnnotations;// 类注解
 	private String className;// 方法类名
+	private List<MethodDefined> methods;// 所有的方法定义
 
-	public ClassDefined(Set<String> interfaces, Set<String> parents, Set<String> classAnnotations, String className) {
+	public ClassDefined(Set<String> interfaces, Set<String> parents, Set<Annotation> classAnnotations, String className) {
 		this.interfaces = interfaces;
 		this.parents = parents;
 		this.classAnnotations = classAnnotations;
@@ -38,12 +40,20 @@ public class ClassDefined {
 		return parents;
 	}
 
-	public Set<String> getClassAnnotations() {
+	public Set<Annotation> getClassAnnotations() {
 		return classAnnotations;
 	}
 	
 	public String getClassName() {
 		return className;
+	}
+
+	public List<MethodDefined> getMethods() {
+		return methods;
+	}
+
+	public void setMethods(List<MethodDefined> methods) {
+		this.methods = methods;
 	}
 
 	@Override

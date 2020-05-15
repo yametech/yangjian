@@ -13,13 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core.eventsubscribe;
-
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+package com.yametech.yangjian.agent.core.eventsubscribe.event;
 
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
@@ -30,13 +24,20 @@ import com.yametech.yangjian.agent.api.interceptor.IMethodAOP;
 import com.yametech.yangjian.agent.api.interceptor.IStaticMethodAOP;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.eventsubscribe.base.EventSubscribe;
 import com.yametech.yangjian.agent.core.eventsubscribe.eventbus.SubscribeEventBus;
 import com.yametech.yangjian.agent.core.util.Util;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class EventDispatcher implements IMethodAOP<Object>, IConstructorListener, IStaticMethodAOP<Object>, IConfigReader {
 	private static final ILogger LOG = LoggerFactory.getLogger(EventDispatcher.class);
 	private static final String CONFIG_KEY_CHECK_SIZE = "eventSubscribe.check.minSize";
-	static final String CONFIG_KEY_CALL_ASYNC = "eventSubscribe.callAsync";
+	private static final String CONFIG_KEY_CALL_ASYNC = "eventSubscribe.callAsync";
 	private static SubscribeEventBus subscribeEventBus;
 	private int minCheckStackSize = 10;// 死循环检测最小调用栈大小
 	private boolean callAsync = true;// 是否异步通知

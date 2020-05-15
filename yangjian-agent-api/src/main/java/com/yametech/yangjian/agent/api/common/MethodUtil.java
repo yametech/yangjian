@@ -15,17 +15,17 @@
  */
 package com.yametech.yangjian.agent.api.common;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.yametech.yangjian.agent.api.bean.ClassDefined;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.bean.MethodInfo;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class MethodUtil {
 	private MethodUtil() {}
@@ -117,28 +117,40 @@ public class MethodUtil {
 			return methodId;
 		}
 		methodId = getId(methodInfo);
-//		if(matchMethodIds != null && !matchMethodIds.contains(methodId)) {
-//			return null;
-//		}
-		if(methodId != null) {
-			cacheMethodInfo.put(methodInfo, methodId);
-		}
+		cacheMethodInfo.put(methodInfo, methodId);
 		return methodId;
 	}
 	
-	public static MethodDefined getMethodDefined(Method method) {
+//	public static ClassDefined getClassDefined(Class<?> cls) {
+//		return getClassDefined(cls, false);
+//	}
+	public static ClassDefined getClassDefined(Class<?> cls) {
+		ClassDefined classDefined = new ClassDefined(getInterface(cls), getSuperClass(cls), getAnnotations(cls.getDeclaredAnnotations()), cls.getTypeName());
+//		if(!containsMethod) {
+//			return classDefined;
+//		}
+		List<MethodDefined> methodDefinedList = new ArrayList<>();
+		for(Method method : cls.getMethods()) {
+			methodDefinedList.add(getMethodDefined(classDefined, method));
+		}
+		classDefined.setMethods(methodDefinedList);
+		return classDefined;
+	}
+
+	private static MethodDefined getMethodDefined(Method method) {
 		Class<?> cls = method.getDeclaringClass();
-		return new MethodDefined(getClassDefined(cls), getAnnotations(method.getAnnotations()), 
-				method.toString(), method.getName(), getMethodParamsType(method), method.getReturnType().getTypeName(), 
+		ClassDefined classDefined = getClassDefined(cls);
+		return getMethodDefined(classDefined, method);
+	}
+
+	public static MethodDefined getMethodDefined(ClassDefined classDefined, Method method) {
+		return new MethodDefined(classDefined, getAnnotations(method.getAnnotations()),
+				method.toString(), method.getName(), getMethodParamsType(method), method.getReturnType().getTypeName(),
 				Modifier.isStatic(method.getModifiers()), false, !Modifier.isStatic(method.getModifiers()));
 	}
-	
-	public static ClassDefined getClassDefined(Class<?> cls) {
-		return new ClassDefined(getInterface(cls), getSuperClass(cls), getAnnotations(cls.getDeclaredAnnotations()), cls.getTypeName());
-	}
-	
+
 	public static String[] getMethodParamsType(Method method) {
-		if(method.getParameterTypes() == null || method.getParameterTypes().length == 0) {
+		if(method.getParameterTypes().length == 0) {
 			return new String[0];
 		}
 		String[] types = new String[method.getParameterTypes().length];
@@ -147,18 +159,24 @@ public class MethodUtil {
 		}
     	return types;
     }
-	
+
 	/**
 	 * 获取类注解
-	 * @param thisClass
+	 * @param annotations
 	 * @return
 	 */
-	public static Set<String> getAnnotations(Annotation[] annotations) {
-		Set<String> anns = new HashSet<>();
-		for(Annotation ann : annotations) {
-			anns.add(ann.getClass().getTypeName());
-		}
-    	return anns;
+	public static Set<com.yametech.yangjian.agent.api.bean.Annotation> getAnnotations(Annotation[] annotations) {
+		return Arrays.stream(annotations).map(annotation -> {
+			Map<String, Object> values = new HashMap<>();
+			Arrays.stream(annotation.annotationType().getDeclaredMethods()).forEach(method -> {
+				try {
+					values.put(method.getName(), method.invoke(annotation));
+				} catch (IllegalAccessException | InvocationTargetException e) {
+					values.put(method.getName(), null);
+				}
+			});
+			return new com.yametech.yangjian.agent.api.bean.Annotation(annotation.annotationType().getName(), values);
+		}).collect(Collectors.toSet());
     }
 	
 	/**
@@ -206,7 +224,7 @@ public class MethodUtil {
 	 */
 	public static Set<String> getClassInterface(Class<?> cls) {
     	Set<String> clsList = new HashSet<>();
-    	if(cls.getInterfaces() == null || cls.getInterfaces().length == 0) {
+    	if(cls.getInterfaces().length == 0) {
     		return clsList;
     	}
     	for(Class<?> inter : cls.getInterfaces()) {

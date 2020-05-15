@@ -15,11 +15,6 @@
  */
 package com.yametech.yangjian.agent.core.eventsubscribe;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.SPI;
@@ -30,6 +25,10 @@ import com.yametech.yangjian.agent.api.configmatch.MethodConstructorMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodRegexMatch;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.eventsubscribe.event.EventMatcher;
+import com.yametech.yangjian.agent.core.eventsubscribe.subscribe.SubscribeMatcher;
+
+import java.util.*;
 
 /**
  * 
@@ -38,14 +37,14 @@ import com.yametech.yangjian.agent.api.log.LoggerFactory;
  * @author liuzhao
  * @date 2020年4月21日 下午3:14:22
  */
-public class EventSubscribeInit implements IConfigReader, SPI {
-	private static final ILogger LOG = LoggerFactory.getLogger(EventSubscribeInit.class);
+public class EventSubscribeConfigReader implements IConfigReader, SPI {
+	private static final ILogger LOG = LoggerFactory.getLogger(EventSubscribeConfigReader.class);
 	private volatile boolean init = false;
 	private static final String EVENTGROUP_PREFIX = "eventSubscribe.group.";
 	
 	@Override
     public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList(EVENTGROUP_PREFIX.replaceAll("\\.", "\\\\.") + ".*"));
+        return new HashSet<>(Collections.singletonList(EVENTGROUP_PREFIX.replaceAll("\\.", "\\\\.") + ".*"));
     }
 
     /**
@@ -77,7 +76,7 @@ public class EventSubscribeInit implements IConfigReader, SPI {
         		LOG.warn("{}中配置的订阅匹配规则有误{}，必须包含类定义", eventGroup, target);
         		return;
         	}
-        	InstanceManage.registry(new SubscribeMatcher(eventGroup, 
+        	InstanceManage.registry(new SubscribeMatcher(eventGroup,
         			new CombineAndMatch(Arrays.asList(new ClassMatch(className), new MethodConstructorMatch())), getMatch(target)));
         	LOG.info("加载事件订阅配置：{} = {}", entry.getKey(), entry.getValue());
         });

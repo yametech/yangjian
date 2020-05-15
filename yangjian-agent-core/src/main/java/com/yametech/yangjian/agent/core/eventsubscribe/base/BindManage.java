@@ -13,25 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core.eventsubscribe;
-
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
+package com.yametech.yangjian.agent.core.eventsubscribe.base;
 
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 
+import java.lang.reflect.Method;
+import java.util.AbstractMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class BindManage {
 	private static final ILogger LOG = LoggerFactory.getLogger(BindManage.class);
 	private static final int MAX_EVENT = 200;
 	private static final int MAX_SUBSCRIBES_EACH_GROUP = 50;
-	private static Map<String, EventSubscribe> events = new ConcurrentHashMap<>();// 事件源方法描述与EventSubscribe的关系
-	private static Map<String, Set<EventSubscribe>> eventSubscribes = new ConcurrentHashMap<>();// 事件分组与EventSubscribe的关系
-	private static Map<String, Map<Method, Object>> subscribes = new ConcurrentHashMap<>();// 事件分组与订阅方法及实例的关系
+	private static final Map<String, EventSubscribe> events = new ConcurrentHashMap<>();// 事件源方法描述与EventSubscribe的关系
+	private static final Map<String, Set<EventSubscribe>> eventSubscribes = new ConcurrentHashMap<>();// 事件分组与EventSubscribe的关系
+	private static final Map<String, Map<Method, Map.Entry<Object, Boolean>>> subscribes = new ConcurrentHashMap<>();// 事件分组与订阅方法及实例的关系
 	
 	private BindManage() {}
 	
@@ -40,16 +42,15 @@ public class BindManage {
 	 * @param methodDefined
 	 * @return
 	 */
-	public static EventSubscribe registEvent(String eventGroup, MethodDefined methodDefined) {
-		LOG.info("registEvent:{} - {}", eventGroup, methodDefined);
+	public static EventSubscribe registerEvent(String eventGroup, MethodDefined methodDefined) {
+		LOG.info("registerEvent:{} - {}", eventGroup, methodDefined);
 		String methodKey = methodDefined.getMethodDes();
 		EventSubscribe eventSubscribe = events.computeIfAbsent(methodKey, key -> {
 			if(events.size() > MAX_EVENT) {
 				return null;
 			}
-			boolean ignoreParams = eventGroup.indexOf(".ignoreParams.") != -1;
-			return new EventSubscribe(ignoreParams, methodDefined.getClassDefined().getClassName(), 
-					methodDefined.getMethodName(), methodDefined.getParams(), methodDefined.getMethodRet());
+//			boolean ignoreParams = eventGroup.indexOf(".ignoreParams.") != -1;
+			return new EventSubscribe(methodDefined);
 		});
 		if(eventSubscribe == null) {
 			return null;
@@ -66,16 +67,19 @@ public class BindManage {
 	 * @param method
 	 * @param instance
 	 */
-	public static void registSubscribe(String eventGroup, Method method, Object instance) {
-		LOG.info("registSubscribe:{} - {} - {}", eventGroup, method, instance);
-		Map<Method, Object> groupSubscribe = subscribes.computeIfAbsent(eventGroup, key -> new ConcurrentHashMap<>());
+	public static void registerSubscribe(String eventGroup, boolean ignoreParams, Method method, Object instance) {
+		LOG.info("registerSubscribe:{} - {} - {}", eventGroup, method, instance);
+		Map<Method, Map.Entry<Object, Boolean>> groupSubscribe = subscribes.computeIfAbsent(eventGroup, key -> new ConcurrentHashMap<>());
+		AtomicBoolean contains = new AtomicBoolean(true);
 		Object value = groupSubscribe.computeIfAbsent(method, key -> {
 			if(groupSubscribe.size() > MAX_SUBSCRIBES_EACH_GROUP) {
+				LOG.warn("超出最大绑定数量{}：{}", MAX_SUBSCRIBES_EACH_GROUP, method);
 				return null;
 			}
-			return instance;
+			contains.set(false);
+			return new AbstractMap.SimpleEntry<>(instance, ignoreParams);
 		});
-		if(value == null) {
+		if(value == null || contains.get()) {
 			return;
 		}
 		Set<EventSubscribe> subscribes = eventSubscribes.get(eventGroup);
@@ -90,9 +94,9 @@ public class BindManage {
 	 * @param eventSubscribe
 	 */
 	private static void refreshBind(String eventGroup, EventSubscribe eventSubscribe) {
-		Map<Method, Object> subscribeMethod = subscribes.get(eventGroup);
+		Map<Method, Map.Entry<Object, Boolean>> subscribeMethod = subscribes.get(eventGroup);
 		if(subscribeMethod != null && subscribeMethod.size() > 0) {
-			subscribeMethod.forEach(eventSubscribe::regist);
+			subscribeMethod.forEach((key, value) -> eventSubscribe.register(key, value.getKey(), value.getValue()));
 		}
 	}
 	

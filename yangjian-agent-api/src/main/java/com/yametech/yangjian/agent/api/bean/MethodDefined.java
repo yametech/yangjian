@@ -20,7 +20,7 @@ import java.util.Set;
 public class MethodDefined {
 	private ClassDefined classDefined;// 类定义
 	private String methodDes;// 方法描述
-	private Set<String> methodAnnotations;// 方法注解
+	private Set<Annotation> methodAnnotations;// 方法注解
 	private String methodName;// 方法名
 	private String[] params;// 方法参数类型
 	private String methodRet;// 方法返回值类型
@@ -32,7 +32,7 @@ public class MethodDefined {
 		this.classDefined = classDefined;
 	}
 	
-	public MethodDefined(ClassDefined classDefined, Set<String> methodAnnotations, 
+	public MethodDefined(ClassDefined classDefined, Set<Annotation> methodAnnotations,
 			String methodDes, String methodName, String[] params, String methodRet, 
 			boolean staticMethod, boolean constructorMethod, boolean instanceMethod) {
 		this.classDefined = classDefined;
@@ -50,7 +50,7 @@ public class MethodDefined {
 		return classDefined;
 	}
 	
-	public Set<String> getMethodAnnotations() {
+	public Set<Annotation> getMethodAnnotations() {
 		return methodAnnotations;
 	}
 	
@@ -81,7 +81,11 @@ public class MethodDefined {
 	public boolean isStaticMethod() {
 		return staticMethod;
 	}
-	
+
+	public String getMethodIdentify() {
+		return classDefined.getClassName() + "." + methodName + "(" + String.join(",", params) + ")";
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();

@@ -18,27 +18,32 @@ package com.yametech.yangjian.agent.api.configmatch;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
 
+import java.util.stream.Stream;
+
 /**
- * 类注解匹配
+ * 匹配含有对应注解方法的构造方法
  * 
  * @author liuzhao
  */
-public class ClassAnnotationMatch implements IConfigMatch {
+public class MethodAnnotationConstructorMatch implements IConfigMatch {
 	private String annotation;
-	
-	public ClassAnnotationMatch(String annotation) {
+
+	public MethodAnnotationConstructorMatch(String annotation) {
 		this.annotation = annotation;
 	}
 	
 	@Override
 	public boolean isMatch(MethodDefined methodDefined) {
-		return methodDefined.getClassDefined().getClassAnnotations() != null
-				&& methodDefined.getClassDefined().getClassAnnotations().stream().anyMatch(ann -> ann.getName().equals(annotation));
+		return methodDefined.isConstructorMethod() && methodDefined.getClassDefined() != null
+				&& methodDefined.getClassDefined().getMethods() != null && methodDefined.getClassDefined().getMethods().size() > 0
+				&& methodDefined.getClassDefined().getMethods().stream()
+						.flatMap(md -> md.getMethodAnnotations() == null ? Stream.empty() : md.getMethodAnnotations().stream())
+						.anyMatch(ann -> ann.getName().equals(annotation));
 	}
 	
 	@Override
 	public String toString() {
-		return annotation;
+		return "Constructor has method annotation " + annotation;
 	}
 	
 }

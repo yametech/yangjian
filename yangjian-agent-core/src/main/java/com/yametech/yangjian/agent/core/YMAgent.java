@@ -15,16 +15,6 @@
  */
 package com.yametech.yangjian.agent.core;
 
-import static net.bytebuddy.matcher.ElementMatchers.isInterface;
-
-import java.lang.instrument.Instrumentation;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
@@ -46,19 +36,32 @@ import com.yametech.yangjian.agent.core.core.elementmatch.ClassElementMatcher;
 import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
 import com.yametech.yangjian.agent.core.util.Util;
 import com.yametech.yangjian.agent.util.OSUtil;
-
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatchers;
+
+import java.lang.instrument.Instrumentation;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
+
+import static net.bytebuddy.matcher.ElementMatchers.isInterface;
 
 public class YMAgent {
 	private static ILogger log = LoggerFactory.getLogger(YMAgent.class);
 	private static final String[] IGNORE_CLASS_CONFIG = new String[] {"^net\\.bytebuddy\\.", "^org\\.slf4j\\.", // ".*\\$auxiliary\\$.*", 
 			"^org\\.apache\\.logging\\.", "^org\\.groovy\\.", "^sun\\.reflect\\.", // ".*javassist.*", ".*\\.asm\\..*", 这两个会有误拦截：com.alibaba.dubbo.rpc.proxy.javassist.JavassistProxyFactory
-			"^org\\.apache\\.skywalking\\.", "^com\\.yametech\\.yangjian\\.agent\\."};
+			"^org\\.apache\\.skywalking\\."};//, "^com\\.yametech\\.yangjian\\.agent\\."};
 	private static final String[] IGNORE_METHOD_CONFIG = new String[] {".*toString\\(\\)$", ".*equals\\(java.lang.Object\\)$",
             ".*hashCode\\(\\)$", ".*clone\\(\\).*"};
-	
+
+	private static List<InterceptorMatcher> transformerMatchers = new CopyOnWriteArrayList<>();
+	private static List<IConfigMatch> typeMatches = new CopyOnWriteArrayList<>();
+
 	/**
 	 * -javaagent:E:\eclipse-workspace\tool-ecpark-monitor\ecpark-agent\dist\ecpark-agent\ecpark-agent.jar=args -Dskywalking.agent.service_name=testlog
 	 * 
@@ -92,13 +95,13 @@ public class YMAgent {
     }
     
     private static void instrumentation(Instrumentation instrumentation) {
-    	List<InterceptorMatcher> interceptorMatchers = InstanceManage.listInstance(InterceptorMatcher.class).stream().collect(Collectors.toList());
-    	List<IConfigMatch> matches = interceptorMatchers.stream().filter(aop -> aop.match() != null)
-    			.map(InterceptorMatcher::match).collect(Collectors.toList());
-    	interceptorMatchers = interceptorMatchers.stream().map(YMAgent::getMatcherProxy).collect(Collectors.toList());// 转换IMetricMatcher为MetricMatcherProxy
+    	List<InterceptorMatcher> interceptorMatchers = new ArrayList<>(InstanceManage.listInstance(InterceptorMatcher.class));
+    	interceptorMatchers.stream().filter(aop -> aop.match() != null)
+    			.map(InterceptorMatcher::match).forEachOrdered(typeMatches::add);
+    	interceptorMatchers.stream().map(YMAgent::getMatcherProxy).forEachOrdered(transformerMatchers::add);// 转换IMetricMatcher为MetricMatcherProxy
     	List<IEnhanceClassMatch> classMatches = InstanceManage.listInstance(IEnhanceClassMatch.class);
-    	matches.addAll(classMatches.stream().filter(aop -> aop.classMatch() != null).map(IEnhanceClassMatch::classMatch).collect(Collectors.toList()));
-    	log.info("match class:{}", matches);
+		typeMatches.addAll(classMatches.stream().filter(aop -> aop.classMatch() != null).map(IEnhanceClassMatch::classMatch).collect(Collectors.toList()));
+    	log.info("match class:{}", typeMatches);
     	IConfigMatch ignoreMatch = getOrRegexMatch(Config.IGNORE_CLASS.getValue(), IGNORE_CLASS_CONFIG);
     	log.info("ignore class:{}", ignoreMatch);
     	IConfigMatch ignoreMethodMatch = getOrRegexMatch(Config.IGNORE_METHODS.getValue(), IGNORE_METHOD_CONFIG);
@@ -108,13 +111,24 @@ public class YMAgent {
                         .or(ElementMatchers.<TypeDescription>isSynthetic())
                 		.or(new ClassElementMatcher(ignoreMatch, "class_ignore")))// byte-buddy代理的类会包含该字符串
 //        		.with(AgentBuilder.LambdaInstrumentationStrategy.ENABLED)
-                .type(new ClassElementMatcher(new CombineOrMatch(matches), "class_match"))
+                .type(new ClassElementMatcher(new CombineOrMatch(typeMatches), "class_match"))
 //                .type(ElementMatchers.nameEndsWith("Timed"))
-                .transform(new AgentTransformer(interceptorMatchers, ignoreMethodMatch, classMatches, Config.IGNORE_CLASSLOADERNAMES.getValue()))
+                .transform(new AgentTransformer(transformerMatchers, ignoreMethodMatch, classMatches, Config.IGNORE_CLASSLOADERNAMES.getValue()))
 //                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)// 使用后会异常
                 .with(new AgentListener())
                 .installOn(instrumentation);
     }
+
+	/**
+	 * 用于类加载后新增增强匹配
+	 * @param matcher
+	 */
+	public static void addTransformerMatchers(InterceptorMatcher matcher) {
+		transformerMatchers.add(matcher);
+		if(matcher.match() != null) {
+			typeMatches.add(matcher.match());
+		}
+	}
     
     private static InterceptorMatcher getMatcherProxy(InterceptorMatcher matcher) {
     	Entry<Class<?>, Class<?>> proxy = MatchProxyManage.getProxy(matcher.getClass());
@@ -152,12 +166,7 @@ public class YMAgent {
      *	 注册关闭通知，注意关闭应用不能使用kill -9，会导致下面的方法不执行
      */
     private static void addShutdownHook() {
-    	Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-    		public void run() {
-            	InstanceManage.afterStop();
-            }
-        });
+    	Runtime.getRuntime().addShutdownHook(new Thread(InstanceManage::afterStop));
     }
     
 }

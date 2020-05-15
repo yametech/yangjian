@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core.eventsubscribe;
+package com.yametech.yangjian.agent.core.eventsubscribe.subscribe;
 
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
@@ -43,7 +43,7 @@ public class SubscribeMatcher implements IMatcherProxy<SubscribeInterceptor>, In
 	
 	@Override
 	public void init(SubscribeInterceptor obj, ClassLoader classLoader, MethodType type, MethodDefined methodDefined) {
-		obj.regist(eventGroup, methodMatch);
+		obj.register(eventGroup, methodMatch);
 	}
 
 	@Override

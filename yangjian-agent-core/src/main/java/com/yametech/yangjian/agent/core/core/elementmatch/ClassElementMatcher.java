@@ -15,14 +15,11 @@
  */
 package com.yametech.yangjian.agent.core.core.elementmatch;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
-import net.bytebuddy.description.method.MethodDescription;
-import net.bytebuddy.description.method.MethodList;
 import net.bytebuddy.description.type.TypeDescription;
+
+import java.util.List;
 
 /**
  * 使用正则匹配类包（不含方法定义）
@@ -39,17 +36,7 @@ public class ClassElementMatcher extends BaseElementMatcher<TypeDescription> {
 
     @Override
     public List<MethodDefined> name(TypeDescription typeDescription) {
-    	List<MethodDefined> matchNames = new ArrayList<>();
-    	MethodList<MethodDescription.InDefinedShape> methods = typeDescription.getDeclaredMethods();
-        for(MethodDescription.InDefinedShape inDefinedShape : methods) {
-//            if(!inDefinedShape.isMethod()) {// 2020-04-24 去除该逻辑，防止无法匹配构造方法
-//                continue;
-//            }
-//            System.out.println(convert(inDefinedShape).toString());
-            matchNames.add(ElementMatcherConvert.convert(inDefinedShape));
-        }
-    	return matchNames;
+        return ElementMatcherConvert.convert(typeDescription).getMethods();
     }
-    
-   
+
 }

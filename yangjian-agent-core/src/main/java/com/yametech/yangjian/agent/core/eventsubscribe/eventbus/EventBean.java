@@ -18,7 +18,7 @@ package com.yametech.yangjian.agent.core.eventsubscribe.eventbus;
 
 import java.lang.reflect.Method;
 
-import com.yametech.yangjian.agent.core.eventsubscribe.EventSubscribe;
+import com.yametech.yangjian.agent.core.eventsubscribe.base.EventSubscribe;
 
 public class EventBean {
 	private EventSubscribe eventSubscribe;

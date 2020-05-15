@@ -1,10 +1,9 @@
 package com.yametech.yangjian.agent.core.eventsubscribe;
 
-import java.lang.reflect.Method;
-import java.util.regex.Pattern;
-
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.core.report.MultiReport;
+
+import java.lang.reflect.Method;
 
 public class TestSubscribe {
 	
@@ -12,10 +11,6 @@ public class TestSubscribe {
 	public void test() {
 		System.err.println(1 << 13);
 		System.err.println(IConfigReader.class.isAssignableFrom(MultiReport.class));
-		System.err.println(EventDispatcher.CONFIG_KEY_CALL_ASYNC.replaceAll("\\.", "\\\\."));
-		
-		System.err.println(Pattern.matches(EventDispatcher.CONFIG_KEY_CALL_ASYNC.replaceAll("\\.", "\\\\."), EventDispatcher.CONFIG_KEY_CALL_ASYNC));
-	
 		for(Method method : Listener.class.getMethods()) {
 			System.err.println(method);
 			for(Class<?> cls : method.getParameterTypes()) {

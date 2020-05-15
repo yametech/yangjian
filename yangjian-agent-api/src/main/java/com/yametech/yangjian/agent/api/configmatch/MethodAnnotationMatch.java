@@ -32,7 +32,7 @@ public class MethodAnnotationMatch implements IConfigMatch {
 	
 	@Override
 	public boolean isMatch(MethodDefined methodDefined) {
-		return methodDefined.getMethodAnnotations() != null && methodDefined.getMethodAnnotations().contains(annotation);
+		return methodDefined.getMethodAnnotations() != null && methodDefined.getMethodAnnotations().stream().anyMatch(ann -> ann.getName().equals(annotation));
 	}
 	
 	@Override

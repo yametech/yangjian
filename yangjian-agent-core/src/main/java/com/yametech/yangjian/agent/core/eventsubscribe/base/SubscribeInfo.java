@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.core.eventsubscribe;
+package com.yametech.yangjian.agent.core.eventsubscribe.base;
 
 import java.util.Arrays;
 
 public class SubscribeInfo {
 	private Object instance;
+	private boolean ignoreParams;
 	private Object[] defaultArguments;
 	private Integer[] extraArgumentsIndex;
 
-	public SubscribeInfo(Object instance, Object[] defaultArguments, Integer[] extraArgumentsIndex) {
+	public SubscribeInfo(Object instance, boolean ignoreParams, Object[] defaultArguments, Integer[] extraArgumentsIndex) {
 		this.instance = instance;
+		this.ignoreParams = ignoreParams;
 		this.defaultArguments = defaultArguments;
 		this.extraArgumentsIndex = extraArgumentsIndex;
 	}
@@ -34,6 +36,14 @@ public class SubscribeInfo {
 
 	public void setInstance(Object instance) {
 		this.instance = instance;
+	}
+
+	public boolean isIgnoreParams() {
+		return ignoreParams;
+	}
+
+	public void setIgnoreParams(boolean ignoreParams) {
+		this.ignoreParams = ignoreParams;
 	}
 
 	public Object[] getDefaultArgumentsCopy() {
