@@ -42,7 +42,7 @@ public class LoggerFactory implements ILoggerFactory {
 	public static final Integer DEFAULT_MAX_FILE_NUM = 10;
 	public static final String DEFAULT_PATTERN = "%timestamp[%level]-[%thread]-[%class.method]: %msg %throwable";
 	public static final String DEFAULT_LINUX_DIR = "/data/www/logs/cus-ecpark-agent";
-	public static final String DEFAULT_TRACE_LOG_DIR = "/data/www/logs/cus-trace-";
+	public static final String DEFAULT_TRACE_LOG_DIR = "/data/www/logs/cus-trace-span";
 
 	/**
 	 * 初始化日志相关的配置，包含应用名称，应用名称会作为日志目录，所以必须提前初始化
@@ -59,7 +59,8 @@ public class LoggerFactory implements ILoggerFactory {
 
 		// 获取System中的应用名称配置Key，不存在时使用配置文件中的key
 		String serviceName = System.getProperty(Constants.SYSTEM_PROPERTIES_PREFIX + Config.SERVICE_NAME.getKey());
-		if (StringUtil.isEmpty(serviceName)) {// 此处对skywalking配置做自动读取，减少研发配置
+		// 此处对skywalking配置做自动读取，减少研发配置
+		if (StringUtil.isEmpty(serviceName)) {
 			serviceName = System.getProperty(SKYWALKING_SERVICE_NAME_CONFIGKEY);
 		}
 		if (!StringUtil.isEmpty(serviceName)) {

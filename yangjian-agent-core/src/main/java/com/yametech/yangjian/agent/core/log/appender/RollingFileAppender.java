@@ -99,7 +99,7 @@ public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<Lo
     private String getAppenderDir(String appenderName) {
         // 链路日志
         if (AppenderFactory.TRACE_APPENDER.equals(appenderName)) {
-            return Config.getKv(Constants.LOG_TRACE_DIR, LoggerFactory.DEFAULT_TRACE_LOG_DIR + serviceName);
+            return Config.getKv(Constants.LOG_TRACE_DIR, LoggerFactory.DEFAULT_TRACE_LOG_DIR) + Constants.PATH_SEPARATOR + serviceName;
         }
         return Config.getKv(Constants.LOG_DIR, LoggerFactory.DEFAULT_DIR) + Constants.PATH_SEPARATOR + serviceName;
     }
