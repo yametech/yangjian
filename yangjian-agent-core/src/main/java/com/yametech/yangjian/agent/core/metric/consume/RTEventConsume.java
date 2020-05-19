@@ -34,7 +34,7 @@ import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
 public class RTEventConsume implements BaseConsume<ConvertTimeEvent> {
 	private static final ILogger log = LoggerFactory.getLogger(RTEventConsume.class);
 	private static final int STATISTICS_SECOND_SIZE = 1 << 3;// 每种类型的统计，内存中存放的最大统计秒数个数
-	private SecondStatisticBean[] allStatistics = new SecondStatisticBean[STATISTICS_SECOND_SIZE];
+	private volatile SecondStatisticBean[] allStatistics = new SecondStatisticBean[STATISTICS_SECOND_SIZE];
 	private long totalNum = 0;// 总消费量
 	private AtomicLong periodTotalNum = new AtomicLong(0);// 最近一个输出周期产生的事件量
 
@@ -55,7 +55,8 @@ public class RTEventConsume implements BaseConsume<ConvertTimeEvent> {
 		if (timeEvents == null) {
 			return;
 		}
-		timeEvents.parallelStream()
+		// 这里用多线程可能会有并发问题，已经支持配置多线程消费了这里不要使用parallelStream
+		timeEvents.stream()
 			.filter(Objects::nonNull)
 			.forEach(timeEvent -> {
 				// 默认优先使用timeEvent自定义的type
