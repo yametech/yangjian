@@ -15,7 +15,19 @@
  */
 package com.yametech.yangjian.agent.plugin.mongo.context;
 
-public abstract class ContextConstants {
-	public static final String MONGO_OPERATOR_COLLECTION = "__mongo_operator_collection_";
-	public static final String MONGO_SERVER_URL = "__mongo_server_url_";
+import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
+import com.yametech.yangjian.agent.api.base.IConfigMatch;
+import com.yametech.yangjian.agent.api.base.SPI;
+import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
+
+/**
+ * @author dengliming
+ * @date 2020/5/19
+ */
+public class DelegateOperationExecutorMatcher implements IEnhanceClassMatch, SPI {
+
+    @Override
+    public IConfigMatch classMatch() {
+        return new ClassMatch("com.mongodb.client.internal.MongoClientDelegate$DelegateOperationExecutor");
+    }
 }
