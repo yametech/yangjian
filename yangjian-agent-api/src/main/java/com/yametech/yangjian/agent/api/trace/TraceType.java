@@ -29,7 +29,8 @@ public enum TraceType {
 	HTTP_SERVER("http-server"),
 	HTTP_CLIENT("http-client"),
 	MYSQL("mysql"),
-	REDIS("redis");
+	REDIS("redis"),
+	MONGO("mongo");
 
 	private String key;
 	private TraceType(String key) {
