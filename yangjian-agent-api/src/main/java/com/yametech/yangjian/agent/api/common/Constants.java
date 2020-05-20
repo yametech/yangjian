@@ -76,6 +76,7 @@ public class Constants {
     public static class ReportType {
     	public static final String LOG = "log";// log上报方式
     	public static final String HTTP = "http";// http上报方式
+        public static final String LOG_TRACE = "log-trace";// trace单独日志文件
     }
     
     public static class DbOperation {

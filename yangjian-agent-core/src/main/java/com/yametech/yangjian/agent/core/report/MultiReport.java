@@ -15,13 +15,6 @@
  */
 package com.yametech.yangjian.agent.core.report;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.IReport;
 import com.yametech.yangjian.agent.api.base.IReportData;
@@ -30,6 +23,8 @@ import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.InstanceManage;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+
+import java.util.*;
 
 /**
  * 注意不要修改路径、类名、构造方法，api中有使用反射获取类实例
@@ -43,7 +38,11 @@ public class MultiReport implements IReportData, IConfigReader {
 	private Set<String> configKeys;
 	private String myKey;
 	private List<IReport> reports;
-	
+
+	/**
+	 * 有反射调用
+	 * @param reportConfigKey
+	 */
 	public MultiReport(String reportConfigKey) {
 		if(reportConfigKey == null) {
 			throw new IllegalArgumentException("reportConfigKey不能为null");
@@ -54,7 +53,7 @@ public class MultiReport implements IReportData, IConfigReader {
 	
 	/**
 	 * 根据Class获取上报实例，并注册配置通知
-	 * @param cls	一般为调用的类Class，用于读取配置
+	 * @param reportConfigKey	一般为调用的类Class，用于读取配置
 	 * @return
 	 */
     static IReportData getReport(String reportConfigKey) {

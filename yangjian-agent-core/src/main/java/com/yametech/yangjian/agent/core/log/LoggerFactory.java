@@ -15,9 +15,6 @@
  */
 package com.yametech.yangjian.agent.core.log;
 
-import java.io.File;
-import java.io.IOException;
-
 import com.yametech.yangjian.agent.api.common.Config;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.StringUtil;
@@ -26,6 +23,9 @@ import com.yametech.yangjian.agent.api.log.ILoggerFactory;
 import com.yametech.yangjian.agent.core.log.impl.PatternLogger;
 import com.yametech.yangjian.agent.core.util.AgentPath;
 import com.yametech.yangjian.agent.util.OSUtil;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author zcn
@@ -42,7 +42,7 @@ public class LoggerFactory implements ILoggerFactory {
 	public static final Integer DEFAULT_MAX_FILE_NUM = 10;
 	public static final String DEFAULT_PATTERN = "%timestamp[%level]-[%thread]-[%class.method]: %msg %throwable";
 	public static final String DEFAULT_LINUX_DIR = "/data/www/logs/cus-ecpark-agent";
-	public static final String DEFAULT_TRACE_LOG_DIR = "/data/www/logs/cus-trace-span";
+	public static final String DEFAULT_TRACE_LOG_DIR = "/data/www/logs/cus-ecpark-agent_trace";
 
 	/**
 	 * 初始化日志相关的配置，包含应用名称，应用名称会作为日志目录，所以必须提前初始化

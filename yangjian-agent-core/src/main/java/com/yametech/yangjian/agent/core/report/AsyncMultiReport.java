@@ -15,12 +15,12 @@
  */
 package com.yametech.yangjian.agent.core.report;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.common.InstanceManage;
 import com.yametech.yangjian.agent.core.report.async.ReportPublish;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 注意不要修改路径、类名、构造方法，api中有使用反射获取类实例
@@ -33,7 +33,11 @@ public class AsyncMultiReport implements IReportData {
 	private String reportType;
 	private ReportPublish publish;
 	private IReportData report;
-	
+
+	/**
+	 * 有反射调用
+	 * @param reportConfigKey
+	 */
 	public AsyncMultiReport(String reportConfigKey) {
 		this.reportType = reportConfigKey;
 		this.report = MultiReport.getReport(reportConfigKey);

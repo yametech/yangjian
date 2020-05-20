@@ -9,3 +9,4 @@ com.yametech.yangjian.agent.core.eventsubscribe.EventSubscribeConfigReader
 com.yametech.yangjian.agent.core.trace.TraceInit
 com.yametech.yangjian.agent.core.runstatus.RunMonitor
 com.yametech.yangjian.agent.core.eventsubscribe.subscribe.AnnotationSubscribeMatcher
+com.yametech.yangjian.agent.core.report.TraceLogReport
