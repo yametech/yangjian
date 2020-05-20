@@ -13,31 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.api.trace;
+package com.yametech.yangjian.agent.plugin.mongo.context;
+
+import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
+import com.yametech.yangjian.agent.api.base.IConfigMatch;
+import com.yametech.yangjian.agent.api.base.SPI;
+import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
 
 /**
- * 链路Span类型
- * 
- * @author liuzhao
+ * @author dengliming
+ * @date 2020/5/19
  */
-public enum TraceType {
-	DUBBO_CLIENT("dubbo-client"),
-	DUBBO_SERVER("dubbo-server"),
-	MQ_PUBLISH("mq-publish"),
-	MQ_CONSUME("mq-consume"),
-	CUSTOM_MARK("custom-mark"),
-	HTTP_SERVER("http-server"),
-	HTTP_CLIENT("http-client"),
-	MYSQL("mysql"),
-	REDIS("redis"),
-	MONGO("mongo");
+public class DelegateOperationExecutorMatcher implements IEnhanceClassMatch, SPI {
 
-	private String key;
-	private TraceType(String key) {
-		this.key = key;
-	}
-	
-	public String getKey() {
-		return key;
-	}
+    @Override
+    public IConfigMatch classMatch() {
+        return new ClassMatch("com.mongodb.client.internal.MongoClientDelegate$DelegateOperationExecutor");
+    }
 }

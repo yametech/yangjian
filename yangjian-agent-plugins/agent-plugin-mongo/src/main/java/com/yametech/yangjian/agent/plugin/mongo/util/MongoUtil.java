@@ -24,24 +24,22 @@ import com.mongodb.bulk.DeleteRequest;
 import com.mongodb.bulk.InsertRequest;
 import com.mongodb.bulk.UpdateRequest;
 import com.mongodb.bulk.WriteRequest;
-import com.mongodb.operation.AggregateOperation;
-import com.mongodb.operation.CountOperation;
-import com.mongodb.operation.FindAndDeleteOperation;
-import com.mongodb.operation.FindAndReplaceOperation;
-import com.mongodb.operation.FindAndUpdateOperation;
-import com.mongodb.operation.FindOperation;
-import com.mongodb.operation.MixedBulkWriteOperation;
+import com.mongodb.operation.*;
 
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.plugin.mongo.context.ContextConstants;
+import org.bson.BsonDocument;
 
 /**
  * @author dengliming
  * @date 2019/12/17
  */
 public class MongoUtil {
+
+    private static final int FILTER_LENGTH_LIMIT = 50;
 
     public static List<TimeEvent> buildRTEvent(long startTime, Object obj) {
         if (obj == null) {
@@ -105,5 +103,79 @@ public class MongoUtil {
             timeEvent.setNumber(timeEvent.getNumber() + 1);
         }
         return new ArrayList<>(timeEventMap.values());
+    }
+
+    public static String getTraceParam(Object obj) {
+        if (obj instanceof CountOperation) {
+            BsonDocument filter = ((CountOperation) obj).getFilter();
+            return StringUtil.shorten(filter.toString(), FILTER_LENGTH_LIMIT);
+        } else if (obj instanceof DistinctOperation) {
+            BsonDocument filter = ((DistinctOperation) obj).getFilter();
+            return StringUtil.shorten(filter.toString(), FILTER_LENGTH_LIMIT);
+        } else if (obj instanceof FindOperation) {
+            BsonDocument filter = ((FindOperation) obj).getFilter();
+            return StringUtil.shorten(filter.toString(), FILTER_LENGTH_LIMIT);
+        } else if (obj instanceof GroupOperation) {
+            BsonDocument filter = ((GroupOperation) obj).getFilter();
+            return StringUtil.shorten(filter.toString(), FILTER_LENGTH_LIMIT);
+        } else if (obj instanceof ListCollectionsOperation) {
+            BsonDocument filter = ((ListCollectionsOperation) obj).getFilter();
+            return StringUtil.shorten(filter.toString(), FILTER_LENGTH_LIMIT);
+        } else if (obj instanceof MapReduceWithInlineResultsOperation) {
+            BsonDocument filter = ((MapReduceWithInlineResultsOperation) obj).getFilter();
+            return StringUtil.shorten(filter.toString(), FILTER_LENGTH_LIMIT);
+        } else if (obj instanceof DeleteOperation) {
+            List<DeleteRequest> writeRequestList = ((DeleteOperation) obj).getDeleteRequests();
+            return getFilter(writeRequestList);
+        } else if (obj instanceof InsertOperation) {
+            List<InsertRequest> writeRequestList = ((InsertOperation) obj).getInsertRequests();
+            return getFilter(writeRequestList);
+        } else if (obj instanceof UpdateOperation) {
+            List<UpdateRequest> writeRequestList = ((UpdateOperation) obj).getUpdateRequests();
+            return getFilter(writeRequestList);
+        } else if (obj instanceof CreateCollectionOperation) {
+            String filter = ((CreateCollectionOperation) obj).getCollectionName();
+            return StringUtil.shorten(filter, FILTER_LENGTH_LIMIT);
+        } else if (obj instanceof CreateIndexesOperation) {
+            List<String> filter = ((CreateIndexesOperation) obj).getIndexNames();
+            return StringUtil.shorten(filter.toString(), FILTER_LENGTH_LIMIT);
+        } else if (obj instanceof CreateViewOperation) {
+            String filter = ((CreateViewOperation) obj).getViewName();
+            return StringUtil.shorten(filter, FILTER_LENGTH_LIMIT);
+        } else if (obj instanceof FindAndDeleteOperation) {
+            BsonDocument filter = ((FindAndDeleteOperation) obj).getFilter();
+            return StringUtil.shorten(filter.toString(), FILTER_LENGTH_LIMIT);
+        } else if (obj instanceof FindAndReplaceOperation) {
+            BsonDocument filter = ((FindAndReplaceOperation) obj).getFilter();
+            return StringUtil.shorten(filter.toString(), FILTER_LENGTH_LIMIT);
+        } else if (obj instanceof FindAndUpdateOperation) {
+            BsonDocument filter = ((FindAndUpdateOperation) obj).getFilter();
+            return StringUtil.shorten(filter.toString(), FILTER_LENGTH_LIMIT);
+        } else if (obj instanceof MapReduceToCollectionOperation) {
+            BsonDocument filter = ((MapReduceToCollectionOperation) obj).getFilter();
+            return StringUtil.shorten(filter.toString(), FILTER_LENGTH_LIMIT);
+        } else if (obj instanceof MixedBulkWriteOperation) {
+            List<? extends WriteRequest> writeRequestList = ((MixedBulkWriteOperation) obj).getWriteRequests();
+            return getFilter(writeRequestList);
+        }
+        return "";
+    }
+
+    private static String getFilter(List<? extends WriteRequest> writeRequestList) {
+        StringBuilder params = new StringBuilder();
+        for (WriteRequest request : writeRequestList) {
+            if (request instanceof InsertRequest) {
+                params.append(((InsertRequest) request).getDocument().toString()).append(",");
+            } else if (request instanceof DeleteRequest) {
+                params.append(((DeleteRequest) request).getFilter()).append(",");
+            } else if (request instanceof UpdateRequest) {
+                params.append(((UpdateRequest) request).getFilter()).append(",");
+            }
+            if (params.length() > FILTER_LENGTH_LIMIT) {
+                params.append("...");
+                break;
+            }
+        }
+        return params.toString();
     }
 }

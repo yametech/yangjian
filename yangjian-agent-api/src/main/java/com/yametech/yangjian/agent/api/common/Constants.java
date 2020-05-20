@@ -103,5 +103,7 @@ public class Constants {
 
         public static final String DB_INSTANCE = "db.instance";
         public static final String DB_STATEMENT = "db.statement";
+        public static final String DB_TYPE = "db.type";
+        public static final String DB_PARAMETERS = "db.parameters";
     }
 }

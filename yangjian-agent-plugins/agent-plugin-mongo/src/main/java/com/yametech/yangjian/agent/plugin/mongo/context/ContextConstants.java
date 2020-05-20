@@ -17,4 +17,5 @@ package com.yametech.yangjian.agent.plugin.mongo.context;
 
 public abstract class ContextConstants {
 	public static final String MONGO_OPERATOR_COLLECTION = "__mongo_operator_collection_";
+	public static final String MONGO_SERVER_URL = "__mongo_server_url_";
 }
