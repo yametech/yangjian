@@ -60,7 +60,7 @@ public class RemoteConfigLoader implements IConfigLoader, ISchedule {
      * 请求远程配置最大重试次数
      */
     private static final int MAX_RETRY = 2;
-    private static final String LOCAL_CONFIG_PATH = "/data/www/config-cache";
+    private static final String LOCAL_CONFIG_PATH = "/data/www/soft/mointor/config-cache";
     private static final String LOCAL_CONFIG_FILE_NAME = "agent-remote.properties";
     /**
      * monitor响应请求成功code
