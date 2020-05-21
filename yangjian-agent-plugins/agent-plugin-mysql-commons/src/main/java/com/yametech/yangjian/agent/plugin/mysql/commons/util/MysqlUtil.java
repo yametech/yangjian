@@ -100,10 +100,6 @@ public class MysqlUtil {
             String parameterizedSql = ParameterizedOutputVisitorUtils.parameterize(sqlBean.getSql(), JdbcConstants.MYSQL);
             timeEvents.add(initMysqlTimeEvent(sqlBean, Constants.EventType.MYSQL_SQL, parameterizedSql, 1));
         }
-
-        for (TimeEvent timeEvent : timeEvents) {
-            System.out.println("=========================timeEvent:" + timeEvent.getType() + ":" + timeEvent.getIdentify());
-        }
         return timeEvents;
     }
 
