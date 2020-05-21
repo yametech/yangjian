@@ -15,7 +15,9 @@
         <module>agent-plugin-kafka</module>
         <module>agent-plugin-method</module>
         <module>agent-plugin-mongo</module>
+        <module>agent-plugin-mysql-commons</module>
         <module>agent-plugin-mysql</module>
+        <module>agent-plugin-mysql-8.x</module>
         <module>agent-plugin-okhttp</module>
         <module>agent-plugin-rabbitmq</module>
         <module>agent-plugin-redisson</module>
