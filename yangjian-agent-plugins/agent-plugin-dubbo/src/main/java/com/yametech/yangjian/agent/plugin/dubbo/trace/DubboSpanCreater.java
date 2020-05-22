@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.yametech.yangjian.agent.api.common.MicrosClock;
 import org.apache.dubbo.rpc.Result;
 import org.apache.dubbo.rpc.RpcContext;
 import org.apache.dubbo.rpc.RpcException;
@@ -39,6 +40,7 @@ import brave.Tracing;
 import brave.internal.Platform;
 
 public abstract class DubboSpanCreater<T extends ISpanCustom> implements ISpanCreater<SpanInfo>, ICustomLoad<T> {
+	protected static final MicrosClock MICROS_CLOCK = new MicrosClock();
 	private List<IDubboCustom> customs;
 	protected Tracer tracer;
 	private ISpanSample spanSample;

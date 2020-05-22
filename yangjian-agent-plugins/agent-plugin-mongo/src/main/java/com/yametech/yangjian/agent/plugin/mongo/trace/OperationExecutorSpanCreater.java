@@ -27,6 +27,7 @@ import com.mongodb.operation.*;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
@@ -45,6 +46,7 @@ import java.util.List;
  */
 public class OperationExecutorSpanCreater implements ISpanCreater<SpanInfo> {
 
+    private static final MicrosClock MICROS_CLOCK = new MicrosClock();
     private static final String SPAN_NAME_FORMAT = "MongoDB/%s";
     protected Tracer tracer;
     private ISpanSample spanSample;
@@ -60,6 +62,10 @@ public class OperationExecutorSpanCreater implements ISpanCreater<SpanInfo> {
         if (!spanSample.sample()) {
             return null;
         }
+        long startTime = MICROS_CLOCK.nowMicros();
+        if (startTime == -1L) {
+            return null;
+        }
         String executeMethod = allArguments[0].getClass().getSimpleName();
         String serverUrl = (String) ((IContext) thisObj)._getAgentContext(ContextConstants.MONGO_SERVER_URL);
         if (StringUtil.isEmpty(serverUrl)) {
@@ -70,7 +76,7 @@ public class OperationExecutorSpanCreater implements ISpanCreater<SpanInfo> {
                 .kind(Span.Kind.CLIENT)
                 .name(String.format(SPAN_NAME_FORMAT, executeMethod))
                 .tag(Constants.Tags.URL, serverUrl)
-                .start(TraceUtil.nowMicros());
+                .start(startTime);
         span.tag(Constants.Tags.DB_STATEMENT, executeMethod + MongoUtil.getTraceParam(allArguments[0]));
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }

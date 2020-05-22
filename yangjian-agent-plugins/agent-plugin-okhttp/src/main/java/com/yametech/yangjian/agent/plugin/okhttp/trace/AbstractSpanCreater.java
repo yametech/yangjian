@@ -7,6 +7,7 @@ import brave.propagation.TraceContext;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
@@ -25,6 +26,7 @@ import java.lang.reflect.Modifier;
  * @date 2020/4/24
  */
 public abstract class AbstractSpanCreater implements ISpanCreater<SpanInfo> {
+    protected static final MicrosClock MICROS_CLOCK = new MicrosClock();
     protected Tracer tracer;
     private ISpanSample spanSample;
     private TraceContext.Injector<Headers.Builder> injector;
@@ -45,11 +47,15 @@ public abstract class AbstractSpanCreater implements ISpanCreater<SpanInfo> {
         if (!spanSample.sample()) {
             return null;
         }
+        long startTime = MICROS_CLOCK.nowMicros();
+        if (startTime == -1L) {
+            return null;
+        }
         HttpUrl requestUrl = request.url();
         Span span = tracer.nextSpan()
                 .kind(Span.Kind.CLIENT)
                 .name(requestUrl.toString())
-                .start(TraceUtil.nowMicros());
+                .start(startTime);
         span.tag(Constants.Tags.HTTP_METHOD, request.method());
         span.tag(Constants.Tags.URL, requestUrl.toString());
         span.remoteIpAndPort(requestUrl.host(), requestUrl.port());

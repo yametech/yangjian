@@ -22,6 +22,7 @@ import brave.internal.Platform;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
@@ -40,6 +41,7 @@ import java.net.InetSocketAddress;
  */
 public abstract class AbstractStatementSpanCreater implements ISpanCreater<SpanInfo> {
 
+    protected static final MicrosClock MICROS_CLOCK = new MicrosClock();
     protected Tracer tracer;
     protected ISpanSample spanSample;
 
@@ -67,6 +69,10 @@ public abstract class AbstractStatementSpanCreater implements ISpanCreater<SpanI
     }
 
     protected BeforeResult<SpanInfo> spanInit(Object thisObj, String spanName, String sql) {
+        long startTime = MICROS_CLOCK.nowMicros();
+        if (startTime == -1L) {
+            return null;
+        }
         ConnectionInfo connectionInfo = (ConnectionInfo) ((IContext) thisObj)._getAgentContext(ContextConstants.MYSQL_CONNECTION_INFO_CONTEXT_KEY);
         if (StringUtil.isEmpty(sql) || connectionInfo == null) {
             return null;
@@ -77,7 +83,7 @@ public abstract class AbstractStatementSpanCreater implements ISpanCreater<SpanI
                 .tag(Constants.Tags.DB_STATEMENT, sql)
                 .tag(Constants.Tags.URL, connectionInfo.getUrl())
                 .tag(Constants.Tags.DB_INSTANCE, connectionInfo.getDatabaseName())
-                .start(TraceUtil.nowMicros());
+                .start(startTime);
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }
 }

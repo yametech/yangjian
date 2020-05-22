@@ -18,6 +18,7 @@ package com.yametech.yangjian.agent.plugin.rabbitmq.trace;
 import brave.Tracer;
 import brave.Tracing;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
+import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
@@ -30,6 +31,7 @@ import java.lang.reflect.Method;
  */
 public abstract class AbstractSpanCreater implements ISpanCreater<SpanInfo> {
 
+    protected static final MicrosClock MICROS_CLOCK = new MicrosClock();
     protected Tracer tracer;
     protected ISpanSample spanSample;
 

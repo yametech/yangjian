@@ -24,6 +24,7 @@ import com.rabbitmq.client.Envelope;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
@@ -54,6 +55,9 @@ public class ConsumerSpanCreater extends AbstractSpanCreater {
 
     @Override
     public BeforeResult<SpanInfo> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
+        if (!spanSample.sample()) {
+            return null;
+        }
         if (!(thisObj instanceof IContext)) {
             return null;
         }
@@ -61,11 +65,10 @@ public class ConsumerSpanCreater extends AbstractSpanCreater {
         if (mqInfo == null) {
             return null;
         }
-
-        if (!spanSample.sample()) {
+        long startTime = MICROS_CLOCK.nowMicros();
+        if (startTime == -1L) {
             return null;
         }
-
         Envelope envelope = (Envelope) allArguments[1];
         AMQP.BasicProperties properties = (AMQP.BasicProperties) allArguments[2];
         TraceContextOrSamplingFlags traceContextOrSamplingFlags = extractor.extract(properties.getHeaders());
@@ -75,7 +78,7 @@ public class ConsumerSpanCreater extends AbstractSpanCreater {
                 .tag(Constants.Tags.MQ_TOPIC, envelope.getExchange())
                 .tag(Constants.Tags.MQ_QUEUE, envelope.getRoutingKey())
                 .tag(Constants.Tags.MQ_SERVER, mqInfo.getIpPorts())
-                .start(TraceUtil.nowMicros());
+                .start(startTime);
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }
 }

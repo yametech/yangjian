@@ -21,6 +21,7 @@ import brave.Tracing;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
@@ -42,6 +43,7 @@ import java.net.InetSocketAddress;
  */
 public class RedisConnectionSpanCreater implements ISpanCreater<SpanInfo> {
 
+    private static final MicrosClock MICROS_CLOCK = new MicrosClock();
     protected Tracer tracer;
     private ISpanSample spanSample;
 
@@ -54,6 +56,10 @@ public class RedisConnectionSpanCreater implements ISpanCreater<SpanInfo> {
     @Override
     public BeforeResult<SpanInfo> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
         if (!spanSample.sample()) {
+            return null;
+        }
+        long startTime = MICROS_CLOCK.nowMicros();
+        if (startTime == -1L) {
             return null;
         }
         String url = (String) ((IContext) thisObj)._getAgentContext(ContextConstants.REDIS_URL_CONTEXT_KEY);
@@ -88,7 +94,7 @@ public class RedisConnectionSpanCreater implements ISpanCreater<SpanInfo> {
                 .tag(Constants.Tags.URL, url)
                 .tag(Constants.Tags.DB_INSTANCE, dbInstance)
                 .tag(Constants.Tags.DB_STATEMENT, StringUtil.shorten(dbStatement.toString(), 50))
-                .start(TraceUtil.nowMicros());
+                .start(startTime);
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }
 
