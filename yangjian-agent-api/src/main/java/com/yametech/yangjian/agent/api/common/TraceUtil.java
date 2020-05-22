@@ -4,9 +4,9 @@ import java.time.Instant;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class TraceUtil {
-
+	private static long previousMicros = -1L;
 	/**
-	 * 获取当前时间的微秒数
+	 * 获取当前时间的微秒数，微秒部分基本都是000，精确度有问题，基本等价于System.currentTimeMillis() * 1000
 	 * 
 	 * @return 微妙数
 	 */
