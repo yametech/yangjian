@@ -19,9 +19,9 @@ import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.convert.IMethodAsyncConvert;
-import com.yametech.yangjian.agent.plugin.mysql.bean.SqlBean;
-import com.yametech.yangjian.agent.plugin.mysql.common.MysqlUtil;
-import com.yametech.yangjian.agent.plugin.mysql.context.ContextConstants;
+import com.yametech.yangjian.agent.plugin.mysql.commons.bean.SqlBean;
+import com.yametech.yangjian.agent.plugin.mysql.commons.util.MysqlUtil;
+import com.yametech.yangjian.agent.plugin.mysql.commons.context.ContextConstants;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;

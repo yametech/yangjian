@@ -18,12 +18,12 @@ package com.yametech.yangjian.agent.plugin.mysql;
 import java.util.List;
 import java.util.Map;
 
-import com.yametech.yangjian.agent.plugin.mysql.druid.sql.SQLUtils;
-import com.yametech.yangjian.agent.plugin.mysql.druid.sql.ast.SQLStatement;
-import com.yametech.yangjian.agent.plugin.mysql.druid.sql.visitor.ParameterizedOutputVisitorUtils;
-import com.yametech.yangjian.agent.plugin.mysql.druid.sql.visitor.SchemaStatVisitor;
-import com.yametech.yangjian.agent.plugin.mysql.druid.stat.TableStat;
-import com.yametech.yangjian.agent.plugin.mysql.druid.util.JdbcConstants;
+import com.yametech.yangjian.agent.plugin.mysql.commons.druid.sql.SQLUtils;
+import com.yametech.yangjian.agent.plugin.mysql.commons.druid.sql.ast.SQLStatement;
+import com.yametech.yangjian.agent.plugin.mysql.commons.druid.sql.visitor.ParameterizedOutputVisitorUtils;
+import com.yametech.yangjian.agent.plugin.mysql.commons.druid.sql.visitor.SchemaStatVisitor;
+import com.yametech.yangjian.agent.plugin.mysql.commons.druid.stat.TableStat;
+import com.yametech.yangjian.agent.plugin.mysql.commons.druid.util.JdbcConstants;
 
 /**
  * @author dengliming
@@ -74,6 +74,7 @@ public class SqlTest {
                 "('耐克运动鞋','广州',500,1000,'003.jpg'),\n" +
                 "\n" +
                 "('耐克运动鞋2','广州2',500,1000,'002.jpg');";
+        sql = "update user set id=1 where name = '1'";
         // 参数化sql
         String parameterizedSql = ParameterizedOutputVisitorUtils.parameterize(sql, JdbcConstants.MYSQL);
         System.out.println("parameterize:" + parameterizedSql);

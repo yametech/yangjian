@@ -48,8 +48,7 @@ public class StatementImplMatcher implements IMetricMatcher {
                         new MethodNameMatch("executeQuery"),
                         new MethodNameMatch("executeUpdate"),
                         new MethodNameMatch("executeBatchInternal"),
-                        new MethodNameMatch("executeUpdateInternal"),
-                        new MethodNameMatch("executeLargeUpdate"),
+                        /*new MethodNameMatch("executeUpdateInternal"),*/
                         new MethodNameMatch("executeBatch")))));
     }
 

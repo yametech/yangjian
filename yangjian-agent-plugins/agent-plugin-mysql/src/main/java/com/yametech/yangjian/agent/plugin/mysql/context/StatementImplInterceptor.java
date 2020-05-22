@@ -23,6 +23,7 @@ import java.util.Map;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.interceptor.IMethodAOP;
+import com.yametech.yangjian.agent.plugin.mysql.commons.context.ContextConstants;
 
 /**
  * 增强类为了获取StatementImpl执行的sql（主要原因是因为执行executeBatch之后jdbc会把batchArgs清理掉导致拿不到sql）

@@ -50,8 +50,7 @@ public class PreparedStatementMatcher implements IMetricMatcher {
                 new CombineOrMatch(Arrays.asList(
                         new MethodNameMatch("execute"),
                         new MethodNameMatch("executeQuery"),
-                        new MethodNameMatch("executeUpdate"),
-                        new MethodNameMatch("executeLargeUpdate")))));
+                        new MethodNameMatch("executeUpdate")))));
     }
 
     @Override

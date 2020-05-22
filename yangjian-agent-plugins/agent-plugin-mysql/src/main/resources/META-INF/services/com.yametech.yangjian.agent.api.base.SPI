@@ -1,4 +1,12 @@
 com.yametech.yangjian.agent.plugin.mysql.context.PreparedStatementMatcher
 com.yametech.yangjian.agent.plugin.mysql.context.StatementImplMatcher
+com.yametech.yangjian.agent.plugin.mysql.context.ConnectionImplMatcher
 com.yametech.yangjian.agent.plugin.mysql.PreparedStatementMatcher
 com.yametech.yangjian.agent.plugin.mysql.StatementImplMatcher
+com.yametech.yangjian.agent.plugin.mysql.GetInstanceMatcher$GetInstanceMatcher6x
+com.yametech.yangjian.agent.plugin.mysql.GetInstanceMatcher$GetInstanceMatcher5x
+com.yametech.yangjian.agent.plugin.mysql.GetInstanceMatcher$GetInstanceMatcher8x
+com.yametech.yangjian.agent.plugin.mysql.CreatePreparedStatementMatcher
+com.yametech.yangjian.agent.plugin.mysql.CreateStatementMatcher
+com.yametech.yangjian.agent.plugin.mysql.trace.PreparedStatementTraceMatcher
+com.yametech.yangjian.agent.plugin.mysql.trace.StatementImplTraceMatcher
