@@ -22,6 +22,7 @@ import brave.propagation.TraceContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MethodUtil;
+import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
@@ -41,7 +42,7 @@ import java.util.Map;
  * @date 2020/4/26
  */
 public class DispatcherHandlerSpanCreater implements ISpanCreater<Void> {
-
+    private static final MicrosClock MICROS_CLOCK = new MicrosClock();
     protected Tracer tracer;
     private ISpanSample spanSample;
     private TraceContext.Extractor<HttpHeaders> extractor;
@@ -69,13 +70,17 @@ public class DispatcherHandlerSpanCreater implements ISpanCreater<Void> {
         if (!spanSample.sample()) {
             return ret;
         }
+        long startTime = MICROS_CLOCK.nowMicros();
+        if (startTime == -1L) {
+            return ret;
+        }
         ServerWebExchange exchange = (ServerWebExchange) allArguments[0];
         HttpHeaders headers = exchange.getRequest().getHeaders();
         ServerHttpRequest request = exchange.getRequest();
         Span span = tracer.nextSpan(extractor.extract(headers))
                 .kind(Span.Kind.SERVER)
                 .name(MethodUtil.getId(method))
-                .start(TraceUtil.nowMicros());
+                .start(startTime);
         span.tag(Constants.Tags.HTTP_METHOD, request.getMethodValue());
         span.tag(Constants.Tags.URL, request.getURI().toString());
         final Map<String, List<String>> parameterMap = request.getQueryParams();

@@ -21,6 +21,7 @@ import brave.Tracing;
 import brave.propagation.TraceContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
@@ -40,6 +41,7 @@ import java.net.URL;
  */
 public class CloseableHttpClientSpanCreater implements ISpanCreater<SpanInfo> {
 
+    private static final MicrosClock MICROS_CLOCK = new MicrosClock();
     protected Tracer tracer;
     private ISpanSample spanSample;
     private TraceContext.Injector<HttpRequest> injector;
@@ -59,14 +61,17 @@ public class CloseableHttpClientSpanCreater implements ISpanCreater<SpanInfo> {
         if (!spanSample.sample()) {
             return null;
         }
-
+        long startTime = MICROS_CLOCK.nowMicros();
+        if (startTime == -1L) {
+            return null;
+        }
         final HttpHost httpHost = (HttpHost) allArguments[0];
         HttpRequest httpRequest = (HttpRequest) allArguments[1];
         String uri = httpRequest.getRequestLine().getUri();
         Span span = tracer.nextSpan()
                 .kind(Span.Kind.CLIENT)
                 .name(getRequestURI(uri))
-                .start(TraceUtil.nowMicros());
+                .start(startTime);
         span.tag(Constants.Tags.HTTP_METHOD, httpRequest.getRequestLine().getMethod());
         span.tag(Constants.Tags.URL, buildUrl(httpHost, uri));
         span.remoteIpAndPort(httpHost.getHostName(), port(httpHost));

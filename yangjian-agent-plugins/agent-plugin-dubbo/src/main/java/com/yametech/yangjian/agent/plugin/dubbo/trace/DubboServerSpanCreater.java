@@ -43,7 +43,6 @@ public class DubboServerSpanCreater extends DubboSpanCreater<IDubboServerCustom>
 	public void init(Tracing tracing, ISpanSample spanSample) {
 		super.init(tracing, spanSample);
 		this.extractor = tracing.propagation().extractor(BraveUtil.MAP_GETTER);
-		
 	}
 
 	@Override
@@ -59,13 +58,17 @@ public class DubboServerSpanCreater extends DubboSpanCreater<IDubboServerCustom>
 		if(!generateSpan(invocation.getArguments(), custom)) {// 不需要生成
 			return null;
 		}
+		long startTime = MICROS_CLOCK.nowMicros();
+		if (startTime == -1L) {
+			return null;
+		}
 		TraceContextOrSamplingFlags extracted = extractor.extract(invocation.getAttachments());// 注入请求中带的链路信息
 //		invoker.getUrl().getServiceInterface();
 //		invoker.getInterface().getName();
 		Span span = tracer.nextSpan(extracted)
 				.kind(kind)
 				.name(getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes()))
-				.start(TraceUtil.nowMicros());
+				.start(startTime);
 		return spanInit(span, invocation.getArguments(), custom);
 	}
 }

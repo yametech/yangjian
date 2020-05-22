@@ -57,10 +57,14 @@ public class DubboClientSpanCreater extends DubboSpanCreater<IDubboClientCustom>
 		if(!generateSpan(invocation.getArguments(), custom)) {// 不需要生成
 			return null;
 		}
-		
+
+		long startTime = MICROS_CLOCK.nowMicros();
+		if (startTime == -1L) {
+			return null;
+		}
 		Span span = tracer.nextSpan().kind(Kind.CLIENT)
 				.name(getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes()))
-				.start(TraceUtil.nowMicros());
+				.start(startTime);
 		injector.inject(span.context(), rpcContext.getAttachments());
 		return spanInit(span, invocation.getArguments(), custom);
 	}

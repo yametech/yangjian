@@ -24,6 +24,7 @@ import brave.propagation.TraceContextOrSamplingFlags;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
@@ -41,7 +42,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @date 2020/4/27
  */
 public class KafkaConsumerSpanCreater implements ISpanCreater<Void> {
-
+    private static final MicrosClock MICROS_CLOCK = new MicrosClock();
     protected Tracer tracer;
     private ISpanSample spanSample;
     private TraceContext.Extractor<Headers> extractor;
@@ -82,10 +83,15 @@ public class KafkaConsumerSpanCreater implements ISpanCreater<Void> {
             return ret;
         }
         TraceContextOrSamplingFlags context = null;
+        long startTime = MICROS_CLOCK.nowMicros();
+        if (startTime == -1L) {
+            return ret;
+        }
         for (ConsumerRecord<?, ?> record : records) {
             if (!spanSample.sample()) {
-                return null;
+                return ret;
             }
+
             context = extractor.extract(record.headers());
             tracer.nextSpan(context)
                     .kind(Span.Kind.CONSUMER)
@@ -93,7 +99,7 @@ public class KafkaConsumerSpanCreater implements ISpanCreater<Void> {
                     .tag(Constants.Tags.MQ_TOPIC, record.topic())
                     .tag(Constants.Tags.MQ_SERVER, mqInfo.getIpPorts())
                     .tag(Constants.Tags.MQ_CONSUMER, mqInfo.getConsumeGroup())
-                    .start(TraceUtil.nowMicros())
+                    .start(startTime)
                     .finish();
         }
         // 此处为了将context传递到当前线程、连接后面在该线程的链路

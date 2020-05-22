@@ -22,6 +22,7 @@ import brave.propagation.TraceContext;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
@@ -40,7 +41,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @date 2020/4/27
  */
 public class KafkaProducerSpanCreater implements ISpanCreater<SpanInfo> {
-
+    private static final MicrosClock MICROS_CLOCK = new MicrosClock();
     protected Tracer tracer;
     private ISpanSample spanSample;
     private TraceContext.Injector<Headers> injector;
@@ -65,13 +66,17 @@ public class KafkaProducerSpanCreater implements ISpanCreater<SpanInfo> {
         if (!spanSample.sample()) {
             return null;
         }
+        long startTime = MICROS_CLOCK.nowMicros();
+        if (startTime == -1L) {
+            return null;
+        }
         ProducerRecord<?, ?> record = (ProducerRecord<?, ?>) allArguments[0];
         Span span = tracer.nextSpan()
                 .kind(Span.Kind.CONSUMER)
                 .name(String.format(SPAN_NAME_FORMAT, record.topic()))
                 .tag(Constants.Tags.MQ_TOPIC, record.topic())
                 .tag(Constants.Tags.MQ_SERVER, mqInfo.getIpPorts())
-                .start(TraceUtil.nowMicros());
+                .start(startTime);
         injector.inject(span.context(), record.headers());
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }

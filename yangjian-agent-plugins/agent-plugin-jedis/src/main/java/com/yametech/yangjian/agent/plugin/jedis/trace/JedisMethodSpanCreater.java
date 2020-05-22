@@ -21,6 +21,7 @@ import brave.Tracing;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
@@ -36,6 +37,7 @@ import java.lang.reflect.Method;
  */
 public class JedisMethodSpanCreater implements ISpanCreater<SpanInfo> {
 
+    private static final MicrosClock MICROS_CLOCK = new MicrosClock();
     private static final String SPAN_NAME_FORMAT = "Jedis/%s";
     protected Tracer tracer;
     private ISpanSample spanSample;
@@ -51,7 +53,6 @@ public class JedisMethodSpanCreater implements ISpanCreater<SpanInfo> {
         if (!(thisObj instanceof IContext)) {
             return null;
         }
-
         if (!spanSample.sample()) {
             return null;
         }
@@ -59,11 +60,15 @@ public class JedisMethodSpanCreater implements ISpanCreater<SpanInfo> {
         if (StringUtil.isEmpty(url)) {
             return null;
         }
+        long startTime = MICROS_CLOCK.nowMicros();
+        if (startTime == -1L) {
+            return null;
+        }
         Span span = tracer.nextSpan()
                 .kind(Span.Kind.CLIENT)
                 .name(String.format(SPAN_NAME_FORMAT, method.getName()))
                 .tag(Constants.Tags.URL, url)
-                .start(TraceUtil.nowMicros());
+                .start(startTime);
         if (allArguments.length > 0 && allArguments[0] instanceof String) {
             span.tag(Constants.Tags.DB_STATEMENT, method.getName() + " " + allArguments[0]);
         } else if (allArguments.length > 0 && allArguments[0] instanceof byte[]) {

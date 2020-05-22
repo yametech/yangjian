@@ -49,6 +49,9 @@ public class ProducerSpanCreater extends AbstractSpanCreater {
 
     @Override
     public BeforeResult<SpanInfo> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
+        if (!spanSample.sample()) {
+            return null;
+        }
         if (!(thisObj instanceof IContext)) {
             return null;
         }
@@ -56,7 +59,8 @@ public class ProducerSpanCreater extends AbstractSpanCreater {
         if (mqInfo == null) {
             return null;
         }
-        if (!spanSample.sample()) {
+        long startTime = MICROS_CLOCK.nowMicros();
+        if (startTime == -1L) {
             return null;
         }
         AMQP.BasicProperties properties = (AMQP.BasicProperties) allArguments[4];
@@ -93,7 +97,7 @@ public class ProducerSpanCreater extends AbstractSpanCreater {
                 .tag(Constants.Tags.MQ_TOPIC, exChangeName)
                 .tag(Constants.Tags.MQ_QUEUE, queueName)
                 .tag(Constants.Tags.MQ_SERVER, mqInfo.getIpPorts())
-                .start(TraceUtil.nowMicros());
+                .start(startTime);
 
         injector.inject(span.context(), headers);
         // 加上这一步主要是因为原来这个参数可能为空所以重新赋值
