@@ -15,15 +15,18 @@
  */
 package com.yametech.yangjian.agent.core.pool;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
+import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
+import com.yametech.yangjian.agent.api.interceptor.IDisableConfig;
 import com.yametech.yangjian.agent.api.interceptor.IMethodAOP;
 import com.yametech.yangjian.agent.api.interceptor.IStaticMethodAOP;
 import com.yametech.yangjian.agent.api.pool.IPoolMonitor;
 import com.yametech.yangjian.agent.api.pool.IPoolMonitorCreater;
+import com.yametech.yangjian.agent.api.pool.IPoolMonitorMatcher;
+
+import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * 
@@ -32,10 +35,12 @@ import com.yametech.yangjian.agent.api.pool.IPoolMonitorCreater;
  * @author liuzhao
  * @date 2020年3月6日 下午3:14:14
  */
-public class PoolMonitorCreater implements IMethodAOP<Long>, IConstructorListener, IStaticMethodAOP<Long>  {
+public class PoolMonitorCreater implements IMethodAOP<Long>, IConstructorListener, IStaticMethodAOP<Long>, IDisableConfig {
 	protected IPoolMonitorCreater convert;
+	private IPoolMonitorMatcher matcher;
 	
-	void init(IPoolMonitorCreater convert) {
+	void init(IPoolMonitorMatcher matcher, IPoolMonitorCreater convert) {
+		this.matcher = matcher;
 		this.convert = convert;
 	}
 
@@ -77,4 +82,8 @@ public class PoolMonitorCreater implements IMethodAOP<Long>, IConstructorListene
 		return null;
 	}
 
+	@Override
+	public String disableKey() {
+		return Constants.DISABLE_SPI_KEY_PREFIX + matcher.getClass().getSimpleName();
+	}
 }

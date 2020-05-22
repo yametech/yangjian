@@ -15,16 +15,26 @@
  */
 package com.yametech.yangjian.agent.core.metric;
 
+import com.yametech.yangjian.agent.api.IMetricMatcher;
+import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.interceptor.IDisableConfig;
 import com.yametech.yangjian.agent.core.metric.base.MetricEventBus;
 
-public class BaseConvertAOP {
+public class BaseConvertAOP implements IDisableConfig {
+	protected IMetricMatcher metricMatcher;
 	protected Object convert;
 	protected MetricEventBus metricEventBus;
 	protected String type;
 	
-	void init(Object convert, MetricEventBus metricEventBus, String type) {
+	void init(IMetricMatcher metricMatcher, Object convert, MetricEventBus metricEventBus, String type) {
+		this.metricMatcher = metricMatcher;
 		this.convert = convert;
 		this.metricEventBus = metricEventBus;
 		this.type = type;
+	}
+
+	@Override
+	public String disableKey() {
+		return Constants.DISABLE_SPI_KEY_PREFIX + metricMatcher.getClass().getSimpleName();
 	}
 }

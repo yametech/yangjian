@@ -15,6 +15,7 @@
  */
 package com.yametech.yangjian.agent.core.core.interceptor;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,16 +26,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public enum InterceptorWrapperRegistry {
     INSTANCE;
 
-    private final Map<String, InterceptorWrapper<?>> interceptorWrapperMap = new ConcurrentHashMap<>();
+    private final Map<Object, InterceptorWrapper<?>> interceptorWrapper = new ConcurrentHashMap<>();
 
-    public <T> InterceptorWrapper getOrCreate(String key, T t) {
-        if (t == null) {
-            return null;
-        }
-        return interceptorWrapperMap.computeIfAbsent(key, k -> new InterceptorWrapper<T>(t));
+    public InterceptorWrapper<?> wrap(Object interceptor) {
+        return interceptorWrapper.computeIfAbsent(interceptor, InterceptorWrapper::new);
     }
 
-    public Map<String, InterceptorWrapper<?>> getInterceptorWrapperMap() {
-        return interceptorWrapperMap;
+    public Collection<InterceptorWrapper<?>> getInterceptorWrapperMap() {
+        return interceptorWrapper.values();
     }
 }

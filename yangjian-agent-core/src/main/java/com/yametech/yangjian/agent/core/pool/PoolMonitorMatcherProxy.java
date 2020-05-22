@@ -54,7 +54,7 @@ public class PoolMonitorMatcherProxy extends BaseMatcherProxy<IPoolMonitorMatche
 				throw new RuntimeException("poolMonitorMatcher配置的loadClass错误，必须为IPoolMonitorCreater的子类");
 			}
 			InstanceManage.registryInit(instance);
-			obj.init((IPoolMonitorCreater)instance);
+			obj.init(matcher, (IPoolMonitorCreater)instance);
 		} catch (Exception e) {
 			log.warn(e, "加载异常：{}，\nclassLoader={}，\nmetricMatcher classLoader：{},\ninstance classLoader：{}",
 					loadClassKey, classLoader,

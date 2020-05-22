@@ -1,12 +1,24 @@
+# 加载本地配置
 com.yametech.yangjian.agent.core.config.LocalConfigLoader
+# 加载远程配置
 com.yametech.yangjian.agent.core.config.RemoteConfigLoader
+# 根据配置禁用插件
 com.yametech.yangjian.agent.core.config.DisableSpi
+# 定时收集JVM数据
 com.yametech.yangjian.agent.core.jvm.JVMMetricsSchedule
+# qps/rt数据统计
 com.yametech.yangjian.agent.core.metric.MetricInit
+# 池监控
 com.yametech.yangjian.agent.core.pool.PoolMonitorSchedule
+# 日志输出report
 com.yametech.yangjian.agent.core.report.LogReport
+# 基于配置方式的事件订阅初始化
 com.yametech.yangjian.agent.core.eventsubscribe.EventSubscribeConfigReader
+# 链路插件初始化
 com.yametech.yangjian.agent.core.trace.TraceInit
+# 服务启动状态监控
 com.yametech.yangjian.agent.core.runstatus.RunMonitor
+# 基于注解的事件订阅初始化
 com.yametech.yangjian.agent.core.eventsubscribe.subscribe.AnnotationSubscribeMatcher
+# trace日志输出report
 com.yametech.yangjian.agent.core.report.TraceLogReport

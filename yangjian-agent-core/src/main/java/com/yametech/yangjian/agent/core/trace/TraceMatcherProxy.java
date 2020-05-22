@@ -15,13 +15,7 @@
  */
 package com.yametech.yangjian.agent.core.trace;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import brave.Tracing;
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
@@ -29,12 +23,7 @@ import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.common.InstanceManage;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
-import com.yametech.yangjian.agent.api.trace.ICustomLoad;
-import com.yametech.yangjian.agent.api.trace.ISpanCreater;
-import com.yametech.yangjian.agent.api.trace.ISpanCustom;
-import com.yametech.yangjian.agent.api.trace.ISpanSample;
-import com.yametech.yangjian.agent.api.trace.ITraceMatcher;
-import com.yametech.yangjian.agent.api.trace.SampleStrategy;
+import com.yametech.yangjian.agent.api.trace.*;
 import com.yametech.yangjian.agent.core.common.BaseMatcherProxy;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
 import com.yametech.yangjian.agent.core.core.classloader.SpiLoader;
@@ -46,7 +35,7 @@ import com.yametech.yangjian.agent.core.trace.sample.RateLimitSampler;
 import com.yametech.yangjian.agent.core.trace.sample.SampleFactory;
 import com.yametech.yangjian.agent.core.util.Util;
 
-import brave.Tracing;
+import java.util.*;
 
 public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<?>> implements IConfigReader {
 	private static ILogger log = LoggerFactory.getLogger(TraceMatcherProxy.class);
@@ -99,7 +88,7 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 			if(spanSample instanceof ITraceDepend) {
 				((ITraceDepend)spanSample).tracer(tracing.tracer());
 			}
-			aop.init((ISpanCreater)instance, tracing, spanSample);
+			aop.init(this.matcher, (ISpanCreater)instance, tracing, spanSample);
 		} catch (Exception e) {
 			log.warn(e, "加载异常：{}，\nclassLoader={}，\nmatcher classLoader：{},\ninstance classLoader：{}",
 					loadClassKey, classLoader,
@@ -111,7 +100,7 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 	
 	@SuppressWarnings("rawtypes")
 	private List<ISpanCustom> getCustomInstance(ICustomLoad customLoad, ClassLoader classLoader) throws IllegalAccessException, InstantiationException, ClassNotFoundException, AgentPackageNotFoundException {
-		Class<?> cls = null;
+		Class<?> cls;
 		try {
 			cls = Util.superClassGeneric(customLoad.getClass(), 0);
 		} catch (Exception e) {

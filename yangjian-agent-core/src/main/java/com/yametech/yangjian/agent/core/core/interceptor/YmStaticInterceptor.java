@@ -15,28 +15,27 @@
  */
 package com.yametech.yangjian.agent.core.core.interceptor;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Callable;
-
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.interceptor.IStaticMethodAOP;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.util.RateLimit;
-
 import net.bytebuddy.implementation.bind.annotation.AllArguments;
 import net.bytebuddy.implementation.bind.annotation.Origin;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import net.bytebuddy.implementation.bind.annotation.SuperCall;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Callable;
+
 public class YmStaticInterceptor {
 	private static final ILogger LOG = LoggerFactory.getLogger(YmStaticInterceptor.class);
 	private static final RateLimit LIMITER = RateLimit.create(10);
-    private IStaticMethodAOP<?>[] interceptors;
+    private InterceptorWrapper<IStaticMethodAOP<?>>[] interceptors;
     
-    public YmStaticInterceptor(IStaticMethodAOP<?>[] interceptors) {
+    public YmStaticInterceptor(InterceptorWrapper<IStaticMethodAOP<?>>[] interceptors) {
     	this.interceptors = interceptors;
     }
 
@@ -48,7 +47,11 @@ public class YmStaticInterceptor {
 		int index = 0;
 		Object ret = null;
 		Map<Class<?>, Object> globalVar = null;
-		for (IStaticMethodAOP<?> interceptor : interceptors) {
+		for (InterceptorWrapper<IStaticMethodAOP<?>> interceptorWrap : interceptors) {
+			if(!interceptorWrap.isEnable()) {
+				continue;
+			}
+			IStaticMethodAOP<?> interceptor = interceptorWrap.getInterceptor();
 			try {
 				BeforeResult<?> result = interceptor.before(allArguments, method);
 				interceptBeans[index++] = new InterceptBean<>(interceptor, result);

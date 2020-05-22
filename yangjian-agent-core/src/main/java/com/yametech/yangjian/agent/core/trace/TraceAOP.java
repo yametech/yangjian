@@ -15,32 +15,33 @@
  */
 package com.yametech.yangjian.agent.core.trace;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-
+import brave.Tracing;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
+import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.interceptor.IDisableConfig;
 import com.yametech.yangjian.agent.api.interceptor.IMethodAOP;
 import com.yametech.yangjian.agent.api.interceptor.IStaticMethodAOP;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
+import com.yametech.yangjian.agent.api.trace.ITraceMatcher;
 
-import brave.Tracing;
+import java.lang.reflect.Method;
+import java.util.Map;
 
-public class TraceAOP<T> implements IMethodAOP<T>, IStaticMethodAOP<T> {
-//	private Tracer tracer;
-//	private ISpanSample spanSample;
+public class TraceAOP<T> implements IMethodAOP<T>, IStaticMethodAOP<T>, IDisableConfig {
+	private ITraceMatcher matcher;
 	private ISpanCreater<T> spanCreater;
-	
+
 	/**
-	 * 
 	 * 初始化链路操作实例及span定制逻辑
+	 * @param matcher
+	 * @param spanCreater	span定制实现
 	 * @param tracing	brave实现的实例
-	 * @param spanCustom	span定制实现
+	 * @param spanSample
 	 */
-	void init(ISpanCreater<T> spanCreater, Tracing tracing, ISpanSample spanSample) {
+	void init(ITraceMatcher matcher, ISpanCreater<T> spanCreater, Tracing tracing, ISpanSample spanSample) {
+		this.matcher = matcher;
 		this.spanCreater = spanCreater;
-//		this.tracer = tracing.tracer();
-//		this.spanSample = spanSample;
 		spanCreater.init(tracing, spanSample);
 	}
 
@@ -65,5 +66,9 @@ public class TraceAOP<T> implements IMethodAOP<T>, IStaticMethodAOP<T> {
 			Object ret, Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
 		return spanCreater.after(thisObj, allArguments, method, ret, t, beforeResult);
 	}
-	
+
+	@Override
+	public String disableKey() {
+		return Constants.DISABLE_SPI_KEY_PREFIX + matcher.getClass().getSimpleName();
+	}
 }

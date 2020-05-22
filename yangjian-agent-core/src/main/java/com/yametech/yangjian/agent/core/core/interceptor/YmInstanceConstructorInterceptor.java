@@ -27,17 +27,20 @@ import net.bytebuddy.implementation.bind.annotation.This;
 public class YmInstanceConstructorInterceptor {
 	private static final ILogger LOG = LoggerFactory.getLogger(YmInstanceConstructorInterceptor.class);
 	private static final RateLimit LIMITER = RateLimit.create(10);
-	private IConstructorListener[] interceptors;
+	private InterceptorWrapper<IConstructorListener>[] interceptors;
 
-	public YmInstanceConstructorInterceptor(IConstructorListener[] interceptors) {
+	public YmInstanceConstructorInterceptor(InterceptorWrapper<IConstructorListener>[] interceptors) {
 		this.interceptors = interceptors;
 	}
 
     @RuntimeType
     public void intercept(@This Object thisObj, @AllArguments Object[] allArguments) throws Throwable {
-		for (IConstructorListener interceptor : interceptors) {
+		for (InterceptorWrapper<IConstructorListener> interceptor : interceptors) {
+			if(!interceptor.isEnable()) {
+				continue;
+			}
 			try {
-				interceptor.constructor(thisObj, allArguments);
+				interceptor.getInterceptor().constructor(thisObj, allArguments);
 			} catch (Throwable t) {
 				if(LIMITER.tryAcquire()) {// 增加打印速率限制(每秒N条)，防止因插件写的有问题，发生大量异常时影响方法调用速度
 					LOG.warn(t, "interceptor constructor exception");

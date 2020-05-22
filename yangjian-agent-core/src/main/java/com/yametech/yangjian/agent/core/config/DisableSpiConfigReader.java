@@ -18,14 +18,13 @@ package com.yametech.yangjian.agent.core.config;
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.base.SPI;
 import com.yametech.yangjian.agent.api.bean.ConfigNotifyType;
+import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.interceptor.IDisableConfig;
 import com.yametech.yangjian.agent.core.common.CoreConstants;
 import com.yametech.yangjian.agent.core.core.interceptor.InterceptorWrapper;
 import com.yametech.yangjian.agent.core.core.interceptor.InterceptorWrapperRegistry;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author dengliming
@@ -35,19 +34,25 @@ public class DisableSpiConfigReader implements IConfigReader, SPI {
 
     @Override
     public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList("spi\\..*"));
+        return new HashSet<>(Collections.singletonList("spi\\..*"));
     }
 
     @Override
     public void configKeyValue(Map<String, String> kv) {
-        Map<String, InterceptorWrapper<?>> interceptorWrapperMap = InterceptorWrapperRegistry.INSTANCE.getInterceptorWrapperMap();
-        if (interceptorWrapperMap == null || interceptorWrapperMap.isEmpty()) {
+        Collection<InterceptorWrapper<?>> interceptorWrapper = InterceptorWrapperRegistry.INSTANCE.getInterceptorWrapperMap();
+        if (interceptorWrapper.isEmpty()) {
             return;
         }
         boolean disableAll = CoreConstants.CONFIG_KEY_DISABLE.equals(kv.getOrDefault(CoreConstants.SPI_PLUGIN_KEY, CoreConstants.CONFIG_KEY_ENABLE));
-        interceptorWrapperMap.values().forEach(interceptorWrapper -> {
-            String enableConfig = kv.get("spi." + interceptorWrapper.getInterceptor().getClass().getSimpleName());
-            interceptorWrapper.setEnable((disableAll && CoreConstants.CONFIG_KEY_ENABLE.equals(enableConfig))
+        interceptorWrapper.forEach(wrap -> {
+            String configKey;
+            if(wrap.getInterceptor() instanceof IDisableConfig) {
+                configKey = ((IDisableConfig)wrap.getInterceptor()).disableKey();
+            } else {
+                configKey = Constants.DISABLE_SPI_KEY_PREFIX + wrap.getInterceptor().getClass().getSimpleName();
+            }
+            String enableConfig = kv.get(configKey);
+            wrap.setEnable((disableAll && CoreConstants.CONFIG_KEY_ENABLE.equals(enableConfig))
                     || (!disableAll && !CoreConstants.CONFIG_KEY_DISABLE.equals(enableConfig)));
         });
     }

@@ -147,7 +147,9 @@ public class AgentTransformer implements AgentBuilder.Transformer {
 							(inDefinedShape.isStatic() && interceptor instanceof IStaticMethodAOP) ||
 							(inDefinedShape.isConstructor() && interceptor instanceof IConstructorListener) ||
 							(inDefinedShape.isMethod() && interceptor instanceof IMethodAOP)
-						)).collect(Collectors.toSet());
+						))
+					.map(InterceptorWrapperRegistry.INSTANCE::wrap)
+					.collect(Collectors.toSet());
     		if(interceptors.isEmpty()) {
     			continue;
     		}
@@ -157,18 +159,18 @@ public class AgentTransformer implements AgentBuilder.Transformer {
             if(inDefinedShape.isStatic()) {// 静态方法
         		builder = builder.method(getMethodMatch(inDefinedShape))
         				.intercept(MethodDelegation.withDefaultConfiguration()
-        						.to(new YmStaticInterceptor(interceptors.toArray(new IStaticMethodAOP[0]))));
+        						.to(new YmStaticInterceptor(interceptors.toArray(new InterceptorWrapper[0]))));
 //        						.to(new YmStaticInterceptor(interceptors, classLoader, inDefinedShape)));
             } else if(inDefinedShape.isConstructor()) {// 构造方法
         		builder = builder.constructor(getMethodMatch(inDefinedShape))
         				.intercept(SuperMethodCall.INSTANCE.andThen(MethodDelegation.withDefaultConfiguration()
-            					.to(new YmInstanceConstructorInterceptor(interceptors.toArray(new IConstructorListener[0])))));
+            					.to(new YmInstanceConstructorInterceptor(interceptors.toArray(new InterceptorWrapper[0])))));
 //        						.to(new YmInstanceConstructorInterceptor(interceptors, classLoader, inDefinedShape))));
             } else if(inDefinedShape.isMethod()) {// 实例方法
         		builder = builder.method(getMethodMatch(inDefinedShape))
         				.intercept(MethodDelegation.withDefaultConfiguration()
 								.withBinders(Morph.Binder.install(OverrideCallable.class))
-        						.to(new YmInstanceInterceptor(interceptors.toArray(new IMethodAOP[0]))));
+        						.to(new YmInstanceInterceptor(interceptors.toArray(new InterceptorWrapper[0]))));
 //        						.to(new YmInstanceInterceptor(interceptors, classLoader, inDefinedShape)));
             }
         }

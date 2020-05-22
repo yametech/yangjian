@@ -52,7 +52,7 @@ public class MetricMatcherProxy extends BaseMatcherProxy<IMetricMatcher, BaseCon
 				throw new RuntimeException("metricMatcher配置的loadClass错误，必须为IConvertBase的子类");
 			}
 			InstanceManage.registryInit(instance);
-			obj.init(instance, metricEventBus, matcher.type());
+			obj.init(matcher, instance, metricEventBus, matcher.type());
 		} catch (Exception e) {
 			log.warn(e, "加载convert异常：{}，\nclassLoader={}，\nmetricMatcher classLoader：{},\nconvertInstance classLoader：{}",
 					convertClass, classLoader,
