@@ -15,23 +15,6 @@
  */
 package com.yametech.yangjian.agent.api.common;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.regex.Pattern;
-
 import com.yametech.yangjian.agent.api.IAppStatusListener;
 import com.yametech.yangjian.agent.api.IConfigLoader;
 import com.yametech.yangjian.agent.api.IConfigReader;
@@ -40,6 +23,13 @@ import com.yametech.yangjian.agent.api.base.IWeight;
 import com.yametech.yangjian.agent.api.bean.ConfigNotifyType;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+
+import java.time.Duration;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.*;
+import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 public class InstanceManage {
 	private static final ILogger LOG = LoggerFactory.getLogger(InstanceManage.class);
@@ -59,10 +49,13 @@ public class InstanceManage {
     	initStatus.put(IAppStatusListener.class, false);
     	initStatus.put(ISchedule.class, false);
     }
-	
+
 	/**
+	 *
+	 *
 	 * 按照Class获取对应Class单个实例
 	 * @param cls	实例类型
+	 * @param <T>	返回类型
 	 * @return	cls的实例
 	 */
 	public static <T> T getInstance(Class<T> cls) {
@@ -72,10 +65,12 @@ public class InstanceManage {
 		}
 		return null;
 	}
-	
+
 	/**
+	 *
 	 * 按照Class获取对应Class实例列表
 	 * @param cls	实例类型
+	 * @param <T>	类型
 	 * @return	cls的实例列表
 	 */
 	@SuppressWarnings("unchecked")
@@ -92,7 +87,7 @@ public class InstanceManage {
 		}
 		return instances;
 	}
-	
+
 	/**
 	 * @return	所有实现SPI的实例
 	 */
@@ -128,7 +123,7 @@ public class InstanceManage {
 
 	/**
 	 * 如果实例需要init则注册，降低托管实例数
-	 * @param instance
+	 * @param instance	需要初始化的实例
 	 * @return	是否执行init
 	 */
 	public static boolean registryInit(Object instance) {
@@ -137,10 +132,10 @@ public class InstanceManage {
 		}
 		return registry(instance);
 	}
-	
+
 	/**
-	 *
 	 * @param instance	 注册一个托管实例
+	 * @return	是否注册成功
 	 */
 	public static boolean registry(Object instance) {
 		return registry(instance, true);

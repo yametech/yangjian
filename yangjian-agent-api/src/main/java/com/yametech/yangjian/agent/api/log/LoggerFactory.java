@@ -19,10 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
 
-/**
- * @author dengliming
- * @date 2020/3/1
- */
 public final class LoggerFactory {
 
     static volatile ILoggerServiceProvider PROVIDER;
@@ -46,7 +42,7 @@ public final class LoggerFactory {
      * 1、需实现com.yametech.yangjian.agent.api.log.ILoggerServiceProvider
      * 2、创建META-INF/services/com.yametech.yangjian.agent.api.log.ILoggerServiceProvider
      *
-     * @return
+     * @return  xx
      */
     private static ILoggerServiceProvider getProvider() {
         if (PROVIDER == null) {

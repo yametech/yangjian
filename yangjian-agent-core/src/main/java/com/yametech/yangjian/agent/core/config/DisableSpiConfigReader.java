@@ -51,6 +51,9 @@ public class DisableSpiConfigReader implements IConfigReader, SPI {
             } else {
                 configKey = Constants.DISABLE_SPI_KEY_PREFIX + wrap.getInterceptor().getClass().getSimpleName();
             }
+            if(configKey == null) {
+                return;
+            }
             String enableConfig = kv.get(configKey);
             wrap.setEnable((disableAll && CoreConstants.CONFIG_KEY_ENABLE.equals(enableConfig))
                     || (!disableAll && !CoreConstants.CONFIG_KEY_DISABLE.equals(enableConfig)));

@@ -19,7 +19,6 @@ package com.yametech.yangjian.agent.api.log;
  * 默认日志实现类（不作任何操作）
  *
  * @author dengliming
- * @date 2020/3/1
  */
 public class NOPLogger implements ILogger {
 

@@ -162,8 +162,8 @@ public class MethodUtil {
 
 	/**
 	 * 获取类注解
-	 * @param annotations
-	 * @return
+	 * @param annotations	转换钱的annotation
+	 * @return	转换后的annotation
 	 */
 	public static Set<com.yametech.yangjian.agent.api.bean.Annotation> getAnnotations(Annotation[] annotations) {
 		return Arrays.stream(annotations).map(annotation -> {
@@ -181,8 +181,8 @@ public class MethodUtil {
 	
 	/**
      * 获取类的父类及祖类，不包含Object
-     * @param cls
-     * @return
+     * @param cls	类
+     * @return	父类或祖类
      */
     public static Set<String> getSuperClass(Class<?> cls) {
     	Set<String> clsList = new HashSet<>();
@@ -199,8 +199,8 @@ public class MethodUtil {
 	
 	/**
 	 * 获取类的所有接口
-	 * @param cls
-	 * @return
+	 * @param cls	类
+	 * @return	所有继承的接口
 	 */
 	public static Set<String> getInterface(Class<?> cls) {
     	Set<String> interfaces = new HashSet<>();
@@ -219,8 +219,8 @@ public class MethodUtil {
 	
 	/**
 	 * 获取直接接口
-	 * @param cls
-	 * @return
+	 * @param cls	类
+	 * @return	直接接口
 	 */
 	public static Set<String> getClassInterface(Class<?> cls) {
     	Set<String> clsList = new HashSet<>();

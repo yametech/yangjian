@@ -15,10 +15,6 @@
  */
 package com.yametech.yangjian.agent.api.log;
 
-/**
- * @author zcn
- * @date: 2019-10-14
- **/
 public interface ILogger {
 
     boolean isDebugEnable();

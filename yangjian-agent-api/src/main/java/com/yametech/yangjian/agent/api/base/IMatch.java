@@ -31,10 +31,12 @@ public interface IMatch {
 	default void method(MethodDefined methodDefined) {}
 
 	/**
+	 *
 	 * 类增强成功后通知
 	 * @param typeName	增强的类
 	 * @param classLoader	增强类使用的classLoader
 	 * @param loaded	是否已加载类
+	 * @throws Exception	可能抛出的异常
 	 */
 	default void onComplete(String typeName, ClassLoader classLoader, boolean loaded) throws Exception {}
 

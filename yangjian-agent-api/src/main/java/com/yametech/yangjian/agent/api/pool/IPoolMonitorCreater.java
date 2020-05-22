@@ -19,9 +19,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
- * 
- * @Description 实现类用于完成池监控实例创建
- * 
+ * 实现类用于完成池监控实例创建
  */
 public interface IPoolMonitorCreater {
 	

@@ -15,9 +15,9 @@
  */
 package com.yametech.yangjian.agent.api.trace.custom;
 
-import java.util.Map;
-
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
+
+import java.util.Map;
 
 /**
  * 
@@ -35,11 +35,10 @@ public interface IDubboCustom {
 	 * @return	是否匹配，true：则执行sample、tags，false：不执行
 	 */
 	boolean filter(Class<?> interfaceCls, String methodName, Class<?>[] parameterTypes);
-	
+
 	/**
-	 * 
 	 * @param params	方法参数
-	 * @Param configSample	配置的采样实例
+	 * @param configSample	配置的采样实例
 	 * @return	true：采样，false：不采样
 	 */
 	boolean sample(Object[] params, ISpanSample configSample);

@@ -15,25 +15,12 @@
  */
 package com.yametech.yangjian.agent.api.common;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.yametech.yangjian.agent.api.common.StringUtil;
 
 public class Config {
 	private static final List<ConfigValue<?>> CONFIG_VALUES = new ArrayList<>();
@@ -96,7 +83,7 @@ public class Config {
 	/**
 	 * 刷新远程配置（覆盖刷新）
 	 *
-	 * @param config
+	 * @param config	需要更新的远程配置
 	 */
 	public static void refreshRemoteConfig(Map<String, String> config) {
     	remoteKvs.clear();

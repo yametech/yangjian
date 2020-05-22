@@ -15,10 +15,10 @@
  */
 package com.yametech.yangjian.agent.api;
 
+import com.yametech.yangjian.agent.api.bean.ConfigNotifyType;
+
 import java.util.Map;
 import java.util.Set;
-
-import com.yametech.yangjian.agent.api.bean.ConfigNotifyType;
 
 public interface IConfigReader {
 	
@@ -46,9 +46,9 @@ public interface IConfigReader {
 	
 	/**
 	 * 获取Int型配置值
-	 * @param configValue
-	 * @param defaultValue
-	 * @return
+	 * @param configValue	configValue字符串
+	 * @param defaultValue	无值或者转换异常时的默认值
+	 * @return	int型转换值
 	 */
 	public static Integer getIntValue(String configValue, Integer defaultValue) {
 		if(configValue == null) {

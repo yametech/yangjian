@@ -15,10 +15,6 @@
  */
 package com.yametech.yangjian.agent.api.log;
 
-/**
- * @author dengliming
- * @date 2020/3/1
- */
 public interface ILoggerFactory {
 
     ILogger getLogger(String name);
