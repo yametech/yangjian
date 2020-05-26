@@ -18,6 +18,9 @@ package com.yametech.yangjian.agent.core.core.elementmatch;
 import com.yametech.yangjian.agent.api.bean.Annotation;
 import com.yametech.yangjian.agent.api.bean.ClassDefined;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import net.bytebuddy.description.annotation.AnnotationList;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 
@@ -25,12 +28,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class ElementMatcherConvert {
+
+	private static final ILogger LOGGER = LoggerFactory.getLogger(ElementMatcherConvert.class);
     
 	private ElementMatcherConvert() {}
 
-//	public static ClassDefined convert(TypeDescription typeDescription) {
-//		return convert(typeDescription, false);
-//	}
     public static ClassDefined convert(TypeDescription typeDescription) {
 		ClassDefined classDefined = new ClassDefined(getInterface(typeDescription), getSuperClass(typeDescription), getClassAnnotation(typeDescription), typeDescription.getActualName());
 //		if(!containsMethod) {
@@ -90,20 +92,27 @@ public class ElementMatcherConvert {
     }
     
     private static Set<Annotation> getMethodAnnotation(MethodDescription.InDefinedShape inDefinedShape) {
-		return inDefinedShape.getDeclaredAnnotations().stream().map(annotation -> {
-					Map<String, Object> values = new HashMap<>();
-					annotation.getAnnotationType().getDeclaredMethods().forEach(method -> values.put(method.getActualName(), annotation.getValue(method).resolve()));
-					return new Annotation(annotation.getAnnotationType().getActualName(), values);
-				}).collect(Collectors.toSet());
+		return buildAnnotation(inDefinedShape.getDeclaredAnnotations());
     }
     
     public static Set<Annotation> getClassAnnotation(TypeDescription thisClass) {
-		return thisClass.getDeclaredAnnotations().stream().map(annotation -> {
-					Map<String, Object> values = new HashMap<>();
-					annotation.getAnnotationType().getDeclaredMethods().forEach(method -> values.put(method.getActualName(), annotation.getValue(method).resolve()));
-					return new Annotation(annotation.getAnnotationType().getActualName(), values);
-				}).collect(Collectors.toSet());
+		return buildAnnotation(thisClass.getDeclaredAnnotations());
     }
+
+    private static Set<Annotation> buildAnnotation(AnnotationList annotationList) {
+		return annotationList.stream()
+				.map(annotation -> {
+					try {
+						Map<String, Object> values = new HashMap<>();
+						annotation.getAnnotationType().getDeclaredMethods().forEach(method -> values.put(method.getActualName(), annotation.getValue(method).resolve()));
+						return new Annotation(annotation.getAnnotationType().getActualName(), values);
+					} catch (Exception e) {
+						// 这里catch主要因为会出现java.lang.IllegalStateException: Type not found异常
+						LOGGER.error("", e);
+					}
+					return null;
+				}).filter(Objects::nonNull).collect(Collectors.toSet());
+	}
 
     /**
      * 获取类的父类及祖类，不包含Object

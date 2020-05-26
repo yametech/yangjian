@@ -74,25 +74,31 @@ public class MethodUtil {
 		}
 		return id.append(')').toString();
 	}
-	
-//	public static String getId(InDefinedShape inDefinedShape) {
-//		if(inDefinedShape == null) {
-//			return null;
-//		}
-//		StringBuilder id = new StringBuilder();
-//		id.append(inDefinedShape.getDeclaringType().asErasure().getActualName()).append('.')
-//			.append(inDefinedShape.getName()).append('(');
-//		TypeList parameterTypes = inDefinedShape.getParameters().asTypeList().asErasures();
-//		for (int j = 0; j < parameterTypes.size(); j++) {
-//			id.append(parameterTypes.get(j).getActualName());
-//            if (j < (parameterTypes.size() - 1)) {
-//            	id.append(',');
-//            }
-//        }
-//		id.append(')');
-//		return id.toString();
-//	}
-	
+
+	/**
+	 * 获取简洁方法名ID 如：com.yametech.yangjian.agent.plugin.spring.trace.Test.test(String)
+	 *
+	 * @param method
+	 * @return
+	 */
+	public static String getSimpleMethodId(Method method) {
+		if (method == null) {
+			return null;
+		}
+		return getSimpleMethodId(method.getDeclaringClass(), method.getName(), method.getParameterTypes());
+	}
+
+	public static String getSimpleMethodId(Class<?> cls, String methodName, Class<?>[] parameterTypes) {
+		String[] parameters = null;
+		if (parameterTypes != null) {
+			parameters = new String[parameterTypes.length];
+			for (int i = 0; i < parameterTypes.length; i++) {
+				parameters[i] = parameterTypes[i].getSimpleName();
+			}
+		}
+		return getId(cls.getTypeName(), methodName, parameters);
+	}
+
 	/**
 	 * 根据方法实例以及匹配条件获取匹配的methodId
 	 * @param method	方法

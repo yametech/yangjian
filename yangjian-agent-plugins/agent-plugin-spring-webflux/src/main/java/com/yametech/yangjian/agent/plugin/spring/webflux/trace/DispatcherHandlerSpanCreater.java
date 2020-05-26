@@ -28,7 +28,9 @@ import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.pattern.PathPattern;
 import reactor.core.publisher.Mono;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -89,6 +91,10 @@ public class DispatcherHandlerSpanCreater implements ISpanCreater<Void> {
             try {
                 if (t != null) {
                     span.error(t);
+                }
+                Object pathPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+                if (pathPattern != null) {
+                    span.name(((PathPattern) pathPattern).getPatternString());
                 }
                 HttpStatus httpStatus = exchange.getResponse().getStatusCode();
                 // fix webflux-2.0.0-2.1.0 version have bug. httpStatus is null. not support
