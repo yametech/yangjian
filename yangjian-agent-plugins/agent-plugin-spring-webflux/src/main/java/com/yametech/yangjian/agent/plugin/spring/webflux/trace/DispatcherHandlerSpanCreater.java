@@ -23,15 +23,12 @@ import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MethodUtil;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
-import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.util.pattern.PathPattern;
 import reactor.core.publisher.Mono;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -79,7 +76,7 @@ public class DispatcherHandlerSpanCreater implements ISpanCreater<Void> {
         ServerHttpRequest request = exchange.getRequest();
         Span span = tracer.nextSpan(extractor.extract(headers))
                 .kind(Span.Kind.SERVER)
-                .name(MethodUtil.getId(method))
+                .name(MethodUtil.getSimpleMethodId(method))
                 .start(startTime);
         span.tag(Constants.Tags.HTTP_METHOD, request.getMethodValue());
         span.tag(Constants.Tags.URL, request.getURI().toString());
@@ -92,10 +89,6 @@ public class DispatcherHandlerSpanCreater implements ISpanCreater<Void> {
             try {
                 if (t != null) {
                     span.error(t);
-                }
-                Object pathPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
-                if (pathPattern != null) {
-                    span.name(((PathPattern) pathPattern).getPatternString());
                 }
                 HttpStatus httpStatus = exchange.getResponse().getStatusCode();
                 // fix webflux-2.0.0-2.1.0 version have bug. httpStatus is null. not support

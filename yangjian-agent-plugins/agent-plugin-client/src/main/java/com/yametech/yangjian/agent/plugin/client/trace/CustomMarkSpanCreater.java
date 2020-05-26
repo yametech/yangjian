@@ -19,7 +19,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
-import com.yametech.yangjian.agent.api.common.TraceUtil;
+import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
@@ -29,6 +29,7 @@ import brave.Tracer;
 import brave.Tracing;
 
 public class CustomMarkSpanCreater implements ISpanCreater<SpanInfo> {
+	protected static final MicrosClock MICROS_CLOCK = new MicrosClock();
 	protected Tracer tracer;
 	private ISpanSample spanSample;
 	
@@ -44,9 +45,13 @@ public class CustomMarkSpanCreater implements ISpanCreater<SpanInfo> {
 		if(!sample || !spanSample.sample()) {
 			return null;
 		}
+		long startTime = MICROS_CLOCK.nowMicros();
+		if (startTime == -1L) {
+			return null;
+		}
 		Span span = tracer.nextSpan()
 				.name(allArguments[0] == null ? "Mark" : allArguments[0].toString())
-				.start(TraceUtil.nowMicros());
+				.start(startTime);
 		@SuppressWarnings("unchecked")
 		Map<String, String> tags =  (Map<String, String>) allArguments[2];
 		if(tags != null) {

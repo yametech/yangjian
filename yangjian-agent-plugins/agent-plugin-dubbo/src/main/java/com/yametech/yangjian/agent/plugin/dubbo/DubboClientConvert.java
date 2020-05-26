@@ -43,7 +43,7 @@ public class DubboClientConvert implements IMethodConvert {
 			return null;
 		}
 		TimeEvent event = get(startTime);
-		event.setIdentify(MethodUtil.getCacheMethodId((Method) allArguments[1]));
+		event.setIdentify(MethodUtil.getSimpleMethodId((Method) allArguments[1]));
 		return Arrays.asList(event);
 	}
 }

@@ -23,7 +23,6 @@ import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MethodUtil;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
-import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
@@ -68,7 +67,7 @@ public class ControllerSpanCreater implements ISpanCreater<SpanInfo> {
         }
         Span span = tracer.nextSpan(extractor.extract(request))
                 .kind(Span.Kind.SERVER)
-                .name(MethodUtil.getId(method))
+                .name(MethodUtil.getSimpleMethodId(method))
                 .start(startTime);
         span.tag(Constants.Tags.HTTP_METHOD, request.getMethod());
         span.tag(Constants.Tags.URL, request.getRequestURL().toString());

@@ -43,7 +43,7 @@ public class InvocableHandlerInterceptor implements IMethodConvert {
         }
         RequestEvent requestEvent = (RequestEvent) ((IContext) allArguments[0])._getAgentContext(ContextConstants.REQUEST_EVENT_CONTEXT_KEY);
         if (requestEvent != null) {
-            requestEvent.setMethodName(MethodUtil.getCacheMethodId(((InvocableHandlerMethod) thisObj).getMethod()));
+            requestEvent.setMethodName(MethodUtil.getSimpleMethodId(((InvocableHandlerMethod) thisObj).getMethod()));
         }
         return null;
     }

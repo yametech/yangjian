@@ -39,6 +39,8 @@ import brave.Tracer;
 import brave.Tracing;
 import brave.internal.Platform;
 
+import static com.yametech.yangjian.agent.api.common.Constants.Tags.STATUS_CODE;
+
 public abstract class DubboSpanCreater<T extends ISpanCustom> implements ISpanCreater<SpanInfo>, ICustomLoad<T> {
 	protected static final MicrosClock MICROS_CLOCK = new MicrosClock();
 	private List<IDubboCustom> customs;
@@ -81,7 +83,7 @@ public abstract class DubboSpanCreater<T extends ISpanCustom> implements ISpanCr
 	    if(exception != null) {
 	    	span.getSpan().error(exception);
 			if (exception instanceof RpcException) {
-				span.getSpan().tag("dubbo.error_code", Integer.toString(((RpcException) exception).getCode()));
+				span.getSpan().tag(STATUS_CODE, Integer.toString(((RpcException) exception).getCode()));
 			}
 	    }
 		span.getSpan().finish();

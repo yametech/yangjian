@@ -53,7 +53,7 @@ public class OkHttpClientConvert implements IMethodConvert {
             return null;
         }
         TimeEvent event = get(startTime);
-		event.setIdentify( StringUtil.filterUrlParams(requestUrl));
+		event.setIdentify(StringUtil.filterUrlParams(requestUrl));
 		return Arrays.asList(event);
     }
 }

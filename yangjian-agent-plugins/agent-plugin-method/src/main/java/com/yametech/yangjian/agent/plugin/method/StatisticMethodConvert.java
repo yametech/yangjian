@@ -37,7 +37,7 @@ public class StatisticMethodConvert implements IStatisticMethodConvert {
 	public List<TimeEvent> convert(long startTime, Object[] allArguments, Method method, Object ret,
 			Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
         TimeEvent event = get(startTime);
-		event.setIdentify(MethodUtil.getCacheMethodId(method));
+		event.setIdentify(MethodUtil.getSimpleMethodId(method));
 		return Arrays.asList(event);
     }
 }

@@ -47,7 +47,7 @@ public class ControllerConvert implements IMethodConvert {
         }
         InvocableHandlerMethod handlerMethod = (InvocableHandlerMethod) thisObj;
         TimeEvent event = get(startTime);
-		event.setIdentify(MethodUtil.getCacheMethodId(handlerMethod.getMethod()));
+		event.setIdentify(MethodUtil.getSimpleMethodId(handlerMethod.getMethod()));
 		return Arrays.asList(event);
     }
 }
