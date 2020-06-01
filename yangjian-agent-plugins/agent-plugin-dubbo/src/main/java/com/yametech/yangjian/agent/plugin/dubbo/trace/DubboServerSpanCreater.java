@@ -18,13 +18,15 @@ package com.yametech.yangjian.agent.plugin.dubbo.trace;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import brave.propagation.ExtraFieldPropagation;
+import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.StringUtil;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.RpcContext;
 
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.BraveUtil;
-import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
 import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
@@ -69,6 +71,10 @@ public class DubboServerSpanCreater extends DubboSpanCreater<IDubboServerCustom>
 				.kind(kind)
 				.name(getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes()))
 				.start(startTime);
+		String parentServiceName = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.SERVICE_NAME);
+		if (StringUtil.notEmpty(span.context().parentIdString()) && StringUtil.notEmpty(parentServiceName)) {
+			span.tag(Constants.ExtraHeaderKey.SERVICE_NAME, parentServiceName);
+		}
 		return spanInit(span, invocation.getArguments(), custom);
 	}
 }

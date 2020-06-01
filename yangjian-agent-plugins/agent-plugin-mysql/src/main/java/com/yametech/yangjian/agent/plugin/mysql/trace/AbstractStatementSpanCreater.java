@@ -18,22 +18,18 @@ package com.yametech.yangjian.agent.plugin.mysql.trace;
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
-import brave.internal.Platform;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.common.StringUtil;
-import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
-import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
 import com.yametech.yangjian.agent.plugin.mysql.commons.bean.ConnectionInfo;
 import com.yametech.yangjian.agent.plugin.mysql.commons.context.ContextConstants;
 
 import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
 
 /**
  * @author dengliming
@@ -80,8 +76,9 @@ public abstract class AbstractStatementSpanCreater implements ISpanCreater<SpanI
         Span span = tracer.nextSpan()
                 .name(spanName)
                 .kind(Span.Kind.CLIENT)
+                .tag(Constants.Tags.COMPONENT, Constants.Component.MYSQL_JDBC)
+                .tag(Constants.Tags.PEER, connectionInfo.getUrl())
                 .tag(Constants.Tags.DB_STATEMENT, sql)
-                .tag(Constants.Tags.URL, connectionInfo.getUrl())
                 .tag(Constants.Tags.DB_INSTANCE, connectionInfo.getDatabaseName())
                 .start(startTime);
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);

@@ -25,7 +25,6 @@ import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
-import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.plugin.kafka.bean.MqInfo;
@@ -96,8 +95,9 @@ public class KafkaConsumerSpanCreater implements ISpanCreater<Void> {
             tracer.nextSpan(context)
                     .kind(Span.Kind.CONSUMER)
                     .name(String.format(SPAN_NAME_FORMAT, record.topic()))
+                    .tag(Constants.Tags.COMPONENT, Constants.Component.KAFKA)
+                    .tag(Constants.Tags.PEER, mqInfo.getIpPorts())
                     .tag(Constants.Tags.MQ_TOPIC, record.topic())
-                    .tag(Constants.Tags.MQ_SERVER, mqInfo.getIpPorts())
                     .tag(Constants.Tags.MQ_CONSUMER, mqInfo.getConsumeGroup())
                     .start(startTime)
                     .finish();

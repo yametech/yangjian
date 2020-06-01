@@ -23,19 +23,15 @@ import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.common.StringUtil;
-import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
 import com.yametech.yangjian.agent.plugin.redisson.context.ContextConstants;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import org.redisson.client.RedisConnection;
 import org.redisson.client.protocol.CommandData;
 import org.redisson.client.protocol.CommandsData;
 
 import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
 
 /**
  * @author dengliming
@@ -67,11 +63,6 @@ public class RedisConnectionSpanCreater implements ISpanCreater<SpanInfo> {
             return null;
         }
 
-        RedisConnection connection = (RedisConnection) thisObj;
-        Channel channel = connection.getChannel();
-        InetSocketAddress remoteAddress = (InetSocketAddress) channel.remoteAddress();
-        String dbInstance = remoteAddress.getAddress().getHostAddress() + ":" + remoteAddress.getPort();
-
         StringBuilder dbStatement = new StringBuilder();
         String operationName = "Redisson/";
         if (allArguments[0] instanceof CommandsData) {
@@ -91,8 +82,8 @@ public class RedisConnectionSpanCreater implements ISpanCreater<SpanInfo> {
         Span span = tracer.nextSpan()
                 .kind(Span.Kind.CLIENT)
                 .name(operationName)
-                .tag(Constants.Tags.URL, url)
-                .tag(Constants.Tags.DB_INSTANCE, dbInstance)
+                .tag(Constants.Tags.COMPONENT, Constants.Component.REDISSON)
+                .tag(Constants.Tags.PEER, url)
                 .tag(Constants.Tags.DB_STATEMENT, StringUtil.shorten(dbStatement.toString(), 50))
                 .start(startTime);
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);

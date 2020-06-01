@@ -22,7 +22,6 @@ import com.rabbitmq.client.AMQP;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
-import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
 import com.yametech.yangjian.agent.plugin.rabbitmq.bean.MqInfo;
@@ -92,11 +91,12 @@ public class ProducerSpanCreater extends AbstractSpanCreater {
         String exChangeName = (String) allArguments[0];
         String queueName = (String) allArguments[1];
         Span span = tracer.nextSpan()
-                .kind(Span.Kind.CONSUMER)
+                .kind(Span.Kind.PRODUCER)
                 .name(SPAN_NAME)
+                .tag(Constants.Tags.COMPONENT, Constants.Component.RABBITMQ)
+                .tag(Constants.Tags.PEER, mqInfo.getIpPorts())
                 .tag(Constants.Tags.MQ_TOPIC, exChangeName)
                 .tag(Constants.Tags.MQ_QUEUE, queueName)
-                .tag(Constants.Tags.MQ_SERVER, mqInfo.getIpPorts())
                 .start(startTime);
 
         injector.inject(span.context(), headers);

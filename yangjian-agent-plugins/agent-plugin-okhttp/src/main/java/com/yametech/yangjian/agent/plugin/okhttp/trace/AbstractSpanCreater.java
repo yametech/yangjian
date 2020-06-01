@@ -3,12 +3,12 @@ package com.yametech.yangjian.agent.plugin.okhttp.trace;
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
+import brave.propagation.ExtraFieldPropagation;
 import brave.propagation.TraceContext;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
-import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
@@ -55,9 +55,12 @@ public abstract class AbstractSpanCreater implements ISpanCreater<SpanInfo> {
         Span span = tracer.nextSpan()
                 .kind(Span.Kind.CLIENT)
                 .name(requestUrl.toString())
+                .tag(Constants.Tags.COMPONENT, Constants.Component.OKHTTP)
+                .tag(Constants.Tags.HTTP_METHOD, request.method())
+                .tag(Constants.Tags.PEER, requestUrl.host() + ":" + requestUrl.port())
                 .start(startTime);
-        span.tag(Constants.Tags.HTTP_METHOD, request.method());
-        span.tag(Constants.Tags.URL, requestUrl.toString());
+        // 自定义字段为了后续服务拓扑图生成
+        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.SERVICE_NAME, Constants.serviceName());
         span.remoteIpAndPort(requestUrl.host(), requestUrl.port());
         Field headersField = Request.class.getDeclaredField("headers");
         Field modifiersField = Field.class.getDeclaredField("modifiers");

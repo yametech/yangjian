@@ -18,12 +18,12 @@ package com.yametech.yangjian.agent.plugin.kafka.trace;
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
+import brave.propagation.ExtraFieldPropagation;
 import brave.propagation.TraceContext;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
-import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
@@ -72,10 +72,11 @@ public class KafkaProducerSpanCreater implements ISpanCreater<SpanInfo> {
         }
         ProducerRecord<?, ?> record = (ProducerRecord<?, ?>) allArguments[0];
         Span span = tracer.nextSpan()
-                .kind(Span.Kind.CONSUMER)
+                .kind(Span.Kind.PRODUCER)
                 .name(String.format(SPAN_NAME_FORMAT, record.topic()))
+                .tag(Constants.Tags.COMPONENT, Constants.Component.KAFKA)
+                .tag(Constants.Tags.PEER, mqInfo.getIpPorts())
                 .tag(Constants.Tags.MQ_TOPIC, record.topic())
-                .tag(Constants.Tags.MQ_SERVER, mqInfo.getIpPorts())
                 .start(startTime);
         injector.inject(span.context(), record.headers());
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);

@@ -18,11 +18,11 @@ package com.yametech.yangjian.agent.plugin.httpclient.trace;
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
+import brave.propagation.ExtraFieldPropagation;
 import brave.propagation.TraceContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
-import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
@@ -56,14 +56,18 @@ public class HttpClientSpanCreater implements ISpanCreater<SpanInfo> {
             return null;
         }
         final HttpMethod httpMethod = (HttpMethod) allArguments[1];
+        final String remotePeer = httpMethod.getURI().getHost() + ":" + httpMethod.getURI().getPort();
         final URI uri = httpMethod.getURI();
         Span span = tracer.nextSpan()
                 .kind(Span.Kind.CLIENT)
                 .name(getRequestURI(uri))
+                .tag(Constants.Tags.COMPONENT, Constants.Component.HTTP_CLIENT)
+                .tag(Constants.Tags.HTTP_METHOD, httpMethod.getName())
+                .tag(Constants.Tags.URL, uri.toString())
+                .tag(Constants.Tags.PEER, remotePeer)
                 .start(startTime);
-        span.tag(Constants.Tags.HTTP_METHOD, httpMethod.getName());
-        span.tag(Constants.Tags.URL, uri.toString());
         span.remoteIpAndPort(httpMethod.getURI().getHost(), httpMethod.getURI().getPort());
+        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.SERVICE_NAME, Constants.serviceName());
         injector.inject(span.context(), httpMethod);
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }

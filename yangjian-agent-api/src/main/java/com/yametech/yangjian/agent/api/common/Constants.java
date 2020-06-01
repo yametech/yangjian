@@ -94,6 +94,7 @@ public class Constants {
 
     public static class Tags {
         public static final String STATUS_CODE = "status_code";
+        public static final String PEER = "peer";
         public static final String URL = "url";
         public static final String HTTP_METHOD = "http.method";
         public static final String MQ_TOPIC = "mq.topic";
@@ -106,5 +107,26 @@ public class Constants {
         public static final String DB_STATEMENT = "db.statement";
         public static final String DB_TYPE = "db.type";
         public static final String DB_PARAMETERS = "db.parameters";
+
+        public static final String COMPONENT = "component";
+    }
+
+    public static class Component {
+        public static final String DUBBO = "dubbo";
+        public static final String OKHTTP = "okhttp";
+        public static final String JEDIS = "jedis";
+        public static final String MYSQL_JDBC = "mysql-jdbc";
+        public static final String KAFKA = "kafka";
+        public static final String RABBITMQ = "rabbitmq";
+        public static final String HTTP_CLIENT = "httpclient";
+        public static final String REDISSON = "redisson";
+        public static final String MONGO = "mongodb";
+        public static final String SPRING_WEBFLUX = "spring-webflux";
+        public static final String SPRING_MVC = "spring-mvc";
+    }
+
+    public static class ExtraHeaderKey {
+        public static final String USER_ID = "user-id";
+        public static final String SERVICE_NAME = "x-service-name";
     }
 }

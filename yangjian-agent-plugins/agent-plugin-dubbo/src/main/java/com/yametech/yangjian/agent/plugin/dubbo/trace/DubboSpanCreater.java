@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
 import org.apache.dubbo.rpc.Result;
 import org.apache.dubbo.rpc.RpcContext;
@@ -63,6 +64,8 @@ public abstract class DubboSpanCreater<T extends ISpanCustom> implements ISpanCr
 	    if (remoteAddress != null) {
 	    	span.remoteIpAndPort(Platform.get().getHostString(remoteAddress), remoteAddress.getPort());
 	    }
+		span.tag(Constants.Tags.COMPONENT, Constants.Component.DUBBO)
+				.tag(Constants.Tags.PEER, Platform.get().getHostString(remoteAddress) + ":" + remoteAddress.getPort());
 	    setTags(span, allArguments, custom);
 	    return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
 	}

@@ -28,8 +28,7 @@ import zipkin2.Span;
 import zipkin2.reporter.Reporter;
 
 public class BraveHelper {
-	public static final String EXTRA_KEY = "user-id";
-	
+
 	/**
 	 * 获取trace实例
 	 * @param spanReporter
@@ -40,11 +39,11 @@ public class BraveHelper {
 		Builder builder = Tracing.newBuilder()
 				.localServiceName(Constants.serviceName())
 				.spanReporter(spanReporter)
-				.propagationFactory(ExtraFieldPropagation.newFactory(B3Propagation.FACTORY, EXTRA_KEY))
+				.propagationFactory(ExtraFieldPropagation.newFactory(B3Propagation.FACTORY, Constants.ExtraHeaderKey.USER_ID, Constants.ExtraHeaderKey.SERVICE_NAME))
 				.currentTraceContext(ThreadLocalCurrentTraceContext.newBuilder()
 				      .addScopeDecorator(StrictScopeDecorator.create())
 				      .build());
-		if(sampler != null) {
+		if (sampler != null) {
 			builder.sampler(sampler);
 		}
 		return builder.build();

@@ -18,11 +18,13 @@ package com.yametech.yangjian.agent.plugin.spring.webflux.trace;
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
+import brave.propagation.ExtraFieldPropagation;
 import brave.propagation.TraceContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MethodUtil;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
+import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import org.springframework.http.HttpHeaders;
@@ -79,9 +81,11 @@ public class DispatcherHandlerSpanCreater implements ISpanCreater<Void> {
         Span span = tracer.nextSpan(extractor.extract(headers))
                 .kind(Span.Kind.SERVER)
                 .name(MethodUtil.getSimpleMethodId(method))
+                .tag(Constants.Tags.COMPONENT, Constants.Component.SPRING_WEBFLUX)
+                .tag(Constants.Tags.HTTP_METHOD, request.getMethodValue())
+                .tag(Constants.Tags.PEER, request.getURI().toString())
                 .start(startTime);
-        span.tag(Constants.Tags.HTTP_METHOD, request.getMethodValue());
-        span.tag(Constants.Tags.URL, request.getURI().toString());
+        String parentServiceName = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.SERVICE_NAME);
         final Map<String, List<String>> parameterMap = request.getQueryParams();
         if (parameterMap != null && !parameterMap.isEmpty()) {
             parameterMap.forEach((k, v) -> span.tag(k, v.toString()));
@@ -92,12 +96,14 @@ public class DispatcherHandlerSpanCreater implements ISpanCreater<Void> {
                 if (t != null) {
                     span.error(t);
                 }
+                if (StringUtil.notEmpty(span.context().parentIdString()) && StringUtil.notEmpty(parentServiceName)) {
+                    span.tag(Constants.ExtraHeaderKey.SERVICE_NAME, parentServiceName);
+                }
                 Object pathPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
                 if (pathPattern != null) {
                     span.name(((PathPattern) pathPattern).getPatternString());
                 }
                 HttpStatus httpStatus = exchange.getResponse().getStatusCode();
-                // fix webflux-2.0.0-2.1.0 version have bug. httpStatus is null. not support
                 if (httpStatus != null) {
                     span.tag(Constants.Tags.STATUS_CODE, Integer.toString(httpStatus.value()));
                 }

@@ -23,7 +23,6 @@ import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.common.StringUtil;
-import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
@@ -67,7 +66,8 @@ public class JedisMethodSpanCreater implements ISpanCreater<SpanInfo> {
         Span span = tracer.nextSpan()
                 .kind(Span.Kind.CLIENT)
                 .name(String.format(SPAN_NAME_FORMAT, method.getName()))
-                .tag(Constants.Tags.URL, url)
+                .tag(Constants.Tags.COMPONENT, Constants.Component.JEDIS)
+                .tag(Constants.Tags.PEER, url)
                 .start(startTime);
         if (allArguments.length > 0 && allArguments[0] instanceof String) {
             span.tag(Constants.Tags.DB_STATEMENT, method.getName() + " " + allArguments[0]);

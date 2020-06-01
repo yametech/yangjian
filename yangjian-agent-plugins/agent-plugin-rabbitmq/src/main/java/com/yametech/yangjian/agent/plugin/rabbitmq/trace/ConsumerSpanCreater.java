@@ -24,8 +24,6 @@ import com.rabbitmq.client.Envelope;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
-import com.yametech.yangjian.agent.api.common.MicrosClock;
-import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
 import com.yametech.yangjian.agent.plugin.rabbitmq.bean.MqInfo;
@@ -75,9 +73,10 @@ public class ConsumerSpanCreater extends AbstractSpanCreater {
         Span span = traceContextOrSamplingFlags != null ? tracer.nextSpan(traceContextOrSamplingFlags) : tracer.nextSpan();
         span.kind(Span.Kind.CONSUMER)
                 .name(SPAN_NAME)
+                .tag(Constants.Tags.COMPONENT, Constants.Component.RABBITMQ)
+                .tag(Constants.Tags.PEER, mqInfo.getIpPorts())
                 .tag(Constants.Tags.MQ_TOPIC, envelope.getExchange())
                 .tag(Constants.Tags.MQ_QUEUE, envelope.getRoutingKey())
-                .tag(Constants.Tags.MQ_SERVER, mqInfo.getIpPorts())
                 .start(startTime);
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }

@@ -18,11 +18,13 @@ package com.yametech.yangjian.agent.plugin.spring.trace;
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
+import brave.propagation.ExtraFieldPropagation;
 import brave.propagation.TraceContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MethodUtil;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
+import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
@@ -68,13 +70,19 @@ public class ControllerSpanCreater implements ISpanCreater<SpanInfo> {
         Span span = tracer.nextSpan(extractor.extract(request))
                 .kind(Span.Kind.SERVER)
                 .name(MethodUtil.getSimpleMethodId(method))
+                .tag(Constants.Tags.COMPONENT, Constants.Component.SPRING_MVC)
+                .tag(Constants.Tags.HTTP_METHOD, request.getMethod())
+                .tag(Constants.Tags.PEER, request.getRequestURL().toString())
                 .start(startTime);
-        span.tag(Constants.Tags.HTTP_METHOD, request.getMethod());
-        span.tag(Constants.Tags.URL, request.getRequestURL().toString());
+        String parentServiceName = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.SERVICE_NAME);
+        if (StringUtil.notEmpty(span.context().parentIdString()) && StringUtil.notEmpty(parentServiceName)) {
+            span.tag(Constants.ExtraHeaderKey.SERVICE_NAME, parentServiceName);
+        }
         final Map<String, String[]> parameterMap = request.getParameterMap();
         if (parameterMap != null && !parameterMap.isEmpty()) {
             parameterMap.forEach((k, v) -> span.tag(k, Arrays.toString(v)));
         }
+        //ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.SERVICE_NAME, Constants.serviceName());
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }
 

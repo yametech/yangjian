@@ -18,27 +18,18 @@ package com.yametech.yangjian.agent.plugin.mongo.trace;
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
-import brave.propagation.TraceContext;
-import com.mongodb.bulk.DeleteRequest;
-import com.mongodb.bulk.InsertRequest;
-import com.mongodb.bulk.UpdateRequest;
-import com.mongodb.bulk.WriteRequest;
-import com.mongodb.operation.*;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.common.StringUtil;
-import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
 import com.yametech.yangjian.agent.plugin.mongo.context.ContextConstants;
 import com.yametech.yangjian.agent.plugin.mongo.util.MongoUtil;
-import org.bson.BsonDocument;
 
 import java.lang.reflect.Method;
-import java.util.List;
 
 /**
  * @author dengliming
@@ -75,7 +66,8 @@ public class OperationExecutorSpanCreater implements ISpanCreater<SpanInfo> {
         Span span = tracer.nextSpan()
                 .kind(Span.Kind.CLIENT)
                 .name(String.format(SPAN_NAME_FORMAT, executeMethod))
-                .tag(Constants.Tags.URL, serverUrl)
+                .tag(Constants.Tags.COMPONENT, Constants.Component.MONGO)
+                .tag(Constants.Tags.PEER, serverUrl)
                 .start(startTime);
         span.tag(Constants.Tags.DB_STATEMENT, executeMethod + MongoUtil.getTraceParam(allArguments[0]));
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
