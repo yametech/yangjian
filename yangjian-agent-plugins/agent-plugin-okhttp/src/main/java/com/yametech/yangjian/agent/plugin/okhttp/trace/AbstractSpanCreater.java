@@ -60,7 +60,7 @@ public abstract class AbstractSpanCreater implements ISpanCreater<SpanInfo> {
                 .tag(Constants.Tags.PEER, requestUrl.host() + ":" + requestUrl.port())
                 .start(startTime);
         // 自定义字段为了后续服务拓扑图生成
-        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.SERVICE_NAME, Constants.serviceName());
+        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE, Constants.serviceName());
         span.remoteIpAndPort(requestUrl.host(), requestUrl.port());
         Field headersField = Request.class.getDeclaredField("headers");
         Field modifiersField = Field.class.getDeclaredField("modifiers");

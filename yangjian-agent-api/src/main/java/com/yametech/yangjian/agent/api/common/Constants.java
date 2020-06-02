@@ -94,7 +94,6 @@ public class Constants {
 
     public static class Tags {
         public static final String STATUS_CODE = "status_code";
-        public static final String PEER = "peer";
         public static final String URL = "url";
         public static final String HTTP_METHOD = "http.method";
         public static final String MQ_TOPIC = "mq.topic";
@@ -108,7 +107,9 @@ public class Constants {
         public static final String DB_TYPE = "db.type";
         public static final String DB_PARAMETERS = "db.parameters";
 
-        public static final String COMPONENT = "component";
+        public static final String PEER = "_peer";
+        public static final String COMPONENT = "_component";
+        public static final String PARENT_SERVICE_NAME = "_parent_service_name";
     }
 
     public static class Component {
@@ -126,7 +127,7 @@ public class Constants {
     }
 
     public static class ExtraHeaderKey {
-        public static final String USER_ID = "user-id";
-        public static final String SERVICE_NAME = "x-service-name";
+        public static final String USER_ID = "x-user-id";
+        public static final String REFERER_SERVICE = "x-referer-service";
     }
 }

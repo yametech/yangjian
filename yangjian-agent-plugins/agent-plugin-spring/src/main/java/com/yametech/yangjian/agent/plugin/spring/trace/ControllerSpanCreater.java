@@ -74,15 +74,14 @@ public class ControllerSpanCreater implements ISpanCreater<SpanInfo> {
                 .tag(Constants.Tags.HTTP_METHOD, request.getMethod())
                 .tag(Constants.Tags.PEER, request.getRequestURL().toString())
                 .start(startTime);
-        String parentServiceName = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.SERVICE_NAME);
+        String parentServiceName = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE);
         if (StringUtil.notEmpty(span.context().parentIdString()) && StringUtil.notEmpty(parentServiceName)) {
-            span.tag(Constants.ExtraHeaderKey.SERVICE_NAME, parentServiceName);
+            span.tag(Constants.Tags.PARENT_SERVICE_NAME, parentServiceName);
         }
         final Map<String, String[]> parameterMap = request.getParameterMap();
         if (parameterMap != null && !parameterMap.isEmpty()) {
             parameterMap.forEach((k, v) -> span.tag(k, Arrays.toString(v)));
         }
-        //ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.SERVICE_NAME, Constants.serviceName());
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }
 

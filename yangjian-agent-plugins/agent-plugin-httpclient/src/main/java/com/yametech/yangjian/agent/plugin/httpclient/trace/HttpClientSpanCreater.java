@@ -67,7 +67,7 @@ public class HttpClientSpanCreater implements ISpanCreater<SpanInfo> {
                 .tag(Constants.Tags.PEER, remotePeer)
                 .start(startTime);
         span.remoteIpAndPort(httpMethod.getURI().getHost(), httpMethod.getURI().getPort());
-        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.SERVICE_NAME, Constants.serviceName());
+        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE, Constants.serviceName());
         injector.inject(span.context(), httpMethod);
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }

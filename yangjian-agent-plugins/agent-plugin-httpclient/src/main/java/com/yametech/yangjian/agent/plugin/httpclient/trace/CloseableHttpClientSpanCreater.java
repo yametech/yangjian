@@ -76,7 +76,7 @@ public class CloseableHttpClientSpanCreater implements ISpanCreater<SpanInfo> {
                 .tag(Constants.Tags.PEER, httpHost.getHostName() + ":" + port(httpHost))
                 .tag(Constants.Tags.URL, buildUrl(httpHost, uri))
                 .start(startTime);
-        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.SERVICE_NAME, Constants.serviceName());
+        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE, Constants.serviceName());
         injector.inject(span.context(), httpRequest);
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }

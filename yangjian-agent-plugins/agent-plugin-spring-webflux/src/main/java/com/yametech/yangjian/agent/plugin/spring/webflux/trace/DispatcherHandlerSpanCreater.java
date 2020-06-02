@@ -85,7 +85,7 @@ public class DispatcherHandlerSpanCreater implements ISpanCreater<Void> {
                 .tag(Constants.Tags.HTTP_METHOD, request.getMethodValue())
                 .tag(Constants.Tags.PEER, request.getURI().toString())
                 .start(startTime);
-        String parentServiceName = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.SERVICE_NAME);
+        String parentServiceName = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE);
         final Map<String, List<String>> parameterMap = request.getQueryParams();
         if (parameterMap != null && !parameterMap.isEmpty()) {
             parameterMap.forEach((k, v) -> span.tag(k, v.toString()));
@@ -97,7 +97,7 @@ public class DispatcherHandlerSpanCreater implements ISpanCreater<Void> {
                     span.error(t);
                 }
                 if (StringUtil.notEmpty(span.context().parentIdString()) && StringUtil.notEmpty(parentServiceName)) {
-                    span.tag(Constants.ExtraHeaderKey.SERVICE_NAME, parentServiceName);
+                    span.tag(Constants.Tags.PARENT_SERVICE_NAME, parentServiceName);
                 }
                 Object pathPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
                 if (pathPattern != null) {

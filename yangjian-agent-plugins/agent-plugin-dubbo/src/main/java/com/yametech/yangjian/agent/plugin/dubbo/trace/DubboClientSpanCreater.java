@@ -67,7 +67,7 @@ public class DubboClientSpanCreater extends DubboSpanCreater<IDubboClientCustom>
 				.kind(Kind.CLIENT)
 				.name(getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes()))
 				.start(startTime);
-		ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.SERVICE_NAME, Constants.serviceName());
+		ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE, Constants.serviceName());
 		injector.inject(span.context(), rpcContext.getAttachments());
 		return spanInit(span, invocation.getArguments(), custom);
 	}

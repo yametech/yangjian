@@ -39,7 +39,7 @@ public class BraveHelper {
 		Builder builder = Tracing.newBuilder()
 				.localServiceName(Constants.serviceName())
 				.spanReporter(spanReporter)
-				.propagationFactory(ExtraFieldPropagation.newFactory(B3Propagation.FACTORY, Constants.ExtraHeaderKey.USER_ID, Constants.ExtraHeaderKey.SERVICE_NAME))
+				.propagationFactory(ExtraFieldPropagation.newFactory(B3Propagation.FACTORY, Constants.ExtraHeaderKey.USER_ID, Constants.ExtraHeaderKey.REFERER_SERVICE))
 				.currentTraceContext(ThreadLocalCurrentTraceContext.newBuilder()
 				      .addScopeDecorator(StrictScopeDecorator.create())
 				      .build());
