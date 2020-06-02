@@ -50,6 +50,9 @@ public class OperationExecutorSpanCreater implements ISpanCreater<SpanInfo> {
 
     @Override
     public BeforeResult<SpanInfo> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
+        if (!(thisObj instanceof IContext)) {
+            return null;
+        }
         if (!spanSample.sample()) {
             return null;
         }

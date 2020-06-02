@@ -15,7 +15,6 @@
  */
 package com.yametech.yangjian.agent.plugin.mongo.context;
 
-import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
@@ -23,26 +22,30 @@ import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
 import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
-import com.yametech.yangjian.agent.api.configmatch.InterfaceMatch;
+import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodNameMatch;
+
 import java.util.Arrays;
 
 /**
  * @author dengliming
  * @date 2020/5/8
  */
-public class CreateOperationExecutorMatcher implements IEnhanceClassMatch, InterceptorMatcher {
-
-    @Override
-    public IConfigMatch classMatch() {
-        return new ClassMatch("com.mongodb.client.internal.MongoClientDelegate");
-    }
+public class CreateOperationExecutorMatcher implements InterceptorMatcher {
 
     @Override
     public IConfigMatch match() {
-        return new CombineAndMatch(Arrays.asList(
-                classMatch(),
-                new MethodNameMatch("getOperationExecutor")
+        return new CombineOrMatch(Arrays.asList(
+                // v3.7.x+
+                new CombineAndMatch(Arrays.asList(
+                        new ClassMatch("com.mongodb.client.internal.MongoClientDelegate"),
+                        new MethodNameMatch("getOperationExecutor")
+                )),
+                // v3.6.x
+                new CombineAndMatch(Arrays.asList(
+                        new ClassMatch("com.mongodb.Mongo"),
+                        new MethodNameMatch("createOperationExecutor")
+                ))
         ));
     }
 

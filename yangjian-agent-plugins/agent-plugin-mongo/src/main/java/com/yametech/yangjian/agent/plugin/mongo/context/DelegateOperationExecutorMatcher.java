@@ -19,6 +19,10 @@ import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.SPI;
 import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
+import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
+import com.yametech.yangjian.agent.api.configmatch.InterfaceMatch;
+
+import java.util.Arrays;
 
 /**
  * @author dengliming
@@ -28,6 +32,10 @@ public class DelegateOperationExecutorMatcher implements IEnhanceClassMatch, SPI
 
     @Override
     public IConfigMatch classMatch() {
-        return new ClassMatch("com.mongodb.client.internal.MongoClientDelegate$DelegateOperationExecutor");
+        return new CombineOrMatch(Arrays.asList(
+                new ClassMatch("com.mongodb.client.internal.MongoClientDelegate$DelegateOperationExecutor"),
+                new InterfaceMatch("com.mongodb.client.internal.OperationExecutor"),
+                new InterfaceMatch("com.mongodb.OperationExecutor")
+        ));
     }
 }

@@ -23,6 +23,8 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
+ * 拦截创建OperationExecutor方法传递服务地址
+ *
  * @author dengliming
  * @date 2020/5/8
  */
