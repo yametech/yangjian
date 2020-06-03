@@ -109,6 +109,7 @@ public class Constants {
 
         public static final String PEER = "_peer";
         public static final String COMPONENT = "_component";
+        public static final String DATABASE = "_database";
         public static final String PARENT_SERVICE_NAME = "_parent_service_name";
     }
 
