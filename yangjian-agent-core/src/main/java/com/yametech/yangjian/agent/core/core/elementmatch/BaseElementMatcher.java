@@ -15,9 +15,6 @@
  */
 package com.yametech.yangjian.agent.core.core.elementmatch;
 
-import java.lang.reflect.Type;
-import java.util.List;
-
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.log.ILogger;
@@ -25,6 +22,9 @@ import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.util.ClassUtil;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+
+import java.lang.reflect.Type;
+import java.util.List;
 
 public abstract class BaseElementMatcher<T> extends ElementMatcher.Junction.AbstractBase<T> {
 	private static ILogger log = LoggerFactory.getLogger(BaseElementMatcher.class);
@@ -66,7 +66,17 @@ public abstract class BaseElementMatcher<T> extends ElementMatcher.Junction.Abst
 //        if(o.toString().indexOf("RabbitmqConsumeAdapterAbs") != -1) {
 //        	System.err.println(">>>>>");
 //        }
-        List<MethodDefined> matchNames = name((T) o);
+        List<MethodDefined> matchNames;
+        try {
+            matchNames = name((T) o);
+        } catch (Exception e) {
+            String className = null;
+            if(o instanceof TypeDescription) {
+                className = ((TypeDescription)o).getDeclaringType().getActualName();
+            }
+            log.warn("转换MethodDefined异常，不执行增强：{} - {} : {}", matchType, className, e.getMessage());
+            return false;
+        }
         boolean isMatch = matchNames.stream().anyMatch(match::isMatch);
         if(o instanceof TypeDescription) {
         	TypeDescription type = ((TypeDescription)o);

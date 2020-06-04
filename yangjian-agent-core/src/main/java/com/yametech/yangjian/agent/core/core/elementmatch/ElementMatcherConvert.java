@@ -21,6 +21,7 @@ import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import net.bytebuddy.description.annotation.AnnotationList;
+import net.bytebuddy.description.annotation.AnnotationValue;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 
@@ -84,7 +85,7 @@ public class ElementMatcherConvert {
 //        inDefinedShape.getParameters().asTypeList().asErasures().forEach(defined -> System.out.println("Parameter=" + defined.getActualName()));
 //        inDefinedShape.getDeclaredAnnotations().asTypeList().forEach(anno ->  System.out.println("annotation=" + anno.getActualName()));
 	}
-    
+
     public static String[] getParams(MethodDescription.InDefinedShape inDefinedShape) {
     	return inDefinedShape.getParameters().asTypeList().asErasures().stream()
     			.map(TypeDescription::getActualName)
@@ -102,16 +103,17 @@ public class ElementMatcherConvert {
     private static Set<Annotation> buildAnnotation(AnnotationList annotationList) {
 		return annotationList.stream()
 				.map(annotation -> {
-					try {
-						Map<String, Object> values = new HashMap<>();
-						annotation.getAnnotationType().getDeclaredMethods().forEach(method -> values.put(method.getActualName(), annotation.getValue(method).resolve()));
-						return new Annotation(annotation.getAnnotationType().getActualName(), values);
-					} catch (Exception e) {
-						// 这里catch主要因为会出现java.lang.IllegalStateException: Type not found异常
-						LOGGER.error("", e);
-					}
-					return null;
-				}).filter(Objects::nonNull).collect(Collectors.toSet());
+					Map<String, Object> values = new HashMap<>();
+					annotation.getAnnotationType().getDeclaredMethods().forEach(method -> {
+						AnnotationValue<?, ?> value =  annotation.getValue(method);
+						if(value.getState().isResolved()) {
+							values.put(method.getActualName(), value.resolve());
+						} else {
+							LOGGER.warn("can't resolve: {} - {}", annotation.getAnnotationType().getActualName(), method.getActualName());
+						}
+					});
+					return new Annotation(annotation.getAnnotationType().getActualName(), values);
+				}).collect(Collectors.toSet());
 	}
 
     /**

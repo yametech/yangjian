@@ -85,11 +85,14 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 //			Tracing tracing = BraveHelper.getTracing(report, null);
 //			Tracing tracing = BraveHelper.getTracing(span -> traceCache.publish(t -> t.setSpan(span)), null);
 			Tracing tracing = InstanceManage.getInstance(Tracing.class);
+			if(tracing == null) {
+				throw new RuntimeException("未初始化Tracing实例");
+			}
 			if(spanSample instanceof ITraceDepend) {
 				((ITraceDepend)spanSample).tracer(tracing.tracer());
 			}
 			aop.init(this.matcher, (ISpanCreater)instance, tracing, spanSample);
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			log.warn(e, "加载异常：{}，\nclassLoader={}，\nmatcher classLoader：{},\ninstance classLoader：{}",
 					loadClassKey, classLoader,
 					Util.join(" > ", Util.listClassLoaders(matcher.getClass())),
