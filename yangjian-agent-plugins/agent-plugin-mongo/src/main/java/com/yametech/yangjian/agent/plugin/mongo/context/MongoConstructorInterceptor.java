@@ -39,7 +39,7 @@ public class MongoConstructorInterceptor implements IConstructorListener {
         StringBuilder sb = new StringBuilder();
         for (ServerDescription description : cluster.getDescription().getAll()) {
             ServerAddress address = description.getAddress();
-            sb.append(address.getHost()).append(":").append(address.getPort()).append(";");
+            sb.append(address.getHost()).append(":").append(address.getPort()).append(",");
         }
         return sb.substring(0, sb.length() - 1);
     }

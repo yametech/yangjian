@@ -13,46 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.plugin.mongo.context;
+package com.yametech.yangjian.agent.plugin.spring.trace;
 
-import java.util.Arrays;
-
-import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
 import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
-import com.yametech.yangjian.agent.api.configmatch.*;
+import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
+import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodArgumentIndexMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodNameMatch;
+
+import java.util.Arrays;
 
 /**
- * MongoDb集合操作类增强获取集合名称
- *
  * @author dengliming
- * @date 2019/12/17
+ * @date 2020/6/3
  */
-public class MongoOperationMatcher implements InterceptorMatcher, IEnhanceClassMatch {
-
-    @Override
-    public IConfigMatch classMatch() {
-        return new CombineOrMatch(Arrays.asList(
-                new ClassMatch("com.mongodb.operation.CountOperation"),
-                new ClassMatch("com.mongodb.operation.AggregateOperation"),
-                new InterfaceMatch("com.mongodb.operation.ReadOperation"),
-                new InterfaceMatch("com.mongodb.operation.WriteOperation")
-        ));
-    }
+public class HandlerMethodMatcher implements InterceptorMatcher {
 
     @Override
     public IConfigMatch match() {
-        return new CombineAndMatch(Arrays.asList(classMatch(),
-                new MethodArgumentIndexMatch(0, "com.mongodb.MongoNamespace")
+        return new CombineAndMatch(Arrays.asList(
+                new ClassMatch("org.springframework.web.bind.annotation.support.HandlerMethodInvoker"),
+                new MethodNameMatch("invokeHandlerMethod"),
+                new MethodArgumentIndexMatch(2, "org.springframework.web.context.request.NativeWebRequest")
         ));
     }
-    
+
     @Override
     public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
-    	return new LoadClassKey("com.yametech.yangjian.agent.plugin.mongo.context.MongoOperationInterceptor");
+        return new LoadClassKey("com.yametech.yangjian.agent.plugin.spring.trace.HandlerMethodInterceptor");
     }
-
 }

@@ -34,6 +34,6 @@ public class MongoOperationInterceptor implements IConstructorListener {
             return;
         }
         MongoNamespace namespace = (MongoNamespace) allArguments[0];
-        ((IContext) thisObj)._setAgentContext(ContextConstants.MONGO_OPERATOR_COLLECTION, namespace.getCollectionName());
+        ((IContext) thisObj)._setAgentContext(ContextConstants.MONGO_OPERATOR_COLLECTION, namespace);
     }
 }

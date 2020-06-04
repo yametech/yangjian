@@ -79,7 +79,7 @@ public abstract class AbstractStatementSpanCreater implements ISpanCreater<SpanI
                 .tag(Constants.Tags.COMPONENT, Constants.Component.MYSQL_JDBC)
                 .tag(Constants.Tags.PEER, connectionInfo.getUrl())
                 .tag(Constants.Tags.DB_STATEMENT, sql)
-                .tag(Constants.Tags.DB_INSTANCE, connectionInfo.getDatabaseName())
+                .tag(Constants.Tags.DATABASE, connectionInfo.getDatabaseName())
                 .start(startTime);
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }

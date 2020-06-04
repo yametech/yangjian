@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.mongodb.MongoNamespace;
 import com.mongodb.bulk.DeleteRequest;
 import com.mongodb.bulk.InsertRequest;
 import com.mongodb.bulk.UpdateRequest;
@@ -47,7 +48,8 @@ public class MongoUtil {
         }
         String collection = null;
         if (obj instanceof IContext) {
-            collection = (String) ((IContext) obj)._getAgentContext(ContextConstants.MONGO_OPERATOR_COLLECTION);
+            MongoNamespace namespace = (MongoNamespace) ((IContext) obj)._getAgentContext(ContextConstants.MONGO_OPERATOR_COLLECTION);
+            collection = namespace.getCollectionName();
         }
 
         // 解析集合操作

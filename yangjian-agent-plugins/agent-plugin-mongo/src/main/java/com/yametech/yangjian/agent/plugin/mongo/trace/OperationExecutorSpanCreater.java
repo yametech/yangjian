@@ -18,6 +18,7 @@ package com.yametech.yangjian.agent.plugin.mongo.trace;
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
+import com.mongodb.MongoNamespace;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
@@ -66,12 +67,22 @@ public class OperationExecutorSpanCreater implements ISpanCreater<SpanInfo> {
             return null;
         }
 
+        // 从operation类中获取数据库名
+        String database = null;
+        if (allArguments[0] instanceof IContext) {
+            MongoNamespace namespace = (MongoNamespace) ((IContext) allArguments[0])._getAgentContext(ContextConstants.MONGO_OPERATOR_COLLECTION);
+            database = namespace.getDatabaseName();
+        }
+
         Span span = tracer.nextSpan()
                 .kind(Span.Kind.CLIENT)
                 .name(String.format(SPAN_NAME_FORMAT, executeMethod))
                 .tag(Constants.Tags.COMPONENT, Constants.Component.MONGO)
                 .tag(Constants.Tags.PEER, serverUrl)
                 .start(startTime);
+        if (StringUtil.notEmpty(database)) {
+            span.tag(Constants.Tags.DATABASE, database);
+        }
         span.tag(Constants.Tags.DB_STATEMENT, executeMethod + MongoUtil.getTraceParam(allArguments[0]));
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }

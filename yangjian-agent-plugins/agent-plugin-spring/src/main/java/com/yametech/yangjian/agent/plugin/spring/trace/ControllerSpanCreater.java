@@ -37,6 +37,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
 
+import static com.yametech.yangjian.agent.plugin.spring.trace.HandlerMethodInterceptor.CONTEXT_LOCAL;
+
 /**
  * @author dengliming
  * @date 2020/4/20
@@ -56,33 +58,39 @@ public class ControllerSpanCreater implements ISpanCreater<SpanInfo> {
 
     @Override
     public BeforeResult<SpanInfo> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        if (request == null) {
-            return null;
+        try {
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            if (request == null) {
+                return null;
+            }
+            if (!spanSample.sample()) {
+                return null;
+            }
+            long startTime = MICROS_CLOCK.nowMicros();
+            if (startTime == -1L) {
+                return null;
+            }
+            Span span = tracer.nextSpan(extractor.extract(request))
+                    .kind(Span.Kind.SERVER)
+                    .name(MethodUtil.getSimpleMethodId(method))
+                    .tag(Constants.Tags.COMPONENT, Constants.Component.SPRING_MVC)
+                    .tag(Constants.Tags.HTTP_METHOD, request.getMethod())
+                    .tag(Constants.Tags.PEER, request.getRequestURL().toString())
+                    .start(startTime);
+            String parentServiceName = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE);
+            if (StringUtil.notEmpty(span.context().parentIdString()) && StringUtil.notEmpty(parentServiceName)) {
+                span.tag(Constants.Tags.PARENT_SERVICE_NAME, parentServiceName);
+            }
+            final Map<String, String[]> parameterMap = request.getParameterMap();
+            if (parameterMap != null && !parameterMap.isEmpty()) {
+                parameterMap.forEach((k, v) -> span.tag(k, Arrays.toString(v)));
+            }
+            return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
+        } catch (Throwable t) {
+            // 防止方法异常导致没有执行after方法，所以这里直接remove
+            CONTEXT_LOCAL.remove();
+            throw t;
         }
-        if (!spanSample.sample()) {
-            return null;
-        }
-        long startTime = MICROS_CLOCK.nowMicros();
-        if (startTime == -1L) {
-            return null;
-        }
-        Span span = tracer.nextSpan(extractor.extract(request))
-                .kind(Span.Kind.SERVER)
-                .name(MethodUtil.getSimpleMethodId(method))
-                .tag(Constants.Tags.COMPONENT, Constants.Component.SPRING_MVC)
-                .tag(Constants.Tags.HTTP_METHOD, request.getMethod())
-                .tag(Constants.Tags.PEER, request.getRequestURL().toString())
-                .start(startTime);
-        String parentServiceName = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE);
-        if (StringUtil.notEmpty(span.context().parentIdString()) && StringUtil.notEmpty(parentServiceName)) {
-            span.tag(Constants.Tags.PARENT_SERVICE_NAME, parentServiceName);
-        }
-        final Map<String, String[]> parameterMap = request.getParameterMap();
-        if (parameterMap != null && !parameterMap.isEmpty()) {
-            parameterMap.forEach((k, v) -> span.tag(k, Arrays.toString(v)));
-        }
-        return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }
 
     @Override
@@ -96,7 +104,11 @@ public class ControllerSpanCreater implements ISpanCreater<SpanInfo> {
         }
 
         try {
-            HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+            HttpServletResponse response = (HttpServletResponse) CONTEXT_LOCAL.get();
+            if (response == null) {
+                response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+            }
+
             if (response != null) {
                 span.getSpan().tag(Constants.Tags.STATUS_CODE, Integer.toString(response.getStatus()));
             }
@@ -105,6 +117,7 @@ public class ControllerSpanCreater implements ISpanCreater<SpanInfo> {
             if (span.getScope() != null) {
                 span.getScope().close();
             }
+            CONTEXT_LOCAL.remove();
         }
         return ret;
     }
