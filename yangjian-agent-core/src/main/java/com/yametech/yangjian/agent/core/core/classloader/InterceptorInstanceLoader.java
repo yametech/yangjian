@@ -19,14 +19,11 @@
 
 package com.yametech.yangjian.agent.core.core.classloader;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
-
-import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.util.Value;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The <code>InterceptorInstanceLoader</code> is a classes finder and container.
@@ -38,9 +35,7 @@ import com.yametech.yangjian.agent.api.log.LoggerFactory;
  */
 public class InterceptorInstanceLoader {
 	private static ILogger log = LoggerFactory.getLogger(InterceptorInstanceLoader.class);
-    private static ConcurrentHashMap<String, Object> INSTANCE_CACHE = new ConcurrentHashMap<String, Object>();
-    private static ReentrantLock INSTANCE_LOAD_LOCK = new ReentrantLock();
-    private static Map<ClassLoader, ClassLoader> EXTEND_PLUGIN_CLASSLOADERS = new HashMap<ClassLoader, ClassLoader>();
+    private static ConcurrentHashMap<String, Object> INSTANCE_CACHE = new ConcurrentHashMap<>();
 
     /**
      * Load an instance of interceptor, and keep it singleton.
@@ -51,34 +46,31 @@ public class InterceptorInstanceLoader {
      * @param targetClassLoader the class loader for current application context
      * @param <T>               expected type
      * @return the type reference.
-     * @throws IllegalAccessException
-     * @throws InstantiationException
-     * @throws ClassNotFoundException
-     * @throws AgentPackageNotFoundException
+     * @throws Exception
      */
-    public static <T> T load(String classKey, String className, ClassLoader targetClassLoader)
-            throws IllegalAccessException, InstantiationException, ClassNotFoundException, AgentPackageNotFoundException {
+    public static <T> T load(String classKey, String className, ClassLoader targetClassLoader) throws Throwable {
         if (targetClassLoader == null) {
             targetClassLoader = InterceptorInstanceLoader.class.getClassLoader();
         }
         String instanceKey = classKey + "_OF_" + targetClassLoader.getClass().getName() + "@" + Integer.toHexString(targetClassLoader.hashCode());
-        Object inst = INSTANCE_CACHE.get(instanceKey);
-        if (inst == null) {
-            INSTANCE_LOAD_LOCK.lock();
-            ClassLoader pluginLoader = null;
+        ClassLoader finalTargetClassLoader = targetClassLoader;
+        Value<Throwable> exception = Value.absent();
+        Object inst = INSTANCE_CACHE.computeIfAbsent(instanceKey, key -> {
+            ClassLoader pluginLoader = AgentClassLoader.getCacheClassLoader(finalTargetClassLoader);
             try {
-                pluginLoader = EXTEND_PLUGIN_CLASSLOADERS.get(targetClassLoader);
-                if (pluginLoader == null) {
-                    pluginLoader = new AgentClassLoader(targetClassLoader, AgentClassLoader.getDefault());
-                    EXTEND_PLUGIN_CLASSLOADERS.put(targetClassLoader, pluginLoader);
-                }
-            } finally {
-                INSTANCE_LOAD_LOCK.unlock();
+                Object instance = Class.forName(className, true, pluginLoader).newInstance();
+                log.info("InterceptorInstanceLoader:{}	{}	{}  {}", className, pluginLoader, instanceKey, instance.getClass().getClassLoader());
+                return instance;
+            } catch (Throwable e) {
+                exception.set(e);
+                log.warn("InterceptorInstanceLoader exception:{}	{}	{}", className, pluginLoader, instanceKey);
+                return null;
             }
-            inst = Class.forName(className, true, pluginLoader).newInstance();
-            log.info("InterceptorInstanceLoader:{}	{}	{}", className, pluginLoader, inst.getClass().getClassLoader());
-            INSTANCE_CACHE.put(instanceKey, inst);
+        });
+        if(exception.get() != null) {
+            throw exception.get();
         }
+        //noinspection unchecked
         return (T) inst;
     }
 }

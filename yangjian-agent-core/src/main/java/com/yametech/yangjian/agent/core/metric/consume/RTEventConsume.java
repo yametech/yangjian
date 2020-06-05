@@ -76,7 +76,7 @@ public class RTEventConsume implements BaseConsume<ConvertTimeEvent> {
 		int index = (int) (nowSecond & (STATISTICS_SECOND_SIZE - 1));
 		if(allStatistics[index] == null || nowSecond != allStatistics[index].getSecond()) {
 			if(allStatistics[index] != null && nowSecond != allStatistics[index].getSecond()) {
-				log.warn("未及时输出统计值，已丢弃", allStatistics[index].getSecond());
+				log.warn("未及时输出统计值，已丢弃 {}", allStatistics[index].getSecond());
 			}
 			allStatistics[index] = new SecondStatisticBean(nowSecond);
 		}

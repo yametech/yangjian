@@ -15,14 +15,6 @@
  */
 package com.yametech.yangjian.agent.core.pool;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.base.IReportData;
@@ -31,6 +23,8 @@ import com.yametech.yangjian.agent.api.common.MultiReportFactory;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.api.pool.IPoolMonitor;
+
+import java.util.*;
 
 /**
  * @author dengliming
@@ -44,7 +38,7 @@ public class PoolMonitorSchedule implements ISchedule, IConfigReader {
     
     @Override
     public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList(CONFIG_KEY.replaceAll("\\.", "\\\\.")));
+        return new HashSet<>(Collections.singletonList(CONFIG_KEY.replaceAll("\\.", "\\\\.")));
     }
 
     @Override
@@ -58,7 +52,7 @@ public class PoolMonitorSchedule implements ISchedule, IConfigReader {
     		try {
     			interval = Integer.parseInt(intervalStr);
             } catch(Exception e) {
-            	LOG.warn("{}配置错误：{}", CONFIG_KEY, intervalStr);
+            	LOG.warn("{} config error: {}", CONFIG_KEY, intervalStr);
             }
     	}
     }

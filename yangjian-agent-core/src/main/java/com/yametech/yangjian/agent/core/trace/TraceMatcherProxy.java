@@ -27,7 +27,6 @@ import com.yametech.yangjian.agent.api.trace.*;
 import com.yametech.yangjian.agent.core.common.BaseMatcherProxy;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
 import com.yametech.yangjian.agent.core.core.classloader.SpiLoader;
-import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
 import com.yametech.yangjian.agent.core.trace.base.ITraceDepend;
 import com.yametech.yangjian.agent.core.trace.sample.FollowerRateLimitSampler;
 import com.yametech.yangjian.agent.core.trace.sample.FollowerSampler;
@@ -93,7 +92,7 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 			}
 			aop.init(this.matcher, (ISpanCreater)instance, tracing, spanSample);
 		} catch (Throwable e) {
-			log.warn(e, "加载异常：{}，\nclassLoader={}，\nmatcher classLoader：{},\ninstance classLoader：{}",
+			log.warn(e, "load TraceAOP exception: {}，\n\t\tclassLoader={}，\n\t\tmatcher classLoader：{},\n\t\tinstance classLoader：{}",
 					loadClassKey, classLoader,
 					Util.join(" > ", Util.listClassLoaders(matcher.getClass())),
 					Util.join(" > ", Util.listClassLoaders(instance == null ? null : instance.getClass())));
@@ -102,7 +101,7 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 	}
 	
 	@SuppressWarnings("rawtypes")
-	private List<ISpanCustom> getCustomInstance(ICustomLoad customLoad, ClassLoader classLoader) throws IllegalAccessException, InstantiationException, ClassNotFoundException, AgentPackageNotFoundException {
+	private List<ISpanCustom> getCustomInstance(ICustomLoad customLoad, ClassLoader classLoader) throws Throwable {
 		Class<?> cls;
 		try {
 			cls = Util.superClassGeneric(customLoad.getClass(), 0);

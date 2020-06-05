@@ -1,14 +1,14 @@
 package com.yametech.yangjian.agent.core.metric.consume;
 
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
 import com.yametech.yangjian.agent.api.convert.statistic.StatisticType;
 import com.yametech.yangjian.agent.api.convert.statistic.impl.BaseStatistic;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SecondStatisticBean {
 	private static final ILogger LOG = LoggerFactory.getLogger(SecondStatisticBean.class);
@@ -47,7 +47,7 @@ public class SecondStatisticBean {
 					secondStatistic.reset(timeEvent.getType(), identify, second);
 					statisticTypeMap.put(type, secondStatistic);
 				} catch (InstantiationException | IllegalAccessException e) {
-					LOG.warn(e, "创建BaseStatistic实例异常{}", type);
+					LOG.warn(e, "create baseStatistic instance exception: {}", type);
 					continue;
 				}
 			}

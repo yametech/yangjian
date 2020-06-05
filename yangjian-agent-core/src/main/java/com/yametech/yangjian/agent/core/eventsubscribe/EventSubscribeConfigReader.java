@@ -65,7 +65,7 @@ public class EventSubscribeConfigReader implements IConfigReader, SPI {
         	String eventGroup = entry.getKey();
         	String[] eventInfo = entry.getValue().split(">", 2);
         	if(eventInfo.length != 2) {
-        		LOG.warn("配置错误：{} = {}", entry.getKey(), entry.getValue());
+        		LOG.warn("config error: {} = {}", entry.getKey(), entry.getValue());
         		return;
         	}
         	String source = eventInfo[0].trim();
@@ -73,12 +73,12 @@ public class EventSubscribeConfigReader implements IConfigReader, SPI {
         	InstanceManage.registry(new EventMatcher(eventGroup, new MethodRegexMatch(source)));
         	String className = getClass(target);
         	if(className == null) {
-        		LOG.warn("{}中配置的订阅匹配规则有误{}，必须包含类定义", eventGroup, target);
+        		LOG.warn("match rule config error: {} - {}，must contains class define", eventGroup, target);
         		return;
         	}
         	InstanceManage.registry(new SubscribeMatcher(eventGroup,
         			new CombineAndMatch(Arrays.asList(new ClassMatch(className), new MethodConstructorMatch())), getMatch(target)));
-        	LOG.info("加载事件订阅配置：{} = {}", entry.getKey(), entry.getValue());
+        	LOG.info("load event config: {} = {}", entry.getKey(), entry.getValue());
         });
     }
     

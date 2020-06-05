@@ -77,7 +77,7 @@ public class AgentTransformer implements AgentBuilder.Transformer {
     	}
     	String classLoaderName = classLoader.getClass().getName();
     	if(ignoreClassLoaderName != null && ignoreClassLoaderName.contains(classLoaderName)) {
-    		log.warn("忽略增强指定classLoader类名：{}	{}", classLoaderName, typeDescription);
+    		log.warn("ignore classLoader: {}	{}", classLoaderName, typeDescription);
     		return builder;
     	}
 //    	log.info("{}:enhanceContextClass", typeDescription);
@@ -98,7 +98,8 @@ public class AgentTransformer implements AgentBuilder.Transformer {
      * @param builder
      * @return
      */
-    private DynamicType.Builder<?> enhanceMethod(TypeDescription typeDescription, DynamicType.Builder<?> builder, ClassLoader classLoader) {
+    @SuppressWarnings("unchecked")
+	private DynamicType.Builder<?> enhanceMethod(TypeDescription typeDescription, DynamicType.Builder<?> builder, ClassLoader classLoader) {
     	List<IMatch> matches = InstanceManage.listInstance(IMatch.class);
 		Set<IMatch> enhanceMatches = new HashSet<>();
         // builder针对同一个类方法设置多次intercept，仅最后一次生效，所以多个MethodInterceptor拦截同一个方法时需合并到一个intercept中
@@ -136,11 +137,12 @@ public class AgentTransformer implements AgentBuilder.Transformer {
 						if(matcher instanceof IMatcherProxy) {
 							((IMatcherProxy)matcher).init(obj, classLoader, type, methodDefined);
 						}
-						log.info("enhanceMethod:{}	{}	{}	{}	{}", obj, classLoader.getClass(), 
-								classLoader.getParent() != null ? classLoader.getParent().getClass() : "null", loadClass, inDefinedShape);
+						log.info("enhanceMethod:{},\n\t\t{},\n\t\t{},\n\t\t{},\n\t\t{}", obj,
+								Util.join(" > ", Util.listClassLoaders(classLoader)),
+								loadClass, inDefinedShape, matcher.match());
 						return obj;
-					} catch (Exception e) {
-						log.warn(e, "加载实例异常{},\n{}", loadClass, Util.join(" > ", Util.listClassLoaders(classLoader)));
+					} catch (Throwable e) {
+						log.warn(e, "load instance exception {},\n\t\t{}", loadClass, Util.join(" > ", Util.listClassLoaders(classLoader)));
 						return null;
 					}
 				}).filter(interceptor -> interceptor != null && (
@@ -225,7 +227,7 @@ public class AgentTransformer implements AgentBuilder.Transformer {
     	if(!match) {
     		return builder;
     	}
-    	log.info("enhanceContextClass:{}	{}	{}", typeDescription, classLoader.getClass(), classLoader.getParent() != null ? classLoader.getParent().getClass() : "null");
+    	log.info("enhanceContextClass:{}	{}", typeDescription, Util.join(" > ", Util.listClassLoaders(classLoader)));
 //    	log.info("{}:builder", typeDescription);
     	// 将context放入对象实例中，好处：生命周期与对象实例一致、取值时间复杂度为O(1)，经过测试大量创建对象时，这种方式耗时更少
     	return builder.defineField(OBJECT_CONTEXT_FIELD_NAME, Map.class, Opcodes.ACC_PRIVATE | Opcodes.ACC_VOLATILE)

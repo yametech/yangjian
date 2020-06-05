@@ -15,14 +15,6 @@
  */
 package com.yametech.yangjian.agent.core.jvm;
 
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.yametech.yangjian.agent.api.IAppStatusListener;
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.ISchedule;
@@ -33,20 +25,11 @@ import com.yametech.yangjian.agent.api.common.MultiReportFactory;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.common.CoreConstants;
-import com.yametech.yangjian.agent.core.jvm.collector.BufferPoolCollector;
-import com.yametech.yangjian.agent.core.jvm.collector.ClassCollector;
-import com.yametech.yangjian.agent.core.jvm.collector.GcCollector;
-import com.yametech.yangjian.agent.core.jvm.collector.MemoryCollector;
-import com.yametech.yangjian.agent.core.jvm.collector.MemoryPoolCollector;
-import com.yametech.yangjian.agent.core.jvm.collector.ProcessCollector;
-import com.yametech.yangjian.agent.core.jvm.collector.ThreadCollector;
-import com.yametech.yangjian.agent.core.jvm.metrics.BufferPoolMetrics;
-import com.yametech.yangjian.agent.core.jvm.metrics.ClassMetrics;
-import com.yametech.yangjian.agent.core.jvm.metrics.JVMGcMetrics;
-import com.yametech.yangjian.agent.core.jvm.metrics.MemoryMetrics;
-import com.yametech.yangjian.agent.core.jvm.metrics.MemoryPoolMetrics;
-import com.yametech.yangjian.agent.core.jvm.metrics.ProcessMetrics;
-import com.yametech.yangjian.agent.core.jvm.metrics.ThreadMetrics;
+import com.yametech.yangjian.agent.core.jvm.collector.*;
+import com.yametech.yangjian.agent.core.jvm.metrics.*;
+
+import java.time.Duration;
+import java.util.*;
 
 /**
  * @author zcn
@@ -67,7 +50,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfi
 
     @Override
     public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList(CONFIG_KEY.replaceAll("\\.", "\\\\.")));
+        return new HashSet<>(Collections.singletonList(CONFIG_KEY.replaceAll("\\.", "\\\\.")));
     }
 
     @Override
@@ -81,7 +64,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfi
     		try {
     			interval = Integer.parseInt(intervalStr);
             } catch(Exception e) {
-            	LOG.warn("{}配置错误：{}", CONFIG_KEY, intervalStr);
+            	LOG.warn("{} config error: {}", CONFIG_KEY, intervalStr);
             }
     	}
     }

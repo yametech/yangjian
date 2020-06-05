@@ -18,31 +18,23 @@
 
 package com.yametech.yangjian.agent.core.core.classloader;
 
+import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.StringUtil;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.core.util.AgentPath;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
-import com.yametech.yangjian.agent.api.common.Constants;
-import com.yametech.yangjian.agent.api.common.StringUtil;
-import com.yametech.yangjian.agent.core.YMAgent;
-import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
-import com.yametech.yangjian.agent.api.log.ILogger;
-import com.yametech.yangjian.agent.api.log.LoggerFactory;
-import com.yametech.yangjian.agent.core.util.AgentPath;
 
 /**
  * The <code>AgentClassLoader</code> represents a classloader,
@@ -51,21 +43,18 @@ import com.yametech.yangjian.agent.core.util.AgentPath;
  * @author wusheng
  */
 public class AgentClassLoader extends ClassLoader {
+    private static final ILogger log = LoggerFactory.getLogger(AgentClassLoader.class);
+    private static AgentClassLoader DEFAULT_LOADER;
+    private static Map<ClassLoader, AgentClassLoader> CLASS_LOADERS = new ConcurrentHashMap<>();
+    private static final String EXTEND_PLUGIN_DEFAULT_DIR = "/data/www/soft/agent-custom";
+    private static List<File> classpath = new LinkedList<>();
+    private static List<Jar> allJars = new LinkedList<>();
 
     static {
         tryRegisterAsParallelCapable();
+        initClasspath();
+        initJar();
     }
-
-    private static final ILogger log = LoggerFactory.getLogger(AgentClassLoader.class);
-    /**
-     * The default class loader for the agent.
-     */
-    private static AgentClassLoader DEFAULT_LOADER;
-    private static final String EXTEND_PLUGIN_DEFAULT_DIR = "/data/www/soft/agent-custom";
-    private List<File> classpath;
-    private List<Jar> allJars;
-    private ReentrantLock jarScanLock = new ReentrantLock();
-//    private List<ClassLoader> classLoaders;
 
     /**
      * Functional Description: solve the classloader dead lock when jvm start
@@ -73,52 +62,26 @@ public class AgentClassLoader extends ClassLoader {
      */
     private static void tryRegisterAsParallelCapable() {
         Method[] methods = ClassLoader.class.getDeclaredMethods();
-        for (int i = 0; i < methods.length; i++) {
-            Method method = methods[i];
+        for (Method method : methods) {
             String methodName = method.getName();
             if ("registerAsParallelCapable".equalsIgnoreCase(methodName)) {
                 try {
                     method.setAccessible(true);
                     method.invoke(null);
                 } catch (Exception e) {
-                	log.warn(e, "can not invoke ClassLoader.registerAsParallelCapable()");
+                    log.warn(e, "can not invoke ClassLoader.registerAsParallelCapable()");
                 }
                 return;
             }
         }
     }
 
-    public static AgentClassLoader getDefault() {
-        return DEFAULT_LOADER;
-    }
-
     /**
-     * Init the default
-     *
-     * @throws AgentPackageNotFoundException
+     * 初始化jar包加载路径
      */
-    public static void initDefaultLoader() throws AgentPackageNotFoundException {
-        if (DEFAULT_LOADER != null) {
-        	return;
-        }
-        synchronized (AgentClassLoader.class) {
-        	if (DEFAULT_LOADER == null) {
-        		DEFAULT_LOADER = new AgentClassLoader(YMAgent.class.getClassLoader());
-        	}
-        }
-    }
-
-    public AgentClassLoader(ClassLoader parent, ClassLoader... extClassLoader) throws AgentPackageNotFoundException {
-        super(parent);
-//        classLoaders =  new ArrayList<>();
-////        classLoaders.add(parent);
-//        if(extClassLoader != null && extClassLoader.length > 0) {
-//        	classLoaders.addAll(Arrays.asList(extClassLoader));
-//        }
-//        System.err.println("parent classLoader:" + parent);
+    private static void initClasspath() {
         File agentDictionary = AgentPath.getCompatiblePath();
 //        System.err.println(agentDictionary.getAbsolutePath());
-        classpath = new LinkedList<File>();
         classpath.add(new File(agentDictionary, "plugins"));
 //        classpath.add(new File(agentDictionary, "activations"));
         // 自定义扩展插件目录配置
@@ -130,6 +93,58 @@ public class AgentClassLoader extends ClassLoader {
         if(extendPluginDir.exists()) {
             classpath.add(extendPluginDir);
         }
+    }
+
+    /**
+     * 加载jar包
+     */
+    private static void initJar() {
+        for (File path : classpath) {
+            if (!path.exists() || !path.isDirectory()) {
+                continue;
+            }
+            String[] jarFileNames = path.list((dir, name) -> name.endsWith(".jar"));
+            if(jarFileNames == null) {
+                continue;
+            }
+            for (String fileName : jarFileNames) {
+                try {
+                    File file = new File(path, fileName);
+                    Jar jar = new Jar(new JarFile(file), file);
+                    allJars.add(jar);
+                    log.info("{} loaded.", file.toString());
+                } catch (IOException e) {
+                    log.error(e, "{} jar file can't be resolved", fileName);
+                }
+            }
+        }
+    }
+
+    public static AgentClassLoader getDefault() {
+        if (DEFAULT_LOADER != null) {
+            return DEFAULT_LOADER;
+        }
+        synchronized (AgentClassLoader.class) {
+            if (DEFAULT_LOADER == null) {
+                DEFAULT_LOADER = getCacheClassLoader(AgentClassLoader.class.getClassLoader());
+            }
+        }
+        return DEFAULT_LOADER;
+    }
+
+    public static AgentClassLoader getCacheClassLoader(ClassLoader parent) {
+        return CLASS_LOADERS.computeIfAbsent(parent, AgentClassLoader::new);
+    }
+
+    public AgentClassLoader(ClassLoader parent) {
+        super(parent);
+        log.info("create AgentClassLoader:{}", parent);
+//        classLoaders =  new ArrayList<>();
+////        classLoaders.add(parent);
+//        if(extClassLoader != null && extClassLoader.length > 0) {
+//        	classLoaders.addAll(Arrays.asList(extClassLoader));
+//        }
+//        System.err.println("parent classLoader:" + parent);
     }
 
 //    @Override
@@ -161,20 +176,19 @@ public class AgentClassLoader extends ClassLoader {
     
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
-        List<Jar> allJars = getAllJars();
         String path = name.replace('.', '/').concat(".class");
         for (Jar jar : allJars) {
             JarEntry entry = jar.jarFile.getJarEntry(path);
             if (entry != null) {
                 try {
                     URL classFileUrl = new URL("jar:file:" + jar.sourceFile.getAbsolutePath() + "!/" + path);
-                    byte[] data = null;
+                    byte[] data;
                     BufferedInputStream is = null;
                     ByteArrayOutputStream baos = null;
                     try {
                         is = new BufferedInputStream(classFileUrl.openStream());
                         baos = new ByteArrayOutputStream();
-                        int ch = 0;
+                        int ch;
                         while ((ch = is.read()) != -1) {
                             baos.write(ch);
                         }
@@ -191,11 +205,7 @@ public class AgentClassLoader extends ClassLoader {
                             } catch (IOException ignored) {
                             }
                     }
-                    if (data != null) {
-                        return defineClass(name, data, 0, data.length);
-                    }
-                } catch (MalformedURLException e) {
-                	log.error(e, "find class fail.");
+                    return defineClass(name, data, 0, data.length);
                 } catch (IOException e) {
                 	log.error(e, "find class fail.");
                 }
@@ -206,31 +216,27 @@ public class AgentClassLoader extends ClassLoader {
 
     @Override
     protected URL findResource(String name) {
-        List<Jar> allJars = getAllJars();
         for (Jar jar : allJars) {
             JarEntry entry = jar.jarFile.getJarEntry(name);
-            if (entry != null) {
-                try {
-                    return new URL("jar:file:" + jar.sourceFile.getAbsolutePath() + "!/" + name);
-                } catch (MalformedURLException e) {
-                    continue;
-                }
+            if (entry == null) {
+                continue;
             }
+            try {
+                return new URL("jar:file:" + jar.sourceFile.getAbsolutePath() + "!/" + name);
+            } catch (MalformedURLException ignored) {}
         }
         return null;
     }
 
     @Override
     protected Enumeration<URL> findResources(String name) throws IOException {
-        List<URL> allResources = new LinkedList<URL>();
-        List<Jar> allJars = getAllJars();
+        List<URL> allResources = new LinkedList<>();
         for (Jar jar : allJars) {
             JarEntry entry = jar.jarFile.getJarEntry(name);
             if (entry != null) {
                 allResources.add(new URL("jar:file:" + jar.sourceFile.getAbsolutePath() + "!/" + name));
             }
         }
-
         final Iterator<URL> iterator = allResources.iterator();
         return new Enumeration<URL>() {
             @Override
@@ -245,42 +251,7 @@ public class AgentClassLoader extends ClassLoader {
         };
     }
 
-    private List<Jar> getAllJars() {
-        if (allJars == null) {
-            jarScanLock.lock();
-            try {
-                if (allJars == null) {
-                    allJars = new LinkedList<Jar>();
-                    for (File path : classpath) {
-                        if (path.exists() && path.isDirectory()) {
-                            String[] jarFileNames = path.list(new FilenameFilter() {
-                                @Override
-                                public boolean accept(File dir, String name) {
-                                    return name.endsWith(".jar");
-                                }
-                            });
-                            for (String fileName : jarFileNames) {
-                                try {
-                                    File file = new File(path, fileName);
-                                    Jar jar = new Jar(new JarFile(file), file);
-                                    allJars.add(jar);
-                                    log.info("{} loaded.", file.toString());
-                                } catch (IOException e) {
-                                	log.error(e, "{} jar file can't be resolved", fileName);
-                                }
-                            }
-                        }
-                    }
-                }
-            } finally {
-                jarScanLock.unlock();
-            }
-        }
-
-        return allJars;
-    }
-
-    private class Jar {
+    private static class Jar {
         private JarFile jarFile;
         private File sourceFile;
 

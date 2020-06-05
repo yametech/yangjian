@@ -35,7 +35,7 @@ public abstract class BaseElementMatcher<T> extends ElementMatcher.Junction.Abst
     private BaseElementMatcher() {
         Type type = ClassUtil.getGenericCls(this.getClass());
         if(!(type instanceof Class)) {
-        	log.info("{}获取泛型失败", this.getClass());
+        	log.info("{} get generic failed", this.getClass());
         } else {
             genericType = (Class<?>) type;
         }
@@ -71,10 +71,10 @@ public abstract class BaseElementMatcher<T> extends ElementMatcher.Junction.Abst
             matchNames = name((T) o);
         } catch (Exception e) {
             String className = null;
-            if(o instanceof TypeDescription) {
+            if(o instanceof TypeDescription && ((TypeDescription)o).getDeclaringType() != null) {
                 className = ((TypeDescription)o).getDeclaringType().getActualName();
             }
-            log.warn("转换MethodDefined异常，不执行增强：{} - {} : {}", matchType, className, e.getMessage());
+            log.warn("get MethodDefined exception，enhance error：{} - {} : {}", matchType, className, e.getMessage());
             return false;
         }
         boolean isMatch = matchNames.stream().anyMatch(match::isMatch);

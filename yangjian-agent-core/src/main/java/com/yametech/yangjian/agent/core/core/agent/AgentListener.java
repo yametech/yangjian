@@ -56,7 +56,7 @@ public class AgentListener implements AgentBuilder.Listener {
     		builder.deleteCharAt(builder.length() - 1);
     	}
     	
-    	log.info("Transformation:{} -> {}", typeDescription.getActualName(), builder.toString());
+    	log.info("Transformation:{} {}", typeDescription.getActualName(), builder.toString());
     }
 
     @Override
@@ -66,11 +66,11 @@ public class AgentListener implements AgentBuilder.Listener {
 
     @Override
     public void onError(String typeName, ClassLoader classLoader, JavaModule javaModule, boolean loaded, Throwable throwable) {
-		log.warn(throwable, "Enhance class {} error.", typeName);
+		log.warn(throwable, "Enhance class {} error.classLoader = {}", typeName, classLoader);
 		try {
 			EnhanceListener.notifyAndUnregister(typeName, classLoader, loaded, throwable);
 		} catch (Throwable e) {
-			log.warn("enhance error notify exception:{}	{}", typeName, classLoader, e);
+			log.warn(e, "enhance error notify exception:{}	{}", typeName, classLoader);
 		}
     }
 
@@ -79,7 +79,7 @@ public class AgentListener implements AgentBuilder.Listener {
     	try {
 			EnhanceListener.notifyAndUnregister(typeName, classLoader, loaded, null);
     	} catch (Throwable e) {
-			log.warn("enhance complete notify exception:{}	{}", typeName, classLoader, e);
+			log.warn(e, "enhance complete notify exception:{}	{}", typeName, classLoader);
 		}
     }
 }

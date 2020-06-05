@@ -31,7 +31,7 @@ public class EnhanceListener {
                 .min(Comparator.comparing(classMatch -> classMatch.getValue().getTime()))
                 .ifPresent(classMatch -> {
                     CLASS_MATCHES.remove(classMatch.getKey());
-                    LOG.warn("注册enhance数量超过{}，删除长时间未通知的注册对象：{}", MAX_SIZE, classMatch);
+                    LOG.warn("register too many enhance listener: {}，delete long time without notice listener {}", MAX_SIZE, classMatch);
                 });
         }
     }
@@ -49,7 +49,7 @@ public class EnhanceListener {
                     match.onError(typeName, classLoader, loaded, throwable);
                 }
             } catch (Throwable e) {
-                LOG.warn("notify enhance exception:{}   {}	{}", match.match(), typeName, classLoader, e);
+                LOG.warn(e, "notify enhance exception:{}   {}	{}", match.match(), typeName, classLoader);
             }
         }));
     }

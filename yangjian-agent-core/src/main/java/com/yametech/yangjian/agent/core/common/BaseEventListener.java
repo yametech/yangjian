@@ -15,13 +15,6 @@
  */
 package com.yametech.yangjian.agent.core.common;
 
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import com.yametech.yangjian.agent.api.IAppStatusListener;
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.ISchedule;
@@ -32,6 +25,9 @@ import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.util.eventbus.assignor.MultiThreadAssignor;
 import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeFactory;
+
+import java.time.Duration;
+import java.util.*;
 
 /**
  * @author liuzhao
@@ -72,7 +68,7 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
         			threadNum = num;
         		}
         	} catch(Exception e) {
-        		log.warn("{}配置错误：{}", THREADNUM_KEY_PREFIX + configKeySuffix, threadNumStr);
+        		log.warn("{} config error: {}", THREADNUM_KEY_PREFIX + configKeySuffix, threadNumStr);
         	}
         }
         
@@ -81,7 +77,7 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
     		try {
     			interval = Integer.parseInt(intervalStr);
             } catch(Exception e) {
-            	log.warn("{}配置错误：{}", INTERVAL_KEY_PREFIX + configKeySuffix, intervalStr);
+            	log.warn("{} config error: {}", INTERVAL_KEY_PREFIX + configKeySuffix, intervalStr);
             }
     	}
     }
@@ -104,7 +100,7 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
     	params.put("period_num", getPeriodNum());
     	MetricData metricData = MetricData.get(null, "consume/" + metricType, params);
     	if(!report.report(metricData)) {
-    		log.warn("上报失败：{}", metricData);
+    		log.warn("report failed : {}", metricData);
     	}
     }
 
@@ -114,6 +110,7 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
         while (previousNum < getTotalNum()) {// N毫秒内无调用事件则关闭，避免因关闭服务导致事件丢失
             try {
                 previousNum = getTotalNum();
+                //noinspection BusyWait
                 Thread.sleep(502L);
             } catch (InterruptedException e) {
                 log.warn(e, "shutdown interrupted");

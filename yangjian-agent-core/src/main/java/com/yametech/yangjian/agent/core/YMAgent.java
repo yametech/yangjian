@@ -30,7 +30,6 @@ import com.yametech.yangjian.agent.core.common.CoreConstants;
 import com.yametech.yangjian.agent.core.common.MatchProxyManage;
 import com.yametech.yangjian.agent.core.core.agent.AgentListener;
 import com.yametech.yangjian.agent.core.core.agent.AgentTransformer;
-import com.yametech.yangjian.agent.core.core.classloader.AgentClassLoader;
 import com.yametech.yangjian.agent.core.core.classloader.SpiLoader;
 import com.yametech.yangjian.agent.core.core.elementmatch.ClassElementMatcher;
 import com.yametech.yangjian.agent.core.exception.AgentPackageNotFoundException;
@@ -72,11 +71,10 @@ public class YMAgent {
     public static void premain(String arguments, Instrumentation instrumentation) throws AgentPackageNotFoundException {
     	log.info("os: {}, {}, {}", OSUtil.OS, arguments, YMAgent.class.getClassLoader().getClass());
     	if(StringUtil.isEmpty(Config.SERVICE_NAME.getValue())) {
-    		log.warn("未配置应用名称，跳过代理");
+    		log.warn("Missing service name config, skip agent.");
     		return;
     	}
     	System.setProperty(Constants.SYSTEM_PROPERTIES_PREFIX + Constants.SERVICE_NAME, Config.SERVICE_NAME.getValue());
-    	AgentClassLoader.initDefaultLoader();
     	SpiLoader.loadSpi();
     	if(log.isDebugEnable()) {
     		InstanceManage.listSpiClass().forEach(spi -> log.debug("spiClassLoader:{}, {}", spi, Util.join(" > ", Util.listClassLoaders(spi))));
@@ -84,7 +82,7 @@ public class YMAgent {
     	InstanceManage.loadConfig(arguments);
     	// 如果禁用了所有插件则直接返回不执行下面拦截逻辑
     	if (CoreConstants.CONFIG_KEY_DISABLE.equals(Config.getKv(CoreConstants.SPI_PLUGIN_KEY))) {
-			log.warn("已配置成禁用所有插件，跳过代理");
+			log.warn("Disable all plugins, skip agent.");
     		return;
 		}
     	InstanceManage.notifyReader();
@@ -142,7 +140,7 @@ public class YMAgent {
     		return proxyMatcher;
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
-			log.warn(e, "转换proxy异常：{}", matcher.getClass());
+			log.warn(e, "Convert proxy exception：{}", matcher.getClass());
 			return matcher;
 		}
     }

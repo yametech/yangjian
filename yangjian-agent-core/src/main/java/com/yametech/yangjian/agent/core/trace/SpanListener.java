@@ -15,8 +15,6 @@
  */
 package com.yametech.yangjian.agent.core.trace;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.common.MultiReportFactory;
 import com.yametech.yangjian.agent.api.log.ILogger;
@@ -25,6 +23,8 @@ import com.yametech.yangjian.agent.core.common.BaseEventListener;
 import com.yametech.yangjian.agent.core.common.EventBusType;
 import com.yametech.yangjian.agent.core.trace.base.TraceSpan;
 import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author liuzhao
@@ -67,7 +67,7 @@ public class SpanListener extends BaseEventListener<TraceSpan> implements BaseCo
     @Override
 	public void accept(TraceSpan t) {
     	if(!report.report("[" + t.getSpan() + "]")) {// 兼容zipkin数据上报格式，方便测试
-    		log.warn("span上报失败：{}", t.getSpan());
+    		log.warn("span report failed: {}", t.getSpan());
     	}
 	}
     

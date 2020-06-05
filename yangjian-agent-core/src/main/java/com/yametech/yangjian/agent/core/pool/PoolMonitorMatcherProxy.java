@@ -55,8 +55,8 @@ public class PoolMonitorMatcherProxy extends BaseMatcherProxy<IPoolMonitorMatche
 			}
 			InstanceManage.registryInit(instance);
 			obj.init(matcher, (IPoolMonitorCreater)instance);
-		} catch (Exception e) {
-			log.warn(e, "加载异常：{}，\nclassLoader={}，\nmetricMatcher classLoader：{},\ninstance classLoader：{}",
+		} catch (Throwable e) {
+			log.warn(e, "load PoolMonitorCreater exception : {}，\n\t\tclassLoader={}，\n\t\tmetricMatcher classLoader：{},\n\t\tinstance classLoader：{}",
 					loadClassKey, classLoader,
 					Util.join(" > ", Util.listClassLoaders(matcher.getClass())),
 					Util.join(" > ", Util.listClassLoaders(instance == null ? null : instance.getClass())));

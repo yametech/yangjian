@@ -53,8 +53,8 @@ public class MetricMatcherProxy extends BaseMatcherProxy<IMetricMatcher, BaseCon
 			}
 			InstanceManage.registryInit(instance);
 			obj.init(matcher, instance, metricEventBus, matcher.type());
-		} catch (Exception e) {
-			log.warn(e, "加载convert异常：{}，\nclassLoader={}，\nmetricMatcher classLoader：{},\nconvertInstance classLoader：{}",
+		} catch (Throwable e) {
+			log.warn(e, "load convert exception: {}，\n\t\tclassLoader={}，\n\t\tmetricMatcher classLoader：{},\n\t\tconvertInstance classLoader：{}",
 					convertClass, classLoader,
 					Util.join(" > ", Util.listClassLoaders(matcher.getClass())),
 					Util.join(" > ", Util.listClassLoaders(instance == null ? null : instance.getClass())));

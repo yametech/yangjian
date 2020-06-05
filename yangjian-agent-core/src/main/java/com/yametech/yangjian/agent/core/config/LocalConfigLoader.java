@@ -15,9 +15,6 @@
  */
 package com.yametech.yangjian.agent.core.config;
 
-import java.io.File;
-import java.util.Properties;
-
 import com.yametech.yangjian.agent.api.IConfigLoader;
 import com.yametech.yangjian.agent.api.common.Config;
 import com.yametech.yangjian.agent.api.common.Constants;
@@ -25,6 +22,9 @@ import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.util.AgentPath;
+
+import java.io.File;
+import java.util.Properties;
 
 /**
  * 加载本地配置，配置来源包含：jvm启动参数、指定路径配置文件、默认配置文件
@@ -69,7 +69,6 @@ public class LocalConfigLoader implements IConfigLoader {
 	
 	/**
 	 * 读取启动参数中的配置，如：-DMonitorAgent.service.name=tttt
-	 * @param arguments
 	 */
 	private void readSystemArguments() {
 		Properties properties = System.getProperties();
@@ -94,7 +93,7 @@ public class LocalConfigLoader implements IConfigLoader {
 //			}
 		}
 		Config.addConfigProperties(configPath);
-		log.info("加载配置文件路径：" + configPath);
+		log.info("loaded config file path: {}", configPath);
 	}
 	
 	@Override

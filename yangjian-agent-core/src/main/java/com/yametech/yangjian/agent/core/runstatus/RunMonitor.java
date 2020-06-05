@@ -16,13 +16,6 @@
 
 package com.yametech.yangjian.agent.core.runstatus;
 
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import com.yametech.yangjian.agent.api.IAppStatusListener;
 import com.yametech.yangjian.agent.api.IConfigReader;
 import com.yametech.yangjian.agent.api.ISchedule;
@@ -35,6 +28,9 @@ import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.common.CoreConstants;
 import com.yametech.yangjian.agent.core.util.Util;
 
+import java.time.Duration;
+import java.util.*;
+
 public class RunMonitor implements ISchedule, IAppStatusListener, IConfigReader {
 	private static final ILogger LOG = LoggerFactory.getLogger(RunMonitor.class);
 	private static final String CONFIG_KEY = "metricOutput.interval.heartbeat";
@@ -45,7 +41,7 @@ public class RunMonitor implements ISchedule, IAppStatusListener, IConfigReader 
 	
 	@Override
     public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList(CONFIG_KEY.replaceAll("\\.", "\\\\.")));
+        return new HashSet<>(Collections.singletonList(CONFIG_KEY.replaceAll("\\.", "\\\\.")));
     }
 
     @Override
@@ -59,7 +55,7 @@ public class RunMonitor implements ISchedule, IAppStatusListener, IConfigReader 
     		try {
     			interval = Integer.parseInt(intervalStr);
             } catch(Exception e) {
-            	LOG.warn("{}配置错误：{}", CONFIG_KEY, intervalStr);
+            	LOG.warn("{} config error: {}", CONFIG_KEY, intervalStr);
             }
     	}
     }
@@ -76,7 +72,7 @@ public class RunMonitor implements ISchedule, IAppStatusListener, IConfigReader 
 				return;
 			}
 			if(!report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.RUNNING, params))) {
-				LOG.warn("心跳上报失败");
+				LOG.warn("running status report failed");
 			}
 		}
 	}
@@ -88,7 +84,7 @@ public class RunMonitor implements ISchedule, IAppStatusListener, IConfigReader 
 	public void beforeRun() {
 		params.put("ip", Util.getIpAddress(null, null));// TODO 检测线上多IP获取是否正确
 		if(!report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.STARTING, params))) {
-			LOG.warn("启动状态上报失败");
+			LOG.warn("start status report failed");
 		}
 	}
 	
@@ -102,7 +98,7 @@ public class RunMonitor implements ISchedule, IAppStatusListener, IConfigReader 
 			// 异步上报队列一定放到最后关闭防止此处发布失败
 			boolean success = report.report(MetricData.get(CoreConstants.BASE_PATH_STATUS + Constants.Status.STOPPING, params));
 			if(!success) {
-				LOG.warn("启动状态上报失败");
+				LOG.warn("shutdown status report failed");
 			}
 			return success;
 		}

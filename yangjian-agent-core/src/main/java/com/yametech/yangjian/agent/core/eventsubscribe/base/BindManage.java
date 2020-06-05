@@ -73,7 +73,7 @@ public class BindManage {
 		AtomicBoolean contains = new AtomicBoolean(true);
 		Object value = groupSubscribe.computeIfAbsent(method, key -> {
 			if(groupSubscribe.size() > MAX_SUBSCRIBES_EACH_GROUP) {
-				LOG.warn("超出最大绑定数量{}：{}", MAX_SUBSCRIBES_EACH_GROUP, method);
+				LOG.warn("bind too many subscribe {} - {}", MAX_SUBSCRIBES_EACH_GROUP, method);
 				return null;
 			}
 			contains.set(false);

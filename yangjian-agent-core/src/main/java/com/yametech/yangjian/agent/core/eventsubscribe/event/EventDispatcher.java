@@ -54,14 +54,14 @@ public class EventDispatcher implements IMethodAOP<Object>, IConstructorListener
 			try {
     			this.minCheckStackSize = Integer.parseInt(kv.get(CONFIG_KEY_CHECK_SIZE));
             } catch(Exception e) {
-            	LOG.warn("{}配置错误：{}", CONFIG_KEY_CHECK_SIZE, kv.get(CONFIG_KEY_CHECK_SIZE));
+            	LOG.warn("{} config error: {}", CONFIG_KEY_CHECK_SIZE, kv.get(CONFIG_KEY_CHECK_SIZE));
             }
 		}
 		if(kv.containsKey(CONFIG_KEY_CALL_ASYNC)) {
 			try {
     			this.callAsync = Boolean.parseBoolean(kv.get(CONFIG_KEY_CALL_ASYNC));
             } catch(Exception e) {
-            	LOG.warn("{}配置错误：{}", CONFIG_KEY_CALL_ASYNC, kv.get(CONFIG_KEY_CALL_ASYNC));
+            	LOG.warn("{} config error: {}", CONFIG_KEY_CALL_ASYNC, kv.get(CONFIG_KEY_CALL_ASYNC));
             }
 		}
 	}

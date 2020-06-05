@@ -15,12 +15,6 @@
  */
 package com.yametech.yangjian.agent.core.metric.consume;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.bean.MetricData;
 import com.yametech.yangjian.agent.api.common.MultiReportFactory;
@@ -31,6 +25,12 @@ import com.yametech.yangjian.agent.core.common.BaseEventListener;
 import com.yametech.yangjian.agent.core.common.EventBusType;
 import com.yametech.yangjian.agent.core.metric.base.ConvertTimeEvent;
 import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * @author liuzhao
@@ -83,7 +83,7 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
                 }
                 MetricData metricData = MetricData.get(statistic.getSecond(), "statistic/" + statistic.getType() + "/" + statistic.statisticType(), thisParams);
                 if(!report.report(metricData)) {
-                	log.warn("上报失败： {}", metricData);
+                	log.warn("report failed: {}", metricData);
                 }
             }
         }

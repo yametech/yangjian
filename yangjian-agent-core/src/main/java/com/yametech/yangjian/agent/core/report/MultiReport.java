@@ -66,7 +66,7 @@ public class MultiReport implements IReportData, IConfigReader {
 	public boolean report(Object data) {
 		List<IReport> useReports = reports;
 		if(useReports == null || useReports.isEmpty()) {
-			LOG.warn("{}不存在report", myKey);
+			LOG.warn("{} not exist report", myKey);
 			return false;
 		}
 		for(IReport report : useReports) {
@@ -81,7 +81,7 @@ public class MultiReport implements IReportData, IConfigReader {
 	public boolean batchReport(List<Object> datas) {
 		List<IReport> useReports = reports;
 		if(useReports == null || useReports.isEmpty()) {
-			LOG.warn("{}不存在report", myKey);
+			LOG.warn("{} not exist report", myKey);
 			return false;
 		}
 		for(IReport report : useReports) {

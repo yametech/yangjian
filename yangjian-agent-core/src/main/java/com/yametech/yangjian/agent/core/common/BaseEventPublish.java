@@ -15,16 +15,6 @@
  */
 package com.yametech.yangjian.agent.core.common;
 
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
-
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.ExceptionHandler;
 import com.yametech.yangjian.agent.api.IAppStatusListener;
@@ -40,6 +30,11 @@ import com.yametech.yangjian.agent.core.util.Util;
 import com.yametech.yangjian.agent.util.eventbus.EventBusBuilder;
 import com.yametech.yangjian.agent.util.eventbus.consume.ConsumeConfig;
 import com.yametech.yangjian.agent.util.eventbus.process.EventBus;
+
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 /**
  * 事件缓存基类，附带metric
@@ -88,7 +83,7 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
             		this.bufferSize = bufferSizeConfig;
             	}
             } catch(Exception e) {
-            	log.warn("{}配置错误：{}", BUFFER_SIZE_KEY_PREFIX + configKeySuffix, bufferSizeStr);
+            	log.warn("{} config error: {}", BUFFER_SIZE_KEY_PREFIX + configKeySuffix, bufferSizeStr);
             }
     	}
     	
@@ -97,7 +92,7 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
     		try {
     			interval = Integer.parseInt(intervalStr);
             } catch(Exception e) {
-            	log.warn("{}配置错误：{}", INTERVAL_KEY_PREFIX + configKeySuffix, intervalStr);
+            	log.warn("{} config error: {}", INTERVAL_KEY_PREFIX + configKeySuffix, intervalStr);
             }
     	}
     	
@@ -106,7 +101,7 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
     		try {
     			discard = Boolean.parseBoolean(discardStr);
             } catch(Exception e) {
-            	log.warn("{}配置错误：{}", DISCARD_KEY_PREFIX + configKeySuffix, discardStr);
+            	log.warn("{} config error: {}", DISCARD_KEY_PREFIX + configKeySuffix, discardStr);
             }
     	}
     }
@@ -172,6 +167,7 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
         while (currentTotal < totalNum.get()) {// N毫秒内无调用事件则关闭，避免因关闭服务导致事件丢失
             try {
                 currentTotal = totalNum.get();
+                //noinspection BusyWait
                 Thread.sleep(602L);
             } catch (InterruptedException e) {
                 log.warn(e, "shutdown interrupted");
@@ -214,7 +210,7 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
         params.put("period_discard_num", periodDiscard);
         MetricData metricData = MetricData.get(null, "product/" + metricType, params);
         if(!report.report(metricData)) {
-        	log.warn("上报失败：{}", metricData);
+        	log.warn("report failed {}", metricData);
         }
     }
 }

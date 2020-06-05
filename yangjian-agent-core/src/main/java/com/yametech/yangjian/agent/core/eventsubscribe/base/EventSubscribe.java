@@ -65,7 +65,7 @@ public class EventSubscribe {
 				subscribeMethod.invoke(instance.getInstance(), getArguments(instance, subscribeMethod, sourceObj, allArguments, ret, t));
 			} catch (Exception e) {
 				if(LIMITER.tryAcquire()) {
-					LOG.warn(e, "事件订阅消费异常:{} {}", method, subscribeMethod);
+					LOG.warn(e, "event subscribe consume exception: {} {}", method, subscribeMethod);
 				}
 			}
 		});
@@ -135,11 +135,11 @@ public class EventSubscribe {
 			return true;
 		}
 		if(MethodUtil.getId(method).equals(MethodUtil.getId(methodDefined))) {
-			LOG.warn("不能自我监听：{}", method);
+			LOG.warn("not allow self subscribe: {}", method);
 			return false;
 		}
 		if(!ignoreParams && method.getParameterTypes().length < params.length) {
-			LOG.warn("参数个数不匹配：{} - {}", method.getParameterTypes().length, params.length);
+			LOG.warn("params number not match: {} - {}", method.getParameterTypes().length, params.length);
 			return false;
 		}
 		if(method.getDeclaringClass().getTypeName().equals(className) && method.getName().equals(methodName)) {
@@ -157,7 +157,7 @@ public class EventSubscribe {
 			startCheckIndex = params.length;
 		}
 		if(method.getParameterCount() - startCheckIndex > 3) {
-			LOG.warn("订阅方法与被订阅方法不能一样：{}", method);
+			LOG.warn("subscribe method params number error: {}", method);
 			return false;
 		}
 		List<Integer> index = new ArrayList<>();
@@ -171,11 +171,11 @@ public class EventSubscribe {
 			index.add(extraArgumentIndex.get(typeName));
 		}
 		if(subscribes.size() > REGISTER_MAX_NUM) {
-			LOG.warn("订阅个数超出最大值{}，无法注册", REGISTER_MAX_NUM);
+			LOG.warn("subscribe error {}, too many subscribe {}", method, REGISTER_MAX_NUM);
 			return false;
 		}
 		subscribes.put(method, new SubscribeInfo(instance, ignoreParams, getDefaultArguments(method), index.toArray(new Integer[0])));
-		LOG.info("成功订阅：{}.{} - {}", className, methodName, method);
+		LOG.info("subscribe success: {}.{} - {}", className, methodName, method);
 		return true;
 	}
 	

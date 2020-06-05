@@ -116,13 +116,13 @@ public class AnnotationSubscribeMatcher implements InterceptorMatcher {
             Class<?> cls = Class.forName(typeName, true, classLoader);
             for (Annotation annotation : cls.getAnnotations()) {
                 if(AUTO_INSTANCE_NAME.equals(annotation.annotationType().getName())) {
-                    LOG.info("创建类实例：{}，{}，{}", typeName, classLoader, loaded);
+                    LOG.info("create instance: {}，{}，{}", typeName, classLoader, loaded);
                     cls.newInstance();// 主动创建实例
                     return;
                 }
             }
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-            LOG.info("创建实例异常", e);
+            LOG.warn(e, "create instance exception");
         }
     }
 
