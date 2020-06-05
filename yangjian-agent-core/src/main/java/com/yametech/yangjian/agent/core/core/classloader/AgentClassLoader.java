@@ -23,6 +23,7 @@ import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.util.AgentPath;
+import com.yametech.yangjian.agent.core.util.Util;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -138,7 +139,7 @@ public class AgentClassLoader extends ClassLoader {
 
     public AgentClassLoader(ClassLoader parent) {
         super(parent);
-        log.info("create AgentClassLoader:{}", parent);
+        log.info("create AgentClassLoader:{}", Util.join(" > ", Util.listClassLoaders(parent)));
 //        classLoaders =  new ArrayList<>();
 ////        classLoaders.add(parent);
 //        if(extClassLoader != null && extClassLoader.length > 0) {
