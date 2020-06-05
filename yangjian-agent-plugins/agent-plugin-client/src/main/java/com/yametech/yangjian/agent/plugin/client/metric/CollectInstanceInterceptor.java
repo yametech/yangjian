@@ -15,14 +15,6 @@
  */
 package com.yametech.yangjian.agent.plugin.client.metric;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
-
 import com.yametech.yangjian.agent.api.ISchedule;
 import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.bean.MetricData;
@@ -32,6 +24,14 @@ import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.client.IStatusCollect;
 import com.yametech.yangjian.agent.client.StatusReturn;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 /**
  * 
@@ -100,6 +100,10 @@ public class CollectInstanceInterceptor implements IConstructorListener, ISchedu
         		type = type.substring(0, TYPE_MAX_LENGTH);
         	}
         	StatusReturn statusReturn = entry.getKey().collect();
+        	if(statusReturn == null) {
+				entry.setValue(now);
+				return;
+			}
         	String reason = statusReturn.getReason();
         	if(reason != null && reason.length() > REASON_MAX_LENGTH) {
         		reason = reason.substring(0, REASON_MAX_LENGTH);
