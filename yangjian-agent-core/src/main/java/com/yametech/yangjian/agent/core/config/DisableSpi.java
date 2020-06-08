@@ -16,11 +16,21 @@
 package com.yametech.yangjian.agent.core.config;
 
 import com.yametech.yangjian.agent.api.IConfigLoader;
+import com.yametech.yangjian.agent.api.IMetricMatcher;
 import com.yametech.yangjian.agent.api.common.Config;
 import com.yametech.yangjian.agent.api.common.InstanceManage;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.api.pool.IPoolMonitorMatcher;
+import com.yametech.yangjian.agent.api.trace.ITraceMatcher;
 import com.yametech.yangjian.agent.core.common.CoreConstants;
+import com.yametech.yangjian.agent.core.metric.MetricInit;
+import com.yametech.yangjian.agent.core.pool.PoolMonitorSchedule;
+import com.yametech.yangjian.agent.core.trace.TraceInit;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 禁用spi，晚于其他IConfigLoader实例加载
@@ -31,18 +41,40 @@ import com.yametech.yangjian.agent.core.common.CoreConstants;
  */
 public class DisableSpi implements IConfigLoader {
 	private static ILogger log = LoggerFactory.getLogger(DisableSpi.class);
+	private static final Set<String> NOT_ALLOW_DISABLE_SPI = new HashSet<>(Arrays.asList(LocalConfigLoader.class.getSimpleName(), DisableSpi.class.getSimpleName(),
+			MetricInit.class.getSimpleName(), TraceInit.class.getSimpleName(), PoolMonitorSchedule.class.getSimpleName()));// 不可以禁用的插件
 	
 	@Override
 	public void load(String arguments) throws Exception {
 		InstanceManage.listSpiClass().stream().filter(spiCls -> {
-			String enableConfig = Config.getKv("spi." + spiCls.getSimpleName());
-			return enableConfig != null && !CoreConstants.CONFIG_KEY_ENABLE.equals(enableConfig);
+			String configSuffix = spiCls.getSimpleName();
+			boolean notAllow = NOT_ALLOW_DISABLE_SPI.contains(configSuffix);
+			if(notAllow) {// 不可禁用
+				return false;
+			}
+			String enableConfig = Config.getKv("spi." + configSuffix);
+			if(CoreConstants.CONFIG_KEY_ENABLE.equals(enableConfig)) {// 配置了启用
+				return false;
+			}
+			String defaultConfig = defaultConfig(spiCls);
+			return defaultConfig != null && !CoreConstants.CONFIG_KEY_ENABLE.equals(defaultConfig);
 		}).forEach(spiCls -> {
 			InstanceManage.removeSpi(spiCls);
 			log.info("disable SPI：{}", spiCls.getName());
 		});
 	}
-	
+
+	private String defaultConfig(Class<?> spiCls) {
+		if(IMetricMatcher.class.isAssignableFrom(spiCls)) {
+			return Config.getKv("spi.Metric");
+		} else if(IPoolMonitorMatcher.class.isAssignableFrom(spiCls)) {
+			return Config.getKv("spi.PoolMonitor");
+		} else if(ITraceMatcher.class.isAssignableFrom(spiCls)) {
+			return Config.getKv("spi.Trace");
+		}
+		return null;
+	}
+
 	@Override
 	public int weight() {
 		return 0;
