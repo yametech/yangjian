@@ -90,9 +90,9 @@ public class DispatcherHandlerSpanCreater implements ISpanCreater<Void> {
         if (parameterMap != null && !parameterMap.isEmpty()) {
             parameterMap.forEach((k, v) -> span.tag(k, v.toString()));
         }
-        Tracer.SpanInScope spanInScope = tracer.withSpanInScope(span);
+        //Tracer.SpanInScope spanInScope = tracer.withSpanInScope(span);
         return ((Mono) ret).doFinally(s -> {
-            try {
+            try (Tracer.SpanInScope spanInScope = tracer.withSpanInScope(span)) {
                 if (t != null) {
                     span.error(t);
                 }
@@ -109,7 +109,6 @@ public class DispatcherHandlerSpanCreater implements ISpanCreater<Void> {
                 }
             } finally {
                 span.finish();
-                spanInScope.close();
             }
         });
     }
