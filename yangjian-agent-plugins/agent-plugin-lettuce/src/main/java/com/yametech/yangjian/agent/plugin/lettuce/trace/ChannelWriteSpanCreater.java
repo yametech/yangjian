@@ -53,16 +53,13 @@ public class ChannelWriteSpanCreater implements ISpanCreater<SpanInfo> {
     @Override
     public BeforeResult<SpanInfo> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
         if (!spanSample.sample()) {
-            System.out.println("===========================>!spanSample");
             return null;
         }
         if (!(thisObj instanceof IContext)) {
-            System.out.println("===========================>!IContext");
             return null;
         }
         String peer = (String) ((IContext) thisObj)._getAgentContext(REDIS_URL_CONTEXT_KEY);
         if (StringUtil.isEmpty(peer)) {
-            System.out.println("===========================>perere");
             return null;
         }
         long startTime = MICROS_CLOCK.nowMicros();

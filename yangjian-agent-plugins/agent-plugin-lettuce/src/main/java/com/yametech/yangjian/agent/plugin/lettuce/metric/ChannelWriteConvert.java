@@ -90,12 +90,9 @@ public class ChannelWriteConvert implements IMethodAsyncConvert, IConfigReader {
         if (StringUtil.isEmpty(key) || keyRules == null) {
             return null;
         }
-        Set<String> keys = new HashSet<>();
-        keys.add("name");
-        return keys;
-        /*return keyRules.stream()
+        return keyRules.stream()
                 .filter(r -> key.indexOf(r) != -1)
-                .collect(Collectors.toSet());*/
+                .collect(Collectors.toSet());
     }
 
     @Override

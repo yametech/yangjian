@@ -122,6 +122,7 @@ public class Constants {
         public static final String RABBITMQ = "rabbitmq";
         public static final String HTTP_CLIENT = "httpclient";
         public static final String REDISSON = "redisson";
+        public static final String LETTUCE = "lettuce";
         public static final String MONGO = "mongodb";
         public static final String SPRING_WEBFLUX = "spring-webflux";
         public static final String SPRING_MVC = "spring-mvc";
