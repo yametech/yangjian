@@ -20,6 +20,7 @@ import java.util.Properties;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
 import com.yametech.yangjian.agent.plugin.kafka.bean.MqInfo;
+import com.yametech.yangjian.agent.plugin.kafka.common.KafkaUtil;
 
 /**
  * 增强类定义
@@ -29,7 +30,7 @@ import com.yametech.yangjian.agent.plugin.kafka.bean.MqInfo;
  * @date 2019年11月8日 下午6:13:04
  */
 public class ConsumeAddressInterceptor implements IConstructorListener {
-	
+
 	@Override
 	public void constructor(Object thisObj, Object[] allArguments) {
 		if(!(thisObj instanceof IContext) || allArguments == null || allArguments[0] == null) {
@@ -38,5 +39,6 @@ public class ConsumeAddressInterceptor implements IConstructorListener {
 		Properties prop = (Properties) allArguments[0];
 		MqInfo info = new MqInfo(prop.getProperty("bootstrap.servers"), null, prop.getProperty("group.id"));
 		((IContext)thisObj)._setAgentContext(ContextConstants.KAFKA_CONTEXT_KEY, info);
+		KafkaUtil.reportDependency(info.getIpPorts());
 	}
 }

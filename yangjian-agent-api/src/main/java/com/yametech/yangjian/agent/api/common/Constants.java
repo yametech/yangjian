@@ -43,6 +43,7 @@ public class Constants {
     
     public static final String REPORT_CONFIG_KEY_PREFIX = "report";
     public static final String DISABLE_SPI_KEY_PREFIX = "spi.";
+    public static final String DEPENDENCY_PATH = "dependency/";
 
     public static class Status {
     	public static final String STARTING = "starting";// 服务启动中
@@ -126,6 +127,7 @@ public class Constants {
         public static final String MONGO = "mongodb";
         public static final String SPRING_WEBFLUX = "spring-webflux";
         public static final String SPRING_MVC = "spring-mvc";
+        public static final String SPRING_RESTTEMPLATE = "spring-resttemplate";
     }
 
     public static class ExtraHeaderKey {

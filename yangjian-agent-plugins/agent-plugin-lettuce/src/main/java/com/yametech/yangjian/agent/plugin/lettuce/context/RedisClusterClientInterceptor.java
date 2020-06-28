@@ -17,6 +17,7 @@ package com.yametech.yangjian.agent.plugin.lettuce.context;
 
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
+import com.yametech.yangjian.agent.plugin.lettuce.util.RedisUtil;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.cluster.RedisClusterClient;
 
@@ -42,6 +43,8 @@ public class RedisClusterClientInterceptor implements IConstructorListener {
         if (peer.length() > 0) {
             peer.deleteCharAt(peer.length() - 1);
         }
-        ((IContext) redisClusterClient.getOptions())._setAgentContext(REDIS_URL_CONTEXT_KEY, peer.toString());
+        String redisUrl = peer.toString();
+        ((IContext) redisClusterClient.getOptions())._setAgentContext(REDIS_URL_CONTEXT_KEY, redisUrl);
+        RedisUtil.reportDependency(redisUrl);
     }
 }

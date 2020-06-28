@@ -18,6 +18,7 @@ package com.yametech.yangjian.agent.plugin.jedis;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
 import com.yametech.yangjian.agent.plugin.jedis.context.ContextConstants;
+import com.yametech.yangjian.agent.plugin.jedis.util.RedisUtil;
 import redis.clients.jedis.JedisShardInfo;
 
 import java.net.URI;
@@ -35,7 +36,9 @@ public abstract class JedisConstructorInterceptor implements IConstructorListene
         public void constructor(Object thisObj, Object[] allArguments) throws Throwable {
             URI uri = (URI) allArguments[0];
             if (uri != null) {
-                ((IContext) thisObj)._setAgentContext(REDIS_URL_CONTEXT_KEY, uri.getHost() + ":" + uri.getPort());
+                String url = uri.getHost() + ":" + uri.getPort();
+                ((IContext) thisObj)._setAgentContext(REDIS_URL_CONTEXT_KEY, url);
+                RedisUtil.reportDependency(url);
             }
         }
     }
@@ -49,8 +52,9 @@ public abstract class JedisConstructorInterceptor implements IConstructorListene
             if (allArguments.length > 1) {
                 port = String.valueOf(allArguments[1]);
             }
-
-            ((IContext) thisObj)._setAgentContext(REDIS_URL_CONTEXT_KEY, host + ":" + port);
+            String url = host + ":" + port;
+            ((IContext) thisObj)._setAgentContext(REDIS_URL_CONTEXT_KEY, url);
+            RedisUtil.reportDependency(url);
         }
     }
 
@@ -59,7 +63,9 @@ public abstract class JedisConstructorInterceptor implements IConstructorListene
         public void constructor(Object thisObj, Object[] allArguments) throws Throwable {
             JedisShardInfo shardInfo = (JedisShardInfo) allArguments[0];
             if (shardInfo != null) {
-                ((IContext) thisObj)._setAgentContext(ContextConstants.REDIS_URL_CONTEXT_KEY, shardInfo.getHost() + ":" + shardInfo.getPort());
+                String url = shardInfo.getHost() + ":" + shardInfo.getPort();
+                ((IContext) thisObj)._setAgentContext(ContextConstants.REDIS_URL_CONTEXT_KEY, url);
+                RedisUtil.reportDependency(url);
             }
         }
     }
