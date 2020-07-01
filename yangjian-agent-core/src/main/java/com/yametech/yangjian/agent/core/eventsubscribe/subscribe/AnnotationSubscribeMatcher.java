@@ -54,6 +54,7 @@ public class AnnotationSubscribeMatcher implements InterceptorMatcher {
                             IConfigMatch match = getConfigMatch(interfaces, parent, clsName, methodName, argumentNumber, argumentType);
                             if(match == null) {
                                 LOG.warn("{}注解Subscribe的值配置错误(必须包含至少一个非空配置值，interfaces与parent必须至少配置一个)", className);
+                                return;
                             }
                             EventMatcher matcher = new EventMatcher(eventGroup, match);
                             InstanceManage.registry(matcher);
