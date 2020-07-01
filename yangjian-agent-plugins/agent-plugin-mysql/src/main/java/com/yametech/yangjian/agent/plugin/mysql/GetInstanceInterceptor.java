@@ -19,6 +19,7 @@ import com.mysql.cj.core.conf.url.HostInfo;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.interceptor.IStaticMethodAOP;
+import com.yametech.yangjian.agent.plugin.mysql.commons.bean.ConnectionInfo;
 import com.yametech.yangjian.agent.plugin.mysql.commons.util.MysqlUtil;
 import com.yametech.yangjian.agent.plugin.mysql.commons.context.ContextConstants;
 import java.lang.reflect.Method;
@@ -43,7 +44,9 @@ public abstract class GetInstanceInterceptor implements IStaticMethodAOP {
         @Override
         public Object after(Object[] allArguments, Method method, BeforeResult beforeResult, Object ret, Throwable t, Map globalVar) throws Throwable {
             if (ret instanceof IContext) {
-                ((IContext) ret)._setAgentContext(ContextConstants.MYSQL_CONNECTION_INFO_CONTEXT_KEY, MysqlUtil.getMysqlConnectionInfo(allArguments[4].toString()));
+                ConnectionInfo connectionInfo = MysqlUtil.getMysqlConnectionInfo(allArguments[4].toString());
+                ((IContext) ret)._setAgentContext(ContextConstants.MYSQL_CONNECTION_INFO_CONTEXT_KEY, connectionInfo);
+                MysqlUtil.reportDependency(connectionInfo, allArguments[4].toString());
             }
             return ret;
         }
@@ -62,7 +65,9 @@ public abstract class GetInstanceInterceptor implements IStaticMethodAOP {
         public Object after(Object[] allArguments, Method method, BeforeResult beforeResult, Object ret, Throwable t, Map globalVar) throws Throwable {
             if (ret instanceof IContext) {
                 final HostInfo hostInfo = (HostInfo) allArguments[0];
-                ((IContext) ret)._setAgentContext(ContextConstants.MYSQL_CONNECTION_INFO_CONTEXT_KEY, MysqlUtil.getMysqlConnectionInfo(hostInfo.getDatabaseUrl()));
+                ConnectionInfo connectionInfo = MysqlUtil.getMysqlConnectionInfo(hostInfo.getDatabaseUrl());
+                ((IContext) ret)._setAgentContext(ContextConstants.MYSQL_CONNECTION_INFO_CONTEXT_KEY, connectionInfo);
+                MysqlUtil.reportDependency(connectionInfo, hostInfo.getDatabaseUrl());
             }
             return ret;
         }

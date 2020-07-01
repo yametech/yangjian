@@ -15,15 +15,15 @@
  */
 package com.yametech.yangjian.agent.plugin.rabbitmq.context;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-
 import com.rabbitmq.client.Connection;
-
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.interceptor.IMethodAOP;
 import com.yametech.yangjian.agent.plugin.rabbitmq.bean.MqInfo;
+import com.yametech.yangjian.agent.plugin.rabbitmq.common.RabbitMqUtil;
+
+import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * 添加地址上下文
@@ -33,7 +33,6 @@ import com.yametech.yangjian.agent.plugin.rabbitmq.bean.MqInfo;
  * @date 2019年11月8日 下午6:13:04
  */
 public class AddressInterceptor implements IMethodAOP<Object> {
-	
 	@Override
 	public BeforeResult<Object> before(Object thisObj, Object[] allArguments, Method method) {
 		return null;
@@ -47,9 +46,10 @@ public class AddressInterceptor implements IMethodAOP<Object> {
 			return ret;
 		}
 		Connection conn = (Connection) thisObj;
-		MqInfo info = new MqInfo(conn.getAddress().getHostAddress() + ":" + conn.getPort(), null, null);
+		String url = conn.getAddress().getHostAddress() + ":" + conn.getPort();
+		MqInfo info = new MqInfo(url, null, null);
 		((IContext)ret)._setAgentContext(ContextConstants.RABBITMQ_CONTEXT_KEY, info);
+		RabbitMqUtil.reportDependency(url);
 		return ret;
 	}
-	
 }

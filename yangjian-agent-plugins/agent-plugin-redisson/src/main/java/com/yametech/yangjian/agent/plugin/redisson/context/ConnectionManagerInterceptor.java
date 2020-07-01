@@ -16,7 +16,11 @@
 package com.yametech.yangjian.agent.plugin.redisson.context;
 
 import com.yametech.yangjian.agent.api.base.IContext;
+import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
+import com.yametech.yangjian.agent.api.bean.MetricData;
+import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.MultiReportFactory;
 import com.yametech.yangjian.agent.api.interceptor.IMethodAOP;
 import com.yametech.yangjian.agent.plugin.redisson.util.ClassUtil;
 import org.redisson.config.Config;
@@ -25,6 +29,7 @@ import org.redisson.connection.ConnectionManager;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -32,6 +37,8 @@ import java.util.Map;
  * @date 2020/5/7
  */
 public class ConnectionManagerInterceptor implements IMethodAOP {
+
+    private static IReportData report = MultiReportFactory.getReport("collect");
 
     @Override
     public BeforeResult before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
@@ -45,32 +52,37 @@ public class ConnectionManagerInterceptor implements IMethodAOP {
         Config config = connectionManager.getCfg();
 
         // 这里通过反射调用获取主要因为Config类不提供get方法获取，目前只有RedissonClient初始化时候才会调用所以频率很低可暂不考虑性能影响
+        String redisUrl = null;
         Object serversConfig = ClassUtil.getObjectField(config, "sentinelServersConfig");
         if (serversConfig != null) {
-            ((IContext) thisObj)._setAgentContext(ContextConstants.REDIS_URL_CONTEXT_KEY,
-                    buildRedisUrl((Collection) ClassUtil.getObjectField(serversConfig, "sentinelAddresses")));
+            redisUrl = buildRedisUrl((Collection) ClassUtil.getObjectField(serversConfig, "sentinelAddresses"));
+            ((IContext) thisObj)._setAgentContext(ContextConstants.REDIS_URL_CONTEXT_KEY, redisUrl);
+            reportDependency(redisUrl);
             return ret;
         }
 
         serversConfig = ClassUtil.getObjectField(config, "masterSlaveServersConfig");
         if (serversConfig != null) {
             Object masterAddress = ClassUtil.getObjectField(serversConfig, "masterAddress");
-            ((IContext) thisObj)._setAgentContext(ContextConstants.REDIS_URL_CONTEXT_KEY,
-                    getRealUrl(masterAddress) + ";" + buildRedisUrl((Collection) ClassUtil.getObjectField(serversConfig, "slaveAddresses")));
+            redisUrl = getRealUrl(masterAddress) + "," + buildRedisUrl((Collection) ClassUtil.getObjectField(serversConfig, "slaveAddresses"));
+            ((IContext) thisObj)._setAgentContext(ContextConstants.REDIS_URL_CONTEXT_KEY, redisUrl);
+            reportDependency(redisUrl);
             return ret;
         }
 
         serversConfig = ClassUtil.getObjectField(config, "clusterServersConfig");
         if (serversConfig != null) {
-            ((IContext) thisObj)._setAgentContext(ContextConstants.REDIS_URL_CONTEXT_KEY,
-                    buildRedisUrl((Collection) ClassUtil.getObjectField(serversConfig, "nodeAddresses")));
+            redisUrl = buildRedisUrl((Collection) ClassUtil.getObjectField(serversConfig, "nodeAddresses"));
+            ((IContext) thisObj)._setAgentContext(ContextConstants.REDIS_URL_CONTEXT_KEY, redisUrl);
+            reportDependency(redisUrl);
             return ret;
         }
 
         serversConfig = ClassUtil.getObjectField(config, "replicatedServersConfig");
         if (serversConfig != null) {
-            ((IContext) thisObj)._setAgentContext(ContextConstants.REDIS_URL_CONTEXT_KEY,
-                    buildRedisUrl((Collection) ClassUtil.getObjectField(serversConfig, "nodeAddresses")));
+            redisUrl = buildRedisUrl((Collection) ClassUtil.getObjectField(serversConfig, "nodeAddresses"));
+            ((IContext) thisObj)._setAgentContext(ContextConstants.REDIS_URL_CONTEXT_KEY, redisUrl);
+            reportDependency(redisUrl);
         }
         return ret;
     }
@@ -79,7 +91,7 @@ public class ConnectionManagerInterceptor implements IMethodAOP {
         StringBuilder sb = new StringBuilder();
         if (nodeAddresses != null && !nodeAddresses.isEmpty()) {
             for (Object uri : nodeAddresses) {
-                sb.append(getRealUrl(uri)).append(";");
+                sb.append(getRealUrl(uri)).append(",");
             }
         }
         return sb.toString();
@@ -93,5 +105,11 @@ public class ConnectionManagerInterceptor implements IMethodAOP {
             return uri.getHost() + ":" + uri.getPort();
         }
         return null;
+    }
+
+    private void reportDependency(String url) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.Tags.PEER, url);
+        report.report(MetricData.get(null, Constants.DEPENDENCY_PATH + Constants.Component.REDISSON, params));
     }
 }

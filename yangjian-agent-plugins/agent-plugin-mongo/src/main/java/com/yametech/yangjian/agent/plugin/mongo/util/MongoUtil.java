@@ -28,8 +28,11 @@ import com.mongodb.bulk.WriteRequest;
 import com.mongodb.operation.*;
 
 import com.yametech.yangjian.agent.api.base.IContext;
+import com.yametech.yangjian.agent.api.base.IReportData;
+import com.yametech.yangjian.agent.api.bean.MetricData;
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.MultiReportFactory;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.plugin.mongo.context.ContextConstants;
 import org.bson.BsonDocument;
@@ -179,5 +182,16 @@ public class MongoUtil {
             }
         }
         return params.toString();
+    }
+
+    private static IReportData report = MultiReportFactory.getReport("collect");
+    public static void reportDependency(String peer, String database) {
+        if (StringUtil.isEmpty(peer) || StringUtil.isEmpty(database)) {
+            return;
+        }
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.Tags.PEER, peer);
+        params.put(Constants.Tags.DATABASE, database);
+        report.report(MetricData.get(null, Constants.DEPENDENCY_PATH + Constants.Component.MONGO, params));
     }
 }

@@ -17,11 +17,9 @@ package com.yametech.yangjian.agent.plugin.jedis;
 
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
-import com.yametech.yangjian.agent.plugin.jedis.context.ContextConstants;
+import com.yametech.yangjian.agent.plugin.jedis.util.RedisUtil;
 import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.JedisShardInfo;
 
-import java.net.URI;
 import java.util.Set;
 
 import static com.yametech.yangjian.agent.plugin.jedis.context.ContextConstants.REDIS_URL_CONTEXT_KEY;
@@ -38,10 +36,12 @@ public abstract class JedisClusterConstructorInterceptor implements IConstructor
             StringBuilder redisConnInfo = new StringBuilder();
             Set<HostAndPort> hostAndPorts = (Set<HostAndPort>) allArguments[0];
             for (HostAndPort hostAndPort : hostAndPorts) {
-                redisConnInfo.append(hostAndPort.toString()).append(";");
+                redisConnInfo.append(hostAndPort.toString()).append(",");
             }
 
-            ((IContext) thisObj)._setAgentContext(ContextConstants.REDIS_URL_CONTEXT_KEY, redisConnInfo.toString());
+            String url = redisConnInfo.toString();
+            ((IContext) thisObj)._setAgentContext(REDIS_URL_CONTEXT_KEY, url);
+            RedisUtil.reportDependency(url);
         }
     }
 
@@ -51,7 +51,9 @@ public abstract class JedisClusterConstructorInterceptor implements IConstructor
         public void constructor(Object thisObj, Object[] allArguments) throws Throwable {
             HostAndPort hostAndPort = (HostAndPort) allArguments[0];
             if (hostAndPort != null) {
-                ((IContext) thisObj)._setAgentContext(ContextConstants.REDIS_URL_CONTEXT_KEY, hostAndPort.getHost() + ":" + hostAndPort.getPort());
+                String url = hostAndPort.getHost() + ":" + hostAndPort.getPort();
+                ((IContext) thisObj)._setAgentContext(REDIS_URL_CONTEXT_KEY, url);
+                RedisUtil.reportDependency(url);
             }
         }
     }

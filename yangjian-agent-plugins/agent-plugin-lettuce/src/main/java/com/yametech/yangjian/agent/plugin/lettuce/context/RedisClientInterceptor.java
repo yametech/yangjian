@@ -17,6 +17,7 @@ package com.yametech.yangjian.agent.plugin.lettuce.context;
 
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
+import com.yametech.yangjian.agent.plugin.lettuce.util.RedisUtil;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 
@@ -35,7 +36,9 @@ public class RedisClientInterceptor implements IConstructorListener {
         RedisURI redisURI = (RedisURI) allArguments[1];
         RedisClient redisClient = (RedisClient) thisObj;
         if (redisClient.getOptions() instanceof IContext) {
-            ((IContext) redisClient.getOptions())._setAgentContext(REDIS_URL_CONTEXT_KEY, getRedisUrl(redisURI));
+            String url = getRedisUrl(redisURI);
+            ((IContext) redisClient.getOptions())._setAgentContext(REDIS_URL_CONTEXT_KEY, url);
+            RedisUtil.reportDependency(url);
         }
     }
 

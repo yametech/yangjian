@@ -4,6 +4,7 @@ import com.mysql.cj.conf.HostInfo;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.interceptor.IStaticMethodAOP;
+import com.yametech.yangjian.agent.plugin.mysql.commons.bean.ConnectionInfo;
 import com.yametech.yangjian.agent.plugin.mysql.commons.context.ContextConstants;
 import com.yametech.yangjian.agent.plugin.mysql.commons.util.MysqlUtil;
 import java.lang.reflect.Method;
@@ -15,6 +16,8 @@ import java.util.Map;
  */
 public class GetInstanceInterceptor implements IStaticMethodAOP {
 
+    private volatile boolean inited = false;
+
     @Override
     public BeforeResult before(Object[] allArguments, Method method) throws Throwable {
         return null;
@@ -24,7 +27,9 @@ public class GetInstanceInterceptor implements IStaticMethodAOP {
     public Object after(Object[] allArguments, Method method, BeforeResult beforeResult, Object ret, Throwable t, Map globalVar) throws Throwable {
         if (ret instanceof IContext) {
             final HostInfo hostInfo = (HostInfo) allArguments[0];
-            ((IContext) ret)._setAgentContext(ContextConstants.MYSQL_CONNECTION_INFO_CONTEXT_KEY, MysqlUtil.getMysqlConnectionInfo(hostInfo.getDatabaseUrl()));
+            ConnectionInfo connectionInfo = MysqlUtil.getMysqlConnectionInfo(hostInfo.getDatabaseUrl());
+            ((IContext) ret)._setAgentContext(ContextConstants.MYSQL_CONNECTION_INFO_CONTEXT_KEY, connectionInfo);
+            MysqlUtil.reportDependency(connectionInfo, hostInfo.getDatabaseUrl());
         }
         return ret;
     }

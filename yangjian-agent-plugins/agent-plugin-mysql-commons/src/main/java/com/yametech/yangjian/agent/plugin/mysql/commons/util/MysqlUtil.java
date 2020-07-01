@@ -15,8 +15,11 @@
  */
 package com.yametech.yangjian.agent.plugin.mysql.commons.util;
 
+import com.yametech.yangjian.agent.api.base.IReportData;
+import com.yametech.yangjian.agent.api.bean.MetricData;
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.MultiReportFactory;
 import com.yametech.yangjian.agent.plugin.mysql.commons.bean.ConnectionInfo;
 import com.yametech.yangjian.agent.plugin.mysql.commons.bean.SqlBean;
 import com.yametech.yangjian.agent.plugin.mysql.commons.druid.sql.SQLUtils;
@@ -25,8 +28,10 @@ import com.yametech.yangjian.agent.plugin.mysql.commons.druid.sql.visitor.Parame
 import com.yametech.yangjian.agent.plugin.mysql.commons.druid.sql.visitor.SchemaStatVisitor;
 import com.yametech.yangjian.agent.plugin.mysql.commons.druid.stat.TableStat;
 import com.yametech.yangjian.agent.plugin.mysql.commons.druid.util.JdbcConstants;
+import com.yametech.yangjian.agent.plugin.mysql.commons.druid.util.LRUCache;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -137,5 +142,18 @@ public class MysqlUtil {
             databaseEndIndex = url.length();
         }
         return url.substring(databaseBeginIndex + 1, databaseEndIndex);
+    }
+
+    private static IReportData report = MultiReportFactory.getReport("collect");
+    private static final LRUCache CONNECT_URL_CACHE = new LRUCache(5);
+
+    public static void reportDependency(ConnectionInfo connectionInfo, String key) {
+        if (!CONNECT_URL_CACHE.containsKey(key)) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.Tags.PEER, connectionInfo.getUrl());
+            params.put(Constants.Tags.DATABASE, connectionInfo.getDatabaseName());
+            report.report(MetricData.get(null, Constants.DEPENDENCY_PATH + Constants.Component.MYSQL_JDBC, params));
+            CONNECT_URL_CACHE.put(key, true);
+        }
     }
 }

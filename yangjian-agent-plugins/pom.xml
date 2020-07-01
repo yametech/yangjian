@@ -28,6 +28,7 @@
         <module>agent-plugin-spring-webflux</module>
         <module>agent-plugin-client</module>
         <module>agent-plugin-lettuce</module>
+        <module>agent-plugin-resttemplate</module>
     </modules>
 
     <properties>

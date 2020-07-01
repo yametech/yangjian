@@ -1,0 +1,4 @@
+com.yametech.yangjian.agent.plugin.resttemplate.metric.RestTemplateMatcher
+com.yametech.yangjian.agent.plugin.resttemplate.trace.RestTemplateMatcher
+com.yametech.yangjian.agent.plugin.resttemplate.trace.CreateRequestMatcher
+com.yametech.yangjian.agent.plugin.resttemplate.trace.HandleResponseMatcher

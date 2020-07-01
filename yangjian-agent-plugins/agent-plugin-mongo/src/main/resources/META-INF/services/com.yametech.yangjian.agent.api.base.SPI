@@ -8,3 +8,5 @@ com.yametech.yangjian.agent.plugin.mongo.trace.OperationExecutorTraceMatcher
 com.yametech.yangjian.agent.plugin.mongo.trace.DelegateOperationExecutorTraceMatcher
 com.yametech.yangjian.agent.plugin.mongo.context.DelegateOperationExecutorMatcher
 com.yametech.yangjian.agent.plugin.mongo.trace.MongoOperationTraceMatcher
+com.yametech.yangjian.agent.plugin.mongo.context.MongoClientMatcher
+com.yametech.yangjian.agent.plugin.mongo.context.MongoClientImplMatcher

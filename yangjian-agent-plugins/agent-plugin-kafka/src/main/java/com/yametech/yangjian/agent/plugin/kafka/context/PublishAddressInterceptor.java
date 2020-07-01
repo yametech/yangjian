@@ -20,6 +20,7 @@ import java.util.Properties;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
 import com.yametech.yangjian.agent.plugin.kafka.bean.MqInfo;
+import com.yametech.yangjian.agent.plugin.kafka.common.KafkaUtil;
 
 /**
  * 增强类定义
@@ -38,5 +39,6 @@ public class PublishAddressInterceptor implements IConstructorListener {
 		Properties prop = (Properties) allArguments[0];
 		MqInfo info = new MqInfo(prop.getProperty("bootstrap.servers"), null, null);
 		((IContext)thisObj)._setAgentContext(ContextConstants.KAFKA_CONTEXT_KEY, info);
+		KafkaUtil.reportDependency(info.getIpPorts());
 	}
 }
