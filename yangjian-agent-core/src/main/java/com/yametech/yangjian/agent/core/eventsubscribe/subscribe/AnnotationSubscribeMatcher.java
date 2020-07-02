@@ -32,7 +32,8 @@ public class AnnotationSubscribeMatcher implements InterceptorMatcher {
 
     @Override
     public IConfigMatch match() {
-        return new MethodAnnotationConstructorMatch("com.yametech.yangjian.agent.client.annotation.Subscribe");
+        return new CombineOrMatch(Arrays.asList(new MethodAnnotationConstructorMatch(SUBSCRIBE_ANNOTATION_NAME),
+                new MethodAnnotationConstructorMatch(SUBSCRIBES_ANNOTATION_NAME)));
     }
 
     @Override
