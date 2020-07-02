@@ -20,6 +20,7 @@ import com.yametech.yangjian.agent.api.bean.ClassDefined;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import net.bytebuddy.description.annotation.AnnotationDescription;
 import net.bytebuddy.description.annotation.AnnotationList;
 import net.bytebuddy.description.annotation.AnnotationValue;
 import net.bytebuddy.description.method.MethodDescription;
@@ -102,18 +103,31 @@ public class ElementMatcherConvert {
 
     private static Set<Annotation> buildAnnotation(AnnotationList annotationList) {
 		return annotationList.stream()
-				.map(annotation -> {
-					Map<String, Object> values = new HashMap<>();
-					annotation.getAnnotationType().getDeclaredMethods().forEach(method -> {
-						AnnotationValue<?, ?> value =  annotation.getValue(method);
-						if(value.getState().isResolved()) {
-							values.put(method.getActualName(), value.resolve());
-						} else {
-							LOGGER.warn("can't resolve: {} - {}", annotation.getAnnotationType().getActualName(), method.getActualName());
-						}
-					});
-					return new Annotation(annotation.getAnnotationType().getActualName(), values);
-				}).collect(Collectors.toSet());
+				.map(ElementMatcherConvert::convertAnnotation)
+				.collect(Collectors.toSet());
+	}
+
+	private static Annotation convertAnnotation(AnnotationDescription annotation) {
+		Map<String, Object> values = new HashMap<>();
+		annotation.getAnnotationType().getDeclaredMethods().forEach(method -> {
+			AnnotationValue<?, ?> value =  annotation.getValue(method);
+			if(value.getState().isResolved()) {
+				Object resolveValue = value.resolve();
+				if(!(resolveValue instanceof AnnotationDescription[])) {
+					values.put(method.getActualName(), resolveValue);
+					return;
+				}
+				AnnotationDescription[] childrenDescription = (AnnotationDescription[]) resolveValue;
+				Annotation[] children = new Annotation[childrenDescription.length];
+				for(int i = 0; i < childrenDescription.length; i++) {
+					children[i] = convertAnnotation(childrenDescription[i]);
+				}
+				values.put(method.getActualName(), children);
+			} else {
+				LOGGER.warn("can't resolve: {} - {}", annotation.getAnnotationType().getActualName(), method.getActualName());
+			}
+		});
+		return new Annotation(annotation.getAnnotationType().getActualName(), values);
 	}
 
     /**

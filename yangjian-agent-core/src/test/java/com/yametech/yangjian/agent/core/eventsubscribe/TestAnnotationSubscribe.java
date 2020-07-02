@@ -21,9 +21,9 @@ public class TestAnnotationSubscribe {
 //		new Listener();
 		service.test1();
 		service.test2("2222");
-		new AnnotationListener().self();
-		service.test3("3333");
-		Thread.sleep(2000);
+//		new AnnotationListener().self();
+//		service.test3("3333");
+//		Thread.sleep(2000);
 	}
 
 	@org.junit.Test

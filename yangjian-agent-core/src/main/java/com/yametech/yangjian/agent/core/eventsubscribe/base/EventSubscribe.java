@@ -139,7 +139,7 @@ public class EventSubscribe {
 			return false;
 		}
 		if(!ignoreParams && method.getParameterTypes().length < params.length) {
-			LOG.warn("params number not match: {} - {}", method.getParameterTypes().length, params.length);
+			LOG.warn("params number not match: {} - {}  > {}", method.getParameterTypes().length, params.length, method);
 			return false;
 		}
 		if(method.getDeclaringClass().getTypeName().equals(className) && method.getName().equals(methodName)) {

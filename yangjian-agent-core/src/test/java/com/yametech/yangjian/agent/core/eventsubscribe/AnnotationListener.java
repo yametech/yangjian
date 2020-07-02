@@ -1,12 +1,15 @@
 package com.yametech.yangjian.agent.core.eventsubscribe;
 
 import com.yametech.yangjian.agent.client.annotation.AutoInstance;
+import com.yametech.yangjian.agent.client.annotation.IgnoreParams;
 import com.yametech.yangjian.agent.client.annotation.Subscribe;
 
 @AutoInstance
 public class AnnotationListener {
 
+	@IgnoreParams
 	@Subscribe(className="com.yametech.yangjian.agent.core.eventsubscribe.Service", methodName = "test1")
+	@Subscribe(className="com.yametech.yangjian.agent.core.eventsubscribe.Service", methodName = "test2")
 	public void test1() throws InterruptedException {
 		System.err.println("Listener.test1");
 //		Thread.sleep(10000);

@@ -21,7 +21,7 @@ import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import java.util.stream.Stream;
 
 /**
- * 匹配含有对应注解方法的构造方法
+ * 匹配含有对应注解方法的构造方法，用于拦截含有某个注解的类实例化
  * 
  * @author liuzhao
  */

@@ -42,6 +42,7 @@ public class AnnotationSubscribeInterceptor implements IConstructorListener {
 			IgnoreParams ignoreParams = method.getAnnotation(IgnoreParams.class);
 			Subscribe[] eventsConfig = method.getAnnotationsByType(Subscribe.class);
 			for(Subscribe subscribe : eventsConfig) {
+//				LOG.info("Subscribe method: {} - {}", method, subscribe);
 				BindManage.registerSubscribe(eventGroup, ignoreParams != null, method, thisObj);
 			}
 		}

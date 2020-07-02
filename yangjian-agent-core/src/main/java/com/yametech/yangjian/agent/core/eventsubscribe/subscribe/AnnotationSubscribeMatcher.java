@@ -16,15 +16,18 @@ import com.yametech.yangjian.agent.core.eventsubscribe.event.EventMatcher;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 public class AnnotationSubscribeMatcher implements InterceptorMatcher {
     private static final ILogger LOG = LoggerFactory.getLogger(AnnotationSubscribeMatcher.class);
     private static final String AUTO_INSTANCE_NAME = "com.yametech.yangjian.agent.client.annotation.AutoInstance";
     private static final String SUBSCRIBE_ANNOTATION_NAME = "com.yametech.yangjian.agent.client.annotation.Subscribe";
-    static final Map<String, Boolean> LOADED_CLASS = new ConcurrentHashMap<>();
+    private static final String SUBSCRIBES_ANNOTATION_NAME = "com.yametech.yangjian.agent.client.annotation.Subscribes";
+    private static final Map<String, Boolean> LOADED_CLASS = new ConcurrentHashMap<>();
     private static final int CLASS_MAX_NUMBER = 500;
 
     @Override
@@ -42,7 +45,16 @@ public class AnnotationSubscribeMatcher implements InterceptorMatcher {
         LOADED_CLASS.computeIfAbsent(className, key -> {
             methodDefined.getClassDefined().getMethods().forEach(md -> {
                 String eventGroup = MethodUtil.getId(md);
-                md.getMethodAnnotations().stream().filter(annotation -> SUBSCRIBE_ANNOTATION_NAME.equals(annotation.getName()))
+                md.getMethodAnnotations().stream()
+                        .filter(annotation -> SUBSCRIBE_ANNOTATION_NAME.equals(annotation.getName()) || SUBSCRIBES_ANNOTATION_NAME.equals(annotation.getName()))
+//                        .flatMap(md -> md.getMethodAnnotations() == null ? Stream.empty() : md.getMethodAnnotations().stream())
+                        .flatMap(annotation -> {
+                            if(SUBSCRIBES_ANNOTATION_NAME.equals(annotation.getName())) {
+                                return Arrays.stream((com.yametech.yangjian.agent.api.bean.Annotation[]) annotation.getMethodValues().get("value"));
+                            } else {
+                                return Stream.of(annotation);
+                            }
+                        })
                         .forEach(annotation -> {
                             String[] interfaces = (String[]) annotation.getMethodValues().get("interfaces");
                             String parent = (String) annotation.getMethodValues().get("parent");
@@ -59,7 +71,7 @@ public class AnnotationSubscribeMatcher implements InterceptorMatcher {
                             EventMatcher matcher = new EventMatcher(eventGroup, match);
                             InstanceManage.registry(matcher);
                             YMAgent.addTransformerMatchers(matcher);
-                            LOG.info("addTransformerMatchers：{}", matcher.match());
+                            LOG.info("addTransformerMatchers：{} - {}", eventGroup, matcher.match());
                         });
             });
             return true;
