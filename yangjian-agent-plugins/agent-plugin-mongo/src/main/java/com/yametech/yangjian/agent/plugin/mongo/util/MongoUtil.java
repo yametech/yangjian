@@ -52,7 +52,9 @@ public class MongoUtil {
         String collection = null;
         if (obj instanceof IContext) {
             MongoNamespace namespace = (MongoNamespace) ((IContext) obj)._getAgentContext(ContextConstants.MONGO_OPERATOR_COLLECTION);
-            collection = namespace.getCollectionName();
+            if (namespace != null) {
+                collection = namespace.getCollectionName();
+            }
         }
 
         // 解析集合操作
@@ -177,11 +179,11 @@ public class MongoUtil {
                 params.append(((UpdateRequest) request).getFilter()).append(",");
             }
             if (params.length() > FILTER_LENGTH_LIMIT) {
-                params.append("...");
+                //params.append("...");
                 break;
             }
         }
-        return params.toString();
+        return StringUtil.shorten(params.toString(), FILTER_LENGTH_LIMIT);
     }
 
     private static IReportData report = MultiReportFactory.getReport("collect");
