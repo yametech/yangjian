@@ -35,7 +35,7 @@ public @interface Subscribe {
     String methodName() default "";
 
     /**
-     * @return  被订阅类匹配的方法名正则表达式，如：test
+     * @return  被订阅类匹配的方法名正则表达式，如：test.*
      */
     String methodNameRegex() default "";
 
