@@ -15,8 +15,6 @@
  */
 package com.yametech.yangjian.agent.core.trace.base;
 
-import com.yametech.yangjian.agent.api.common.Constants;
-
 import brave.Tracing;
 import brave.Tracing.Builder;
 import brave.propagation.B3Propagation;
@@ -24,6 +22,7 @@ import brave.propagation.ExtraFieldPropagation;
 import brave.propagation.StrictScopeDecorator;
 import brave.propagation.ThreadLocalCurrentTraceContext;
 import brave.sampler.Sampler;
+import com.yametech.yangjian.agent.api.common.Constants;
 import zipkin2.Span;
 import zipkin2.reporter.Reporter;
 
@@ -39,6 +38,8 @@ public class BraveHelper {
 		Builder builder = Tracing.newBuilder()
 				.localServiceName(Constants.serviceName())
 				.spanReporter(spanReporter)
+				// 这里自定义error tag解析为了限制异常信息的长度
+				.errorParser(new ErrorTagParser())
 				.propagationFactory(ExtraFieldPropagation.newFactory(B3Propagation.FACTORY, Constants.ExtraHeaderKey.USER_ID, Constants.ExtraHeaderKey.REFERER_SERVICE))
 				.currentTraceContext(ThreadLocalCurrentTraceContext.newBuilder()
 				      .addScopeDecorator(StrictScopeDecorator.create())
