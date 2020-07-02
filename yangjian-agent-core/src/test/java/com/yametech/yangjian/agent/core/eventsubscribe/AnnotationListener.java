@@ -55,7 +55,7 @@ public class AnnotationListener {
 	}
 
 	@IgnoreParams
-	@Subscribe(className="com.yametech.yangjian.agent.core.eventsubscribe.Service", methodNameRegex = "test.*")
+	@Subscribe(className="com.yametech.yangjian.agent.core.eventsubscribe.Service", methodName = "test.*", isMethodNameRegex = true)
 	public void test1_regex() throws InterruptedException {
 		System.err.println("Regex Listener.test*");
 //		Thread.sleep(10000);
