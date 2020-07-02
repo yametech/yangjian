@@ -65,8 +65,8 @@ public class AnnotationSubscribeMatcher implements InterceptorMatcher {
                             int argumentNumber = (int) annotation.getMethodValues().get("argumentNumber");
                             String[] argumentType = (String[]) annotation.getMethodValues().get("argumentType");
 //                            boolean ignoreParams = (boolean) annotation.getMethodValues().get("ignoreParams");
-                            String methodNameRegex = (String) annotation.getMethodValues().get("methodNameRegex");
-                            IConfigMatch match = getConfigMatch(interfaces, parent, clsName, methodName, methodNameRegex,
+                            boolean isMethodNameRegex = (boolean) annotation.getMethodValues().getOrDefault("methodNameRegex", false);
+                            IConfigMatch match = getConfigMatch(interfaces, parent, clsName, methodName, isMethodNameRegex,
                                     argumentNumber, argumentType);
                             if (match == null) {
                                 LOG.warn("{}注解Subscribe的值配置错误(必须包含至少一个非空配置值，interfaces与parent必须至少配置一个)", className);
@@ -83,7 +83,7 @@ public class AnnotationSubscribeMatcher implements InterceptorMatcher {
     }
 
     private IConfigMatch getConfigMatch(String[] interfaces, String parent, String className, String methodName,
-                                        String methodNameRegex, int argumentNumber, String[] argumentType) {
+                                        boolean isMethodNameRegex, int argumentNumber, String[] argumentType) {
         boolean containsInterface = false;
         List<IConfigMatch> matches = new ArrayList<>();
         if (interfaces.length > 0) {
@@ -109,9 +109,7 @@ public class AnnotationSubscribeMatcher implements InterceptorMatcher {
             containsClassName = true;
         }
         if (StringUtil.notEmpty(methodName.trim())) {
-            matches.add(new MethodNameMatch(methodName.trim()));
-        } else if (StringUtil.notEmpty(methodNameRegex.trim())) {
-            matches.add(new MethodNameRegexMatch(methodNameRegex.trim()));
+            matches.add(isMethodNameRegex ? new MethodNameRegexMatch(methodName.trim()) : new MethodNameMatch(methodName.trim()));
         }
         if (argumentNumber != -1) {
             matches.add(new MethodArgumentNumMatch(argumentNumber));
