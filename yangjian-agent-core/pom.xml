@@ -22,7 +22,6 @@
         <jmh.version>1.19</jmh.version>
         <maven-shade-plugin.version>3.1.1</maven-shade-plugin.version>
         <maven-resources-plugin.version>2.6</maven-resources-plugin.version>
-        <brave.version>5.10.2</brave.version>
         <disruptor.version>3.4.2</disruptor.version>
         <opentelemetry.version>0.2.4</opentelemetry.version>
 <!--     	<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths> -->
