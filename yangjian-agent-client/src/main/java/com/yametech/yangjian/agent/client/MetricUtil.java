@@ -23,12 +23,39 @@ public class MetricUtil {
 
 	/**
 	 *
-	 * @param name	统计信息的命名，同名调用会聚合计算qps/rt，长度不可超过50
-	 * @param supplier
+	 * @param name	统计标识，同名会聚合计算qps/rt，长度不可超过50，如：success-order、error-order
+	 */
+	public static void mark(String name) {
+		mark(name, 1);
+	}
+
+	/**
+	 *
+	 * @param name	统计标识，同名会聚合计算qps/rt，长度不可超过50，如：success-order、error-order
+	 * @param number	累加次数
+	 */
+	public static void mark(String name, int number) {}
+
+	/**
+	 *
+	 * @param name	统计标识，同名会聚合计算qps/rt，长度不可超过50，如：success-order、error-order
+	 * @param supplier	执行的业务
 	 * @param <T>
 	 * @return
 	 */
 	public static <T> T mark(String name, Supplier<T> supplier) {
+		return mark(name, 1, supplier);
+	}
+
+	/**
+	 *
+	 * @param name	统计标识，同名会聚合计算qps/rt，长度不可超过50，如：success-order、error-order
+	 * @param number	累加次数
+	 * @param supplier	执行的业务
+	 * @param <T>
+	 * @return
+	 */
+	public static <T> T mark(String name, int number, Supplier<T> supplier) {
 		return supplier.get();
 	}
 

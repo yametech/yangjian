@@ -25,6 +25,8 @@ import java.util.Map;
 
 public class MethodMetricConvert implements IMethodConvert {
 	private static final int MAX_LENGTH = 50;
+	private static final char PREFIX = '[';
+	private static final char SUFFIX = ']';
 
 	@Override
 	public List<TimeEvent> convert(Object thisObj, long startTime, Object[] allArguments, 
@@ -37,7 +39,8 @@ public class MethodMetricConvert implements IMethodConvert {
 			identify = identify.substring(0, MAX_LENGTH);
 		}
 		TimeEvent event = get(startTime);
-		event.setIdentify(identify);
+		event.setIdentify(PREFIX + identify + SUFFIX);
+		event.setNumber((int)allArguments[1]);
 		return Collections.singletonList(event);
 	}
 }

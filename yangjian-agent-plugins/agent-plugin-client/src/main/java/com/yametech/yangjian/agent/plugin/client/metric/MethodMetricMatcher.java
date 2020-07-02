@@ -29,12 +29,22 @@ public class MethodMetricMatcher implements IMetricMatcher {
 
     @Override
     public IConfigMatch match() {
-        return new CombineAndMatch(Arrays.asList(
-                new ClassMatch("com.yametech.yangjian.agent.client.MetricUtil"),
-                new MethodNameMatch("mark"),
-                new MethodArgumentNumMatch(2),
-                new MethodArgumentIndexMatch(0, "java.lang.String"),
-                new MethodArgumentIndexMatch(1, "java.util.function.Supplier")
+        return new CombineOrMatch(Arrays.asList(
+                new CombineAndMatch(Arrays.asList(
+                        new ClassMatch("com.yametech.yangjian.agent.client.MetricUtil"),
+                        new MethodNameMatch("mark"),
+                        new MethodArgumentNumMatch(3),
+                        new MethodArgumentIndexMatch(0, "java.lang.String"),
+                        new MethodArgumentIndexMatch(1, "java.lang.int"),
+                        new MethodArgumentIndexMatch(2, "java.util.function.Supplier")
+                )),
+                new CombineAndMatch(Arrays.asList(
+                        new ClassMatch("com.yametech.yangjian.agent.client.MetricUtil"),
+                        new MethodNameMatch("mark"),
+                        new MethodArgumentNumMatch(2),
+                        new MethodArgumentIndexMatch(0, "java.lang.String"),
+                        new MethodArgumentIndexMatch(1, "java.lang.int")
+                ))
         ));
     }
 
