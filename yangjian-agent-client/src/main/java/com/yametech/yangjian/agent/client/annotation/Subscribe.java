@@ -32,7 +32,12 @@ public @interface Subscribe {
     /**
      * @return  被订阅类匹配的方法名，如：test
      */
-    String methodName();
+    String methodName() default "";
+
+    /**
+     * @return  被订阅类匹配的方法名正则表达式，如：test
+     */
+    String methodNameRegex() default "";
 
     /**
      * @return  被订阅方法的参数个数，如：argumentNumber=0

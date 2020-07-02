@@ -4,6 +4,8 @@ import com.yametech.yangjian.agent.client.annotation.AutoInstance;
 import com.yametech.yangjian.agent.client.annotation.IgnoreParams;
 import com.yametech.yangjian.agent.client.annotation.Subscribe;
 
+import java.util.regex.Pattern;
+
 @AutoInstance
 public class AnnotationListener {
 
@@ -50,5 +52,12 @@ public class AnnotationListener {
 //		Thread.sleep(10000);
 		// 模拟死循环
 		service.test3("qqqqqq");
+	}
+
+	@IgnoreParams
+	@Subscribe(className="com.yametech.yangjian.agent.core.eventsubscribe.Service", methodNameRegex = "test.*")
+	public void test1_regex() throws InterruptedException {
+		System.err.println("Regex Listener.test*");
+//		Thread.sleep(10000);
 	}
 }
