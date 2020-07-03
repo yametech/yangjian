@@ -31,6 +31,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.yametech.yangjian.agent.server.model.MetricsParameter.*;
+
 /**
  * @author dengliming
  * @date 2020/3/8
@@ -40,9 +42,6 @@ public class MetricsExporter extends Collector {
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricsExporter.class);
     private List<IMetricsResolver> metricsResolvers = new ArrayList<>();
     private DiskMetricStore diskMetricStore;
-    private static final String PARAM_SECOND_KEY = "second";
-    private static final String PARAM_IP_KEY = "ip";
-    private static final String PARAM_SERVICE_NAME_KEY = "serviceName";
 
     public MetricsExporter(DiskMetricStore diskMetricStore) {
         metricsResolvers.add(new ThreadMetricsResolver());
@@ -111,6 +110,11 @@ public class MetricsExporter extends Collector {
 
                     if (PARAM_SERVICE_NAME_KEY.equals(s[0])) {
                         metricsParameter.setServiceName(s[1]);
+                        return false;
+                    }
+
+                    if (PARAM_DATA_TYPE_KEY.equals(s[0])) {
+                        metricsParameter.setDataType(s[1]);
                         return false;
                     }
 

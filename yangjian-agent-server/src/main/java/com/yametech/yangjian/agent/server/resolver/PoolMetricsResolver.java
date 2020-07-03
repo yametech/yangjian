@@ -19,6 +19,7 @@ import com.yametech.yangjian.agent.server.metric.GaugeMetricFamily;
 import com.yametech.yangjian.agent.server.model.MetricsParameter;
 import io.prometheus.client.Collector;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +44,7 @@ public class PoolMetricsResolver implements IMetricsResolver<MetricsParameter, L
         if (metricsParameter == null) {
             return false;
         }
-        return MapUtils.getString(metricsParameter.getParams(), "dataType", "").contains("connectionPool");
+        return StringUtils.defaultIfBlank(metricsParameter.getDataType(), "").contains("connectionPool");
     }
 
     /**
@@ -59,7 +60,7 @@ public class PoolMetricsResolver implements IMetricsResolver<MetricsParameter, L
         Map<String, Object> params = metricsParameter.getParams();
         String sign = MapUtils.getString(params, "sign");
         List<Collector.MetricFamilySamples> sampleFamilies = new ArrayList<>();
-        String poolType = extractPoolType(MapUtils.getString(metricsParameter.getParams(), "dataType", ""));
+        String poolType = extractPoolType(metricsParameter.getDataType());
         List<String> labelValues = Arrays.asList(serviceName, instance, poolType, sign);
         sampleFamilies.add(new GaugeMetricFamily(
                 "pool_monitor_active_count",

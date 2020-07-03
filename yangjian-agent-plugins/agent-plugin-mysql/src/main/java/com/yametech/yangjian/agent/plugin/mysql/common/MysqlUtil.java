@@ -37,6 +37,10 @@ public class MysqlUtil {
     private static final String SQL_EXCLUDE_COLUMUN_PREFIX = "@@";
     private static final String SQL_EXCLUDE_WARNING_PREFIX = "WARNINGS";
     private static final String SQL_EXCLUDE_SUFFIX = "where 1 = 2";
+    /**
+     * 限制sql最大长度
+     */
+    private static final int SQL_MAX_LENGTH = 250;
 
     /**
      * 判断sql是否排除
@@ -102,7 +106,7 @@ public class MysqlUtil {
         TimeEvent timeEvent = new TimeEvent();
         timeEvent.setEventTime(sqlBean.getEventTime());
         timeEvent.setUseTime(sqlBean.getUseTime());
-        timeEvent.setIdentify(identify);
+        timeEvent.setIdentify(identify.length() > SQL_MAX_LENGTH ? identify.substring(0, SQL_MAX_LENGTH) : identify);
         timeEvent.setNumber(num);
         // 区分sql统计跟表操作统计
         timeEvent.setType(type);

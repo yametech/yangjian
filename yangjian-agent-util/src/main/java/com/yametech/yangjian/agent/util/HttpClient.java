@@ -35,13 +35,13 @@ public class HttpClient {
     private static final ILogger LOGGER = LoggerFactory.getLogger(HttpClient.class);
     private static final int DEFAULT_TIME_OUT = 3000;
 
-    public static String doHttpRequest(HttpRequest request) {
+    public static HttpResponse doHttpRequest(HttpRequest request) {
         String requestUrl = request.getRequestUrl();
         if (StringUtil.isEmpty(requestUrl)) {
             return null;
         }
 
-        String response = null;
+        HttpResponse response = new HttpResponse();
         HttpURLConnection conn = null;
         try {
             conn = (HttpURLConnection) new URL(requestUrl).openConnection();
@@ -57,8 +57,9 @@ public class HttpClient {
                 writeToStream(conn.getOutputStream(), request.getDatas());
             }
 
+            response.setCode(conn.getResponseCode());
             if (conn.getResponseCode() == HttpsURLConnection.HTTP_OK) {
-                response = readResponseAsString(conn.getInputStream());
+                response.setData(readResponseAsString(conn.getInputStream()));
             }
         } catch (Exception e) {
             LOGGER.error(e, "doHttpRequest error.");

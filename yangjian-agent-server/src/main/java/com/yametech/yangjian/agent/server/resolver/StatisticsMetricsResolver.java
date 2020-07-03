@@ -19,6 +19,7 @@ import com.yametech.yangjian.agent.server.metric.GaugeMetricFamily;
 import com.yametech.yangjian.agent.server.model.MetricsParameter;
 import io.prometheus.client.Collector;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +44,7 @@ public class StatisticsMetricsResolver implements IMetricsResolver<MetricsParame
         if (metricsParameter == null) {
             return false;
         }
-        return MapUtils.getString(metricsParameter.getParams(), "dataType", "").contains("/RT");
+        return StringUtils.defaultIfBlank(metricsParameter.getDataType(), "").contains("/RT");
     }
 
     /**
@@ -57,7 +58,7 @@ public class StatisticsMetricsResolver implements IMetricsResolver<MetricsParame
         String serviceName = metricsParameter.getServiceName();
         String instance = metricsParameter.getInstance();
         Map<String, Object> params = metricsParameter.getParams();
-        String type = extractType(MapUtils.getString(params, "dataType"));
+        String type = extractType(metricsParameter.getDataType());
         String sign = MapUtils.getString(params, "sign");
         int num = MapUtils.getIntValue(params, "num", 0);
         int rtTotal = MapUtils.getIntValue(params, "rt_total", 0);

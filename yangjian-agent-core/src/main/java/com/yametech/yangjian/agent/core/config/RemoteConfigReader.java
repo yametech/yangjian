@@ -23,6 +23,7 @@ import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.util.HttpClient;
 import com.yametech.yangjian.agent.util.HttpRequest;
+import com.yametech.yangjian.agent.util.HttpResponse;
 import com.yametech.yangjian.agent.util.json.JSONUtils;
 
 import java.io.*;
@@ -150,14 +151,14 @@ public class RemoteConfigReader implements IConfigLoader, ISchedule {
     private Map<String, String> getRemoteServerConfig(String url, int retryTimes) {
         int sleepSeconds = 2;
         do {
-            String response = null;
+            HttpResponse<String> response = null;
             int code = -1;
             Map<String, Object> responseMap = null;
             // 允许重试多次
             try {
                 response = HttpClient.doHttpRequest(new HttpRequest(url, HttpRequest.HttpMethod.GET));
-                if (StringUtil.notEmpty(response)) {
-                    responseMap = (Map<String, Object>) JSONUtils.parse(response);
+                if (response != null && StringUtil.notEmpty(response.getData())) {
+                    responseMap = (Map<String, Object>) JSONUtils.parse(response.getData());
                     code = Integer.parseInt(responseMap.getOrDefault("code", -99).toString());
                     if (code == HTTP_RES_CODE_200) {
                         //{"code":200,"msg":"success","data":[{"configKey":"test1","configValue":"2"}]}
