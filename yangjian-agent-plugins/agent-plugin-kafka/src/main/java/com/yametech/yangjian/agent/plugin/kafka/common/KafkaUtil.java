@@ -16,7 +16,7 @@ import java.util.Map;
 public class KafkaUtil {
 
     private static IReportData report = MultiReportFactory.getReport("collect");
-    private static final LRUCache CONNECT_URL_CACHE = new LRUCache(5);
+    private static final LRUCache CONNECT_URL_CACHE = new LRUCache(150);
 
     public static void reportDependency(String url) {
         CONNECT_URL_CACHE.computeIfAbsent(url, key -> {

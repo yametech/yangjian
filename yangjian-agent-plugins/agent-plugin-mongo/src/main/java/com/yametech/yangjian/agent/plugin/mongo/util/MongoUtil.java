@@ -188,7 +188,7 @@ public class MongoUtil {
     }
 
     private static IReportData report = MultiReportFactory.getReport("collect");
-    private static final LRUCache CONNECT_URL_CACHE = new LRUCache(5);
+    private static final LRUCache CONNECT_URL_CACHE = new LRUCache(150);
 
     public static void reportDependency(String peer, String database) {
         if (StringUtil.isEmpty(peer) || StringUtil.isEmpty(database)) {

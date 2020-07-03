@@ -145,7 +145,7 @@ public class MysqlUtil {
     }
 
     private static IReportData report = MultiReportFactory.getReport("collect");
-    private static final LRUCache CONNECT_URL_CACHE = new LRUCache(5);
+    private static final LRUCache CONNECT_URL_CACHE = new LRUCache(150);
 
     public static void reportDependency(ConnectionInfo connectionInfo, String key) {
         CONNECT_URL_CACHE.computeIfAbsent(key, (k) -> {
