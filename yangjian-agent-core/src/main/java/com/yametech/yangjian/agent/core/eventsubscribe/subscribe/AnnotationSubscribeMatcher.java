@@ -65,7 +65,7 @@ public class AnnotationSubscribeMatcher implements InterceptorMatcher {
                             int argumentNumber = (int) annotation.getMethodValues().get("argumentNumber");
                             String[] argumentType = (String[]) annotation.getMethodValues().get("argumentType");
 //                            boolean ignoreParams = (boolean) annotation.getMethodValues().get("ignoreParams");
-                            boolean isMethodNameRegex = (boolean) annotation.getMethodValues().getOrDefault("methodNameRegex", false);
+                            boolean isMethodNameRegex = (boolean) annotation.getMethodValues().getOrDefault("isMethodNameRegex", false);
                             IConfigMatch match = getConfigMatch(interfaces, parent, clsName, methodName, isMethodNameRegex,
                                     argumentNumber, argumentType);
                             if (match == null) {
