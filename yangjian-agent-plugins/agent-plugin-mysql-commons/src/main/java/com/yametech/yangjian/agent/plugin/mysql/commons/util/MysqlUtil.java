@@ -148,12 +148,12 @@ public class MysqlUtil {
     private static final LRUCache CONNECT_URL_CACHE = new LRUCache(5);
 
     public static void reportDependency(ConnectionInfo connectionInfo, String key) {
-        if (!CONNECT_URL_CACHE.containsKey(key)) {
+        CONNECT_URL_CACHE.computeIfAbsent(key, (k) -> {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.Tags.PEER, connectionInfo.getUrl());
             params.put(Constants.Tags.DATABASE, connectionInfo.getDatabaseName());
             report.report(MetricData.get(null, Constants.DEPENDENCY_PATH + Constants.Component.MYSQL_JDBC, params));
-            CONNECT_URL_CACHE.put(key, true);
-        }
+            return true;
+        });
     }
 }

@@ -32,6 +32,7 @@ import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.bean.MetricData;
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.LRUCache;
 import com.yametech.yangjian.agent.api.common.MultiReportFactory;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.plugin.mongo.context.ContextConstants;
@@ -187,13 +188,19 @@ public class MongoUtil {
     }
 
     private static IReportData report = MultiReportFactory.getReport("collect");
+    private static final LRUCache CONNECT_URL_CACHE = new LRUCache(5);
+
     public static void reportDependency(String peer, String database) {
         if (StringUtil.isEmpty(peer) || StringUtil.isEmpty(database)) {
             return;
         }
-        Map<String, Object> params = new HashMap<>();
-        params.put(Constants.Tags.PEER, peer);
-        params.put(Constants.Tags.DATABASE, database);
-        report.report(MetricData.get(null, Constants.DEPENDENCY_PATH + Constants.Component.MONGO, params));
+        String url = peer + "`" + database;
+        CONNECT_URL_CACHE.computeIfAbsent(url, key -> {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.Tags.PEER, peer);
+            params.put(Constants.Tags.DATABASE, database);
+            report.report(MetricData.get(null, Constants.DEPENDENCY_PATH + Constants.Component.MONGO, params));
+            return true;
+        });
     }
 }

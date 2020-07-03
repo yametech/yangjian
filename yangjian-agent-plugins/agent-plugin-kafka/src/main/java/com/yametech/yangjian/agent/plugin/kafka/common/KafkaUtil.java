@@ -19,11 +19,11 @@ public class KafkaUtil {
     private static final LRUCache CONNECT_URL_CACHE = new LRUCache(5);
 
     public static void reportDependency(String url) {
-        if (!CONNECT_URL_CACHE.containsKey(url)) {
+        CONNECT_URL_CACHE.computeIfAbsent(url, key -> {
             Map<String, Object> params = new HashMap<>();
-            params.put(Constants.Tags.PEER, url);
+            params.put(Constants.Tags.PEER, key);
             report.report(MetricData.get(null, Constants.DEPENDENCY_PATH + Constants.Component.KAFKA, params));
-            CONNECT_URL_CACHE.put(url, true);
-        }
+            return true;
+        });
     }
 }
