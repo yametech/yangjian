@@ -40,9 +40,13 @@ public abstract class BaseMemoryPoolAccessor implements IMemoryPoolAccessor {
         List<MemoryPoolMetrics> poolList = new LinkedList<>();
         for (MemoryPoolMXBean pool : beans) {
             String name = pool.getName();
+            MemoryPoolType memoryPoolType = getPoolType(name);
+            if(memoryPoolType == null) {
+                continue;
+            }
             MemoryUsage memoryUsage = pool.getUsage();
             poolList.add(new MemoryPoolMetrics(
-                    getPoolType(name),
+                    memoryPoolType,
                     memoryUsage.getInit() >> 10,
                     memoryUsage.getMax() >> 10,
                     memoryUsage.getUsed() >> 10,
