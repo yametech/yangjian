@@ -16,8 +16,6 @@ import java.util.Map;
  */
 public class GetInstanceInterceptor implements IStaticMethodAOP {
 
-    private volatile boolean inited = false;
-
     @Override
     public BeforeResult before(Object[] allArguments, Method method) throws Throwable {
         return null;

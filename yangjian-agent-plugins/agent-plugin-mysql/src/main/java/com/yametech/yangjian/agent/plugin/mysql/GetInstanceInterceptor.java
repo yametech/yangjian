@@ -53,7 +53,7 @@ public abstract class GetInstanceInterceptor implements IStaticMethodAOP {
     }
 
     /**
-     * mysql6.x-8.x
+     * mysql6.x
      */
     public static class GetInstanceInterceptor6x extends GetInstanceInterceptor {
         @Override
