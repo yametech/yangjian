@@ -15,10 +15,7 @@
  */
 package com.yametech.yangjian.agent.util;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import com.yametech.yangjian.agent.api.common.CustomThreadFactory;
 
@@ -35,7 +32,7 @@ public class SemaphoreLimiter implements IRateLimiter {
     private int maxPermits;
     private Semaphore semaphore;
     private TimeUnit timePeriod;
-    private ScheduledExecutorService scheduler;
+    private ExecutorService scheduler;
 
     public static SemaphoreLimiter getDefaultLimiter() {
         return new SemaphoreLimiter(10000, TimeUnit.SECONDS);
@@ -53,7 +50,7 @@ public class SemaphoreLimiter implements IRateLimiter {
      */
     private void scheduleRefillPermits() {
         scheduler = Executors.newSingleThreadScheduledExecutor(new CustomThreadFactory("limit-schedule", true));
-        scheduler.scheduleAtFixedRate(() -> semaphore.release(maxPermits - semaphore.availablePermits()),
+        ((ScheduledExecutorService)scheduler).scheduleAtFixedRate(() -> semaphore.release(maxPermits - semaphore.availablePermits()),
                 0, 1, timePeriod);
     }
 

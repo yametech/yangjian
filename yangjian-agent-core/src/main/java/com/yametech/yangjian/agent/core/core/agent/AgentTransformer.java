@@ -75,8 +75,11 @@ public class AgentTransformer implements AgentBuilder.Transformer {
     	if(typeDescription.isInterface()) {
     		return builder;
     	}
-    	String classLoaderName = classLoader.getClass().getName();
-    	if(ignoreClassLoaderName != null && ignoreClassLoaderName.contains(classLoaderName)) {
+    	String classLoaderName = null;
+		if(classLoader != null){
+			classLoaderName = classLoader.getClass().getName();
+		}
+    	if(classLoaderName != null && ignoreClassLoaderName != null && ignoreClassLoaderName.contains(classLoaderName)) {
     		log.warn("ignore classLoader: {}	{}", classLoaderName, typeDescription);
     		return builder;
     	}

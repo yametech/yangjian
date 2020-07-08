@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 
 import static net.bytebuddy.matcher.ElementMatchers.isInterface;
@@ -54,16 +53,17 @@ public class YMAgent {
 	private static final ILogger LOG = LoggerFactory.getLogger(YMAgent.class);
 	private static final String[] IGNORE_CLASS_CONFIG = new String[] {"^net\\.bytebuddy\\.", "^org\\.slf4j\\.", // ".*\\$auxiliary\\$.*", 
 			"^org\\.apache\\.logging\\.", "^org\\.groovy\\.", "^sun\\.reflect\\.", // ".*javassist.*", ".*\\.asm\\..*", 这两个会有误拦截：com.alibaba.dubbo.rpc.proxy.javassist.JavassistProxyFactory
-			"^org\\.apache\\.skywalking\\.", "^javassist\\.", "^java\\.util\\."};//, "^com\\.yametech\\.yangjian\\.agent\\."};
+			"^org\\.apache\\.skywalking\\.", "^javassist\\."};//, "^com\\.yametech\\.yangjian\\.agent\\."};
 	private static final String[] IGNORE_METHOD_CONFIG = new String[] {".*toString\\(\\)$", ".*equals\\(java.lang.Object\\)$",
             ".*hashCode\\(\\)$", ".*clone\\(\\).*"};
+//	public static final Class[] IGNORE_CLASS = new Class[]{LinkedHashMap.class};
 
 	private static final List<InterceptorMatcher> TRANSFORMER_MATCHERS = new CopyOnWriteArrayList<>();
 	private static final List<IConfigMatch> TYPE_MATCHES = new CopyOnWriteArrayList<>();
-	private static final List<IConfigMatch> IGNORE_MATCHES = new CopyOnWriteArrayList<>();
-	private static final List<IConfigMatch> IGNORE_METHOD_MATCHES = new CopyOnWriteArrayList<>();
-	private static final List<IEnhanceClassMatch> CLASS_MATCHES = new CopyOnWriteArrayList<>();
-	private static final Set<String> IGNORE_CLASS_LOADER_NAME = new CopyOnWriteArraySet<>();
+//	private static final List<IConfigMatch> IGNORE_MATCHES = new CopyOnWriteArrayList<>();
+//	private static final List<IConfigMatch> IGNORE_METHOD_MATCHES = new CopyOnWriteArrayList<>();
+//	private static final List<IEnhanceClassMatch> CLASS_MATCHES = new CopyOnWriteArrayList<>();
+//	private static final Set<String> IGNORE_CLASS_LOADER_NAME = new CopyOnWriteArraySet<>();
 
 	/**
 	 * -javaagent:E:\eclipse-workspace\tool-ecpark-monitor\ecpark-agent\dist\ecpark-agent\ecpark-agent.jar=args -Dskywalking.agent.service_name=testlog
@@ -78,7 +78,6 @@ public class YMAgent {
     		return;
     	}
     	System.setProperty(Constants.SYSTEM_PROPERTIES_PREFIX + Constants.SERVICE_NAME, Config.SERVICE_NAME.getValue());
-		instrumentation(instrumentation);// 类增强放到最开始，防止部分增强类提前加载了，导致无法增强
 		SpiLoader.loadSpi();
 		if(LOG.isDebugEnable()) {
 			InstanceManage.listSpiClass().forEach(spi -> LOG.debug("spiClassLoader:{}, {}", spi, Util.join(" > ", Util.listClassLoaders(spi))));
@@ -90,45 +89,58 @@ public class YMAgent {
 			return;
 		}
 		InstanceManage.notifyReader();
+		instrumentation(instrumentation);// 放在此处避免beforeRun、startSchedule中使用的类无法增强
 		InstanceManage.beforeRun();
 		InstanceManage.startSchedule();
 		addShutdownHook();
-		initMatch();// 更新增强类过滤条件
     }
 
     private static void instrumentation(Instrumentation instrumentation) {
+		List<IConfigMatch> ignoreMatches = new ArrayList<>();
 		for(String s : IGNORE_CLASS_CONFIG) {
-			IGNORE_MATCHES.add(new MethodRegexMatch(s));
+			ignoreMatches.add(new MethodRegexMatch(s));
 		}
+		ignoreMatches.addAll(getOrRegexMatch(Config.IGNORE_CLASS.getValue()));
+		LOG.info("ignore class:{}", ignoreMatches);
+		List<IConfigMatch> ignoreMethodMatches = new ArrayList<>();
 		for(String s : IGNORE_METHOD_CONFIG) {
-			IGNORE_METHOD_MATCHES.add(new MethodRegexMatch(s));
+			ignoreMethodMatches.add(new MethodRegexMatch(s));
 		}
+		ignoreMethodMatches.addAll(getOrRegexMatch(Config.IGNORE_METHODS.getValue()));
+		LOG.info("ignore method:{}", ignoreMethodMatches);
+		List<IEnhanceClassMatch> classMatches = InstanceManage.listInstance(IEnhanceClassMatch.class);
+		TYPE_MATCHES.addAll(classMatches.stream().filter(aop -> aop.classMatch() != null).map(IEnhanceClassMatch::classMatch).collect(Collectors.toList()));
+		List<InterceptorMatcher> interceptorMatchers = new ArrayList<>(InstanceManage.listInstance(InterceptorMatcher.class));
+		TYPE_MATCHES.addAll(interceptorMatchers.stream().filter(aop -> aop.match() != null).map(InterceptorMatcher::match).collect(Collectors.toList()));
+		TRANSFORMER_MATCHERS.addAll(interceptorMatchers.stream().map(YMAgent::getMatcherProxy).collect(Collectors.toList()));// 转换IMetricMatcher为MetricMatcherProxy
+		LOG.info("match class:{}", TYPE_MATCHES);
     	new AgentBuilder.Default()
 				.ignore(isInterface()
 						.or(ElementMatchers.<TypeDescription>isSynthetic())
-						.or(new ClassElementMatcher(new CombineOrMatch(IGNORE_MATCHES), "class_ignore")))// byte-buddy代理的类会包含该字符串
+						.or(new ClassElementMatcher(new CombineOrMatch(ignoreMatches), "class_ignore")))// byte-buddy代理的类会包含该字符串
 //        		.with(AgentBuilder.LambdaInstrumentationStrategy.ENABLED)
 				.type(new ClassElementMatcher(new CombineOrMatch(TYPE_MATCHES), "class_match"))
 //                .type(ElementMatchers.nameEndsWith("Timed"))
-				.transform(new AgentTransformer(TRANSFORMER_MATCHERS, new CombineOrMatch(IGNORE_METHOD_MATCHES), CLASS_MATCHES, IGNORE_CLASS_LOADER_NAME))
+				.transform(new AgentTransformer(TRANSFORMER_MATCHERS, new CombineOrMatch(ignoreMethodMatches), classMatches, Config.IGNORE_CLASSLOADERNAMES.getValue()))
 //                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)// 使用后会异常
 				.with(new AgentListener())
 				.installOn(instrumentation);
 	}
 
-    private static void initMatch() {
-		IGNORE_CLASS_LOADER_NAME.addAll(Config.IGNORE_CLASSLOADERNAMES.getValue());
-    	List<InterceptorMatcher> interceptorMatchers = new ArrayList<>(InstanceManage.listInstance(InterceptorMatcher.class));
-    	interceptorMatchers.stream().filter(aop -> aop.match() != null).map(InterceptorMatcher::match).forEachOrdered(TYPE_MATCHES::add);
-    	interceptorMatchers.stream().map(YMAgent::getMatcherProxy).forEachOrdered(TRANSFORMER_MATCHERS::add);// 转换IMetricMatcher为MetricMatcherProxy
-		CLASS_MATCHES.addAll(InstanceManage.listInstance(IEnhanceClassMatch.class));
-		TYPE_MATCHES.addAll(CLASS_MATCHES.stream().filter(aop -> aop.classMatch() != null).map(IEnhanceClassMatch::classMatch).collect(Collectors.toList()));
-		LOG.info("match class:{}", TYPE_MATCHES);
-		IGNORE_MATCHES.addAll(getOrRegexMatch(Config.IGNORE_CLASS.getValue()));
-    	LOG.info("ignore class:{}", IGNORE_MATCHES);
-		IGNORE_METHOD_MATCHES.addAll(getOrRegexMatch(Config.IGNORE_METHODS.getValue()));
-    	LOG.info("ignore method:{}", IGNORE_METHOD_MATCHES);
-    }
+	/**
+	 * 前置Match初始化
+	 */
+//    private static void initMatch() {
+//		CLASS_MATCHES.addAll(InstanceManage.listInstance(IEnhanceClassMatch.class, null));
+//		TYPE_MATCHES.addAll(CLASS_MATCHES.stream().filter(aop -> aop.classMatch() != null).map(IEnhanceClassMatch::classMatch).collect(Collectors.toList()));
+//
+//		List<InterceptorMatcher> interceptorMatchers = new ArrayList<>(
+//				InstanceManage.listInstance(InterceptorMatcher.class, new Class[]{IAppStatusListener.class}));
+//
+//		TYPE_MATCHES.addAll(interceptorMatchers.stream().filter(aop -> aop.match() != null).map(InterceptorMatcher::match).collect(Collectors.toList()));
+//		TRANSFORMER_MATCHERS.addAll(interceptorMatchers.stream().map(YMAgent::getMatcherProxy).collect(Collectors.toList()));// 转换IMetricMatcher为MetricMatcherProxy
+//		LOG.info("match class:{}", TYPE_MATCHES);
+//    }
 
 	/**
 	 * 用于类加载后新增增强匹配

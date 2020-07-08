@@ -14,7 +14,7 @@ public class EnhanceListener {
     private static final int MAX_SIZE = 500;
     private static final ILogger LOG = LoggerFactory.getLogger(EnhanceListener.class);
     private static final Map<String, MatchInfo> CLASS_MATCHES = new ConcurrentHashMap<>();
-    private static ExecutorService executor = Executors.newSingleThreadExecutor();
+    private static ExecutorService executor;
 
     private EnhanceListener() {}
 
@@ -40,6 +40,13 @@ public class EnhanceListener {
         MatchInfo matchInfo = CLASS_MATCHES.remove(typeName);
         if(matchInfo == null) {
             return;
+        }
+        if(executor == null) {
+            synchronized (EnhanceListener.class) {
+                if(executor == null) {
+                    executor = Executors.newSingleThreadExecutor();
+                }
+            }
         }
         executor.execute(() -> matchInfo.getMatches().forEach(match -> {
             try {

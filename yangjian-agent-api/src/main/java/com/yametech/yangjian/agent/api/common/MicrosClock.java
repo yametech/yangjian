@@ -15,12 +15,13 @@
  */
 package com.yametech.yangjian.agent.api.common;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class MicrosClock implements Runnable {
-    private static ScheduledExecutorService service = Executors.newScheduledThreadPool(1, new CustomThreadFactory("ClockTime-check-schedule", true));
+    private static ExecutorService service;
     private static final int CALIBRATION_MILLIS = 1000;// 偏差超过该毫秒数时才会自动校准
 
     private long startMicrosTime;
@@ -30,7 +31,8 @@ public class MicrosClock implements Runnable {
 
     public MicrosClock() {
         init();
-        service.scheduleAtFixedRate(this, 1, 1, TimeUnit.SECONDS);
+        service = Executors.newScheduledThreadPool(1, new CustomThreadFactory("ClockTime-check-schedule", true));
+        ((ScheduledExecutorService)service).scheduleAtFixedRate(this, 1, 1, TimeUnit.SECONDS);
     }
 
     private void init() {

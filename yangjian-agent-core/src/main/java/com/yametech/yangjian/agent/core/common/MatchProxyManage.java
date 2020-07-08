@@ -32,4 +32,8 @@ public class MatchProxyManage {
 		}
 		return null;
 	}
+
+	public static boolean hasProxy(Class<?> cls) {
+		return getProxy(cls) != null;
+	}
 }

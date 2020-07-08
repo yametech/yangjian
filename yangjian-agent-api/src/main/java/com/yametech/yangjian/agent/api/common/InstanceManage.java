@@ -38,7 +38,7 @@ public class InstanceManage {
     private static Set<Object> loadedInstance = new CopyOnWriteArraySet<>();// 需要托管的实例
     
     private static final int MAX_INSTANCE = 2000;// 最大托管的实例个数
-    private static ScheduledExecutorService service;
+    private static ExecutorService service;
     private static Map<Class<?>, Boolean> initStatus = new ConcurrentHashMap<>();
 
     private InstanceManage() {}
@@ -75,10 +75,21 @@ public class InstanceManage {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> List<T> listInstance(Class<T> cls) {
-		loadSpiInstance(cls);// 初始化对应的SPI实例
+		return listInstance(cls, null);
+	}
+
+	/**
+	 *
+	 * @param cls	实例类型
+	 * @param excludes	排除的类
+	 * @param <T>	类型
+	 * @return	cls的实例列表
+	 */
+	private static <T> List<T> listInstance(Class<T> cls, Class<?>[] excludes) {
+		loadSpiInstance(cls, excludes);// 初始化对应的SPI实例
 		List<T> instances = new ArrayList<>();
 		for(Object api : loadedInstance) {
-			if(cls.isAssignableFrom(api.getClass())) {
+			if(isMatch(api.getClass(), cls, excludes)) {
 				instances.add((T) api);
 			}
 		}
@@ -86,6 +97,23 @@ public class InstanceManage {
 			Collections.sort(instances, (o1, o2) -> Integer.compare(((IWeight)o2).weight(), ((IWeight)o1).weight()));
 		}
 		return instances;
+	}
+
+	/**
+	 * 判断cls为match的子类，并且cls不是exclude的子类
+	 * @param cls
+	 * @param match
+	 * @param excludes
+	 * @return
+	 */
+	private static boolean isMatch(Class<?> cls, Class<?> match, Class<?>[] excludes) {
+		boolean result = match.isAssignableFrom(cls);
+		int i = 0;
+		while(result && excludes != null && i < excludes.length) {
+			result = !excludes[i].isAssignableFrom(cls);
+			i++;
+		}
+		return result;
 	}
 
 	/**
@@ -203,12 +231,12 @@ public class InstanceManage {
 		return new HashSet<>(spiInstances.keySet());
 	}
 	
-	private static synchronized void loadSpiInstance(Class<?> spiCls) {
+	private static synchronized void loadSpiInstance(Class<?> spiCls, Class<?>[] excludes) {
 		spiInstances.entrySet().forEach(entry -> {
 			if(entry.getValue() != EMPTY_VALUE) {
 				return;
 			}
-			if(spiCls != null && !spiCls.isAssignableFrom(entry.getKey())) {
+			if(spiCls != null && !isMatch(entry.getKey(), spiCls, excludes)) {
 				return;
 			}
 			try {
@@ -314,7 +342,7 @@ public class InstanceManage {
 		if(delay == 0) {
 			delay += schedule.interval();
 		}
-		service.scheduleAtFixedRate(() -> {
+		((ScheduledExecutorService)service).scheduleAtFixedRate(() -> {
 			try {
 				schedule.execute();
 			} catch(Exception e) {
