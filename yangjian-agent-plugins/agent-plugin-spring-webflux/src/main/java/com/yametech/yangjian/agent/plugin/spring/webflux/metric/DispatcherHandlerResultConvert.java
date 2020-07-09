@@ -13,31 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.plugin.spring.webflux;
+package com.yametech.yangjian.agent.plugin.spring.webflux.metric;
 
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
+import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.convert.IMethodConvert;
 import com.yametech.yangjian.agent.plugin.spring.webflux.bean.RequestEvent;
 import com.yametech.yangjian.agent.plugin.spring.webflux.context.ContextConstants;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 拦截该方法为了传递请求的开始时间
- *
  * @author dengliming
  * @date 2020/3/17
  */
-public class DispatcherHandlerConvert implements IMethodConvert {
+public class DispatcherHandlerResultConvert implements IMethodConvert {
 
     @Override
     public List<TimeEvent> convert(Object thisObj, long startTime, Object[] allArguments, Method method,
                                    Object ret, Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
-        if (allArguments[0] instanceof IContext) {
-            ((IContext) allArguments[0])._setAgentContext(ContextConstants.REQUEST_EVENT_CONTEXT_KEY, new RequestEvent().setStartTime(System.currentTimeMillis()));
+        if (!(allArguments[0] instanceof IContext)) {
+            return null;
+        }
+
+        RequestEvent requestEvent = (RequestEvent) ((IContext) allArguments[0])._getAgentContext(ContextConstants.REQUEST_EVENT_CONTEXT_KEY);
+        if (requestEvent != null && StringUtil.notEmpty(requestEvent.getMethodName())) {
+            TimeEvent event = get(requestEvent.getStartTime());
+            event.setIdentify(requestEvent.getMethodName());
+            return Arrays.asList(event);
         }
         return null;
     }

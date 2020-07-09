@@ -40,8 +40,10 @@ public interface IMethodCallbackConvert extends IConvertBase {
 	 * @param t	方法抛出的异常（未抛出则为null）
 	 * @param globalVar	本次调用中所有拦截器设置的上下文数据
 	 * @throws Throwable	转换异常
+	 *
+	 * @return ret 源方法返回值 注：可被修改
 	 */
-	void convert(Consumer<List<TimeEvent>> eventCallback, Object thisObj, long startTime, Object[] allArguments, Method method,
+	Object convert(Consumer<List<TimeEvent>> eventCallback, Object thisObj, long startTime, Object[] allArguments, Method method,
 				 Object ret, Throwable t, Map<Class<?>, Object> globalVar) throws Throwable;
 
 }

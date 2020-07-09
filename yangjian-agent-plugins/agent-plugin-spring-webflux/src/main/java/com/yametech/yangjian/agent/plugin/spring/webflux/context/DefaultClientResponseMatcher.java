@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.plugin.spring.webflux;
+package com.yametech.yangjian.agent.plugin.spring.webflux.context;
 
-import com.yametech.yangjian.agent.api.IMetricMatcher;
+import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
+import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
@@ -23,29 +24,35 @@ import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
 import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodArgumentIndexMatch;
-import com.yametech.yangjian.agent.api.configmatch.MethodNameMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodConstructorMatch;
 
 import java.util.Arrays;
 
 /**
+ * 增强DefaultClientResponse为了获取请求响应码，因为该类目前的访问是protected的，不能直接在这里调用
  *
  * @author dengliming
- * @date 2020/3/17
+ * @date 2020/6/28
  */
-public class InvocableHandlerMatcher implements IMetricMatcher {
+public class DefaultClientResponseMatcher implements IEnhanceClassMatch, InterceptorMatcher {
+
+    @Override
+    public IConfigMatch classMatch() {
+        return new ClassMatch("org.springframework.web.reactive.function.client.DefaultClientResponse");
+    }
 
     @Override
     public IConfigMatch match() {
-        // org.springframework.web.reactive.result.method.InvocableHandlerMethod#invoke(org.springframework.web.server.ServerWebExchange, org.springframework.web.reactive.BindingContext, java.lang.Object...)
         return new CombineAndMatch(Arrays.asList(
-                new ClassMatch("org.springframework.web.reactive.result.method.InvocableHandlerMethod"),
-                new MethodNameMatch("invoke"),
-                new MethodArgumentIndexMatch(0, "org.springframework.web.server.ServerWebExchange")
+                classMatch(),
+                new MethodArgumentIndexMatch(0, "org.springframework.http.client.reactive.ClientHttpResponse"),
+                new MethodArgumentIndexMatch(4, "java.util.function.Supplier"),
+                new MethodConstructorMatch()
         ));
     }
 
     @Override
     public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
-        return new LoadClassKey("com.yametech.yangjian.agent.plugin.spring.webflux.InvocableHandlerInterceptor");
+        return new LoadClassKey("com.yametech.yangjian.agent.plugin.spring.webflux.context.DefaultClientResponseInterceptor");
     }
 }

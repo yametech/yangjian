@@ -22,7 +22,7 @@ import java.util.Map;
 
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
 import com.yametech.yangjian.agent.api.common.MethodUtil;
-import com.yametech.yangjian.agent.api.convert.IStatisticMethodConvert;
+import com.yametech.yangjian.agent.api.convert.IMethodConvert;
 
 /**
  * 转换静态方法调用RT
@@ -31,13 +31,12 @@ import com.yametech.yangjian.agent.api.convert.IStatisticMethodConvert;
  * @Description
  * @date 2019年10月9日 下午3:43:15
  */
-public class StatisticMethodConvert implements IStatisticMethodConvert {
+public class StatisticMethodConvert implements IMethodConvert {
 
 	@Override
-	public List<TimeEvent> convert(long startTime, Object[] allArguments, Method method, Object ret,
-			Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
-        TimeEvent event = get(startTime);
+	public List<TimeEvent> convert(Object thisObj, long startTime, Object[] allArguments, Method method, Object ret, Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
+		TimeEvent event = get(startTime);
 		event.setIdentify(MethodUtil.getSimpleMethodId(method));
 		return Arrays.asList(event);
-    }
+	}
 }

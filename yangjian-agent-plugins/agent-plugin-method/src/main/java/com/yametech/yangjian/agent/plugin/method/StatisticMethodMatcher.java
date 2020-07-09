@@ -28,8 +28,10 @@ import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
+import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
 import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodRegexMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodStatisticMatch;
 
 /**
  * 拦截自定义静态方法
@@ -66,7 +68,10 @@ public class StatisticMethodMatcher implements IMetricMatcher, IConfigReader {
     	if(matches == null || matches.isEmpty()) {
     		return null;
     	} else {
-    		return new CombineOrMatch(matches);
+    		return new CombineAndMatch(Arrays.asList(
+                    new CombineOrMatch(matches),
+                    new MethodStatisticMatch()
+            ));
     	}
     }
 

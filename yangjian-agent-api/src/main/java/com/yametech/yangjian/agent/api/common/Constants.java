@@ -128,6 +128,7 @@ public class Constants {
         public static final String SPRING_WEBFLUX = "spring-webflux";
         public static final String SPRING_MVC = "spring-mvc";
         public static final String SPRING_RESTTEMPLATE = "spring-resttemplate";
+        public static final String SPRING_WEBCLIENT = "spring-webclient";
     }
 
     public static class ExtraHeaderKey {

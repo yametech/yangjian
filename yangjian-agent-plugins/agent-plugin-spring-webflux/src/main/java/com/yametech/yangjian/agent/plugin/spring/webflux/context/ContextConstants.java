@@ -21,6 +21,8 @@ package com.yametech.yangjian.agent.plugin.spring.webflux.context;
  */
 public class ContextConstants {
 
-    public static String REQUEST_EVENT_CONTEXT_KEY = "___request_event___";
+    public static String REQUEST_EVENT_CONTEXT_KEY = "__req_event___";
+    public static String RESPONSE_STATUS_CONTEXT_KEY = "__res_status__";
+    public static String REQUEST_HEADER_CONTEXT_KEY = "__req_header__";
 
 }
