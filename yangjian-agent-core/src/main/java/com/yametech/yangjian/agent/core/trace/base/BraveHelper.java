@@ -17,6 +17,7 @@ package com.yametech.yangjian.agent.core.trace.base;
 
 import brave.Tracing;
 import brave.Tracing.Builder;
+import brave.context.slf4j.MDCScopeDecorator;
 import brave.propagation.B3Propagation;
 import brave.propagation.ExtraFieldPropagation;
 import brave.propagation.StrictScopeDecorator;
@@ -43,6 +44,7 @@ public class BraveHelper {
 				.propagationFactory(ExtraFieldPropagation.newFactory(B3Propagation.FACTORY, Constants.ExtraHeaderKey.USER_ID, Constants.ExtraHeaderKey.REFERER_SERVICE))
 				.currentTraceContext(ThreadLocalCurrentTraceContext.newBuilder()
 				      .addScopeDecorator(StrictScopeDecorator.create())
+					  .addScopeDecorator(MDCScopeDecorator.create())
 				      .build());
 		if (sampler != null) {
 			builder.sampler(sampler);
