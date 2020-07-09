@@ -112,7 +112,9 @@ public class YMAgent {
 
 		// 加载优先增强的类Match，该类Match不能实现接口IEnhanceClassMatch, IMatcherProxy, IConfigReader, IAppStatusListener，否则无法优先加载
 		List<IMatchPriority> interceptorMatchers = new ArrayList<>(
-				InstanceManage.listInstance(IMatchPriority.class, new Class[]{IEnhanceClassMatch.class, IMatcherProxy.class, IConfigReader.class, IAppStatusListener.class}));
+				InstanceManage.listInstance(IMatchPriority.class, new Class[]{IMatcherProxy.class, IConfigReader.class, IAppStatusListener.class}));
+		CLASS_MATCHES.addAll(interceptorMatchers.stream().filter(match -> match instanceof IEnhanceClassMatch)
+				.map(match -> (IEnhanceClassMatch)match).collect(Collectors.toList()));
 		TYPE_MATCHES.addAll(interceptorMatchers.stream().filter(aop -> aop.match() != null).map(InterceptorMatcher::match).collect(Collectors.toList()));
 		TRANSFORMER_MATCHERS.addAll(interceptorMatchers);
 		LOG.info("Priority match class:{}", TYPE_MATCHES);
@@ -130,7 +132,7 @@ public class YMAgent {
 	}
 
 	private static void refreshMatch() {
-		List<IEnhanceClassMatch> classMatches = InstanceManage.listInstance(IEnhanceClassMatch.class);
+		List<IEnhanceClassMatch> classMatches = InstanceManage.listInstance(IEnhanceClassMatch.class, new Class[]{IMatchPriority.class});
 		CLASS_MATCHES.addAll(classMatches);
 		TYPE_MATCHES.addAll(classMatches.stream().filter(aop -> aop.classMatch() != null).map(IEnhanceClassMatch::classMatch).collect(Collectors.toList()));
 		List<InterceptorMatcher> interceptorMatchers = new ArrayList<>(InstanceManage.listInstance(InterceptorMatcher.class, new Class[]{IMatchPriority.class}));
