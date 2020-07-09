@@ -24,9 +24,7 @@ import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.api.pool.IPoolMonitorMatcher;
 import com.yametech.yangjian.agent.api.trace.ITraceMatcher;
 import com.yametech.yangjian.agent.core.common.CoreConstants;
-import com.yametech.yangjian.agent.core.metric.MetricInit;
 import com.yametech.yangjian.agent.core.pool.PoolMonitorSchedule;
-import com.yametech.yangjian.agent.core.trace.TraceInit;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -41,8 +39,8 @@ import java.util.Set;
  */
 public class DisableSpi implements IConfigLoader {
 	private static ILogger log = LoggerFactory.getLogger(DisableSpi.class);
-	private static final Set<String> NOT_ALLOW_DISABLE_SPI = new HashSet<>(Arrays.asList(LocalConfigLoader.class.getSimpleName(), DisableSpi.class.getSimpleName(),
-			MetricInit.class.getSimpleName(), TraceInit.class.getSimpleName(), PoolMonitorSchedule.class.getSimpleName()));// 不可以禁用的插件
+	private static final Set<String> NOT_ALLOW_DISABLE_SPI = new HashSet<>(Arrays.asList(LocalConfigLoader.class.getSimpleName(),
+			DisableSpi.class.getSimpleName(), PoolMonitorSchedule.class.getSimpleName()));// 不可以禁用的插件
 	
 	@Override
 	public void load(String arguments) throws Exception {

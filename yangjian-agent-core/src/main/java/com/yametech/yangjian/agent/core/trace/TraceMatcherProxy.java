@@ -27,7 +27,9 @@ import com.yametech.yangjian.agent.api.trace.*;
 import com.yametech.yangjian.agent.core.common.BaseMatcherProxy;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
 import com.yametech.yangjian.agent.core.core.classloader.SpiLoader;
+import com.yametech.yangjian.agent.core.trace.base.BraveHelper;
 import com.yametech.yangjian.agent.core.trace.base.ITraceDepend;
+import com.yametech.yangjian.agent.core.trace.base.TraceEventBus;
 import com.yametech.yangjian.agent.core.trace.sample.FollowerRateLimitSampler;
 import com.yametech.yangjian.agent.core.trace.sample.FollowerSampler;
 import com.yametech.yangjian.agent.core.trace.sample.RateLimitSampler;
@@ -45,6 +47,7 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 	private static final String KEY_PREFIX_TYPE_QPS = "trace.sample.qps.";
 	
 	private static ISpanSample globalSample;
+	private static Tracing tracing;
 	private ISpanSample spanSample;
 //	private TraceEventBus traceCache;
 	
@@ -83,7 +86,7 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 			// 测试上报到zipkin后端
 //			Tracing tracing = BraveHelper.getTracing(report, null);
 //			Tracing tracing = BraveHelper.getTracing(span -> traceCache.publish(t -> t.setSpan(span)), null);
-			Tracing tracing = InstanceManage.getInstance(Tracing.class);
+			Tracing tracing = getTracing();// 单例
 			if(tracing == null) {
 				throw new RuntimeException("未初始化Tracing实例");
 			}
@@ -98,6 +101,20 @@ public class TraceMatcherProxy extends BaseMatcherProxy<ITraceMatcher, TraceAOP<
 					Util.join(" > ", Util.listClassLoaders(instance == null ? null : instance.getClass())));
 			throw new RuntimeException(e);
 		}
+	}
+
+	/**
+	 * 仅初始化时调用，所以此处没有加两次检查提高性能
+	 * @return
+	 */
+	private synchronized static Tracing getTracing() {
+		if(tracing != null) {
+			return tracing;
+		}
+		TraceEventBus publish = new TraceEventBus();
+		InstanceManage.registryInit(publish);
+		tracing = BraveHelper.getTracing(span -> publish.publish(t -> t.setSpan(span)), null);
+		return tracing;
 	}
 	
 	@SuppressWarnings("rawtypes")

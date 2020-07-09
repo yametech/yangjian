@@ -140,6 +140,10 @@ public abstract class BaseEventPublish<T> implements IAppStatusListener, ISchedu
     }
 
     public boolean publish(Consumer<T> consumer) {
+        if(eventBus == null) {
+            log.warn("eventBus未初始化");
+            return false;
+        }
         return eventBus.publish(event -> {
         	incrTotalNum();
         	if (event == null) {
