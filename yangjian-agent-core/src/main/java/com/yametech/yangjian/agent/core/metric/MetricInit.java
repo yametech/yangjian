@@ -16,16 +16,22 @@
 
 package com.yametech.yangjian.agent.core.metric;
 
-//public class MetricInit implements IAppStatusListener {
-//
-//	@Override
-//	public void beforeRun() {
-//		InstanceManage.registry(new MetricEventBus());
-//	}
-//
-//	@Override
-//	public boolean shutdown(Duration duration) {
-//		return true;
-//	}
-//
-//}
+import com.yametech.yangjian.agent.api.IAppStatusListener;
+import com.yametech.yangjian.agent.api.common.InstanceManage;
+import com.yametech.yangjian.agent.core.metric.base.MetricEventBus;
+
+import java.time.Duration;
+
+public class MetricInit implements IAppStatusListener {
+
+	@Override
+	public void beforeRun() {
+		InstanceManage.registry(new MetricEventBus());
+	}
+
+	@Override
+	public boolean shutdown(Duration duration) {
+		return true;
+	}
+
+}

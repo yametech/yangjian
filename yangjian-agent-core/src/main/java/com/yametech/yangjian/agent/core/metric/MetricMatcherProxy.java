@@ -32,23 +32,10 @@ import com.yametech.yangjian.agent.core.util.Util;
 
 public class MetricMatcherProxy extends BaseMatcherProxy<IMetricMatcher, BaseConvertAOP> {
 	private static ILogger log = LoggerFactory.getLogger(MetricMatcherProxy.class);
-	private static MetricEventBus metricEventBus;
+//	private static MetricEventBus metricEventBus;
 	
 	public MetricMatcherProxy(IMetricMatcher metricMatcher) {
 		super(metricMatcher);
-	}
-
-	/**
-	 * 仅初始化时调用，所以此处没有加两次检查提高性能
-	 * @return
-	 */
-	private synchronized static MetricEventBus getEventBus() {
-		if(metricEventBus != null) {
-			return metricEventBus;
-		}
-		metricEventBus = new MetricEventBus();
-		InstanceManage.registryInit(metricEventBus);
-		return metricEventBus;
 	}
 
 	@Override
@@ -64,7 +51,7 @@ public class MetricMatcherProxy extends BaseMatcherProxy<IMetricMatcher, BaseCon
 				throw new RuntimeException("metricMatcher配置的loadClass错误，必须为IConvertBase的子类");
 			}
 			InstanceManage.registryInit(instance);
-			obj.init(matcher, instance, getEventBus(), matcher.type());
+			obj.init(matcher, instance, InstanceManage.getInstance(MetricEventBus.class), matcher.type());
 		} catch (Throwable e) {
 			log.warn(e, "load convert exception: {}，\n\t\tclassLoader={}，\n\t\tmetricMatcher classLoader：{},\n\t\tconvertInstance classLoader：{}",
 					convertClass, classLoader,

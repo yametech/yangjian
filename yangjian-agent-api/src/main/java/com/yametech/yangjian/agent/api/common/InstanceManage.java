@@ -85,7 +85,7 @@ public class InstanceManage {
 	 * @param <T>	类型
 	 * @return	cls的实例列表
 	 */
-	private static <T> List<T> listInstance(Class<T> cls, Class<?>[] excludes) {
+	public static <T> List<T> listInstance(Class<T> cls, Class<?>[] excludes) {
 		loadSpiInstance(cls, excludes);// 初始化对应的SPI实例
 		List<T> instances = new ArrayList<>();
 		for(Object api : loadedInstance) {

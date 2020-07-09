@@ -15,9 +15,9 @@
  */
 package com.yametech.yangjian.agent.core;
 
-import com.yametech.yangjian.agent.api.IEnhanceClassMatch;
-import com.yametech.yangjian.agent.api.InterceptorMatcher;
+import com.yametech.yangjian.agent.api.*;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
+import com.yametech.yangjian.agent.api.base.IMatcherProxy;
 import com.yametech.yangjian.agent.api.common.Config;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.InstanceManage;
@@ -62,7 +62,7 @@ public class YMAgent {
 	private static final List<IConfigMatch> TYPE_MATCHES = new CopyOnWriteArrayList<>();
 //	private static final List<IConfigMatch> IGNORE_MATCHES = new CopyOnWriteArrayList<>();
 //	private static final List<IConfigMatch> IGNORE_METHOD_MATCHES = new CopyOnWriteArrayList<>();
-//	private static final List<IEnhanceClassMatch> CLASS_MATCHES = new CopyOnWriteArrayList<>();
+	private static final List<IEnhanceClassMatch> CLASS_MATCHES = new CopyOnWriteArrayList<>();
 //	private static final Set<String> IGNORE_CLASS_LOADER_NAME = new CopyOnWriteArraySet<>();
 
 	/**
@@ -88,12 +88,13 @@ public class YMAgent {
 			LOG.warn("Disable all plugins, skip agent.");
 			return;
 		}
+		instrumentation(instrumentation);
 		InstanceManage.notifyReader();
-		instrumentation(instrumentation);// 放在此处避免beforeRun、startSchedule中使用的类无法增强
 		InstanceManage.beforeRun();
 		InstanceManage.startSchedule();
 		addShutdownHook();
-    }
+		refreshMatch();
+	}
 
     private static void instrumentation(Instrumentation instrumentation) {
 		List<IConfigMatch> ignoreMatches = new ArrayList<>();
@@ -108,12 +109,13 @@ public class YMAgent {
 		}
 		ignoreMethodMatches.addAll(getOrRegexMatch(Config.IGNORE_METHODS.getValue()));
 		LOG.info("ignore method:{}", ignoreMethodMatches);
-		List<IEnhanceClassMatch> classMatches = InstanceManage.listInstance(IEnhanceClassMatch.class);
-		TYPE_MATCHES.addAll(classMatches.stream().filter(aop -> aop.classMatch() != null).map(IEnhanceClassMatch::classMatch).collect(Collectors.toList()));
-		List<InterceptorMatcher> interceptorMatchers = new ArrayList<>(InstanceManage.listInstance(InterceptorMatcher.class));
+
+		// 加载优先增强的类Match，该类Match不能实现接口IEnhanceClassMatch, IMatcherProxy, IConfigReader, IAppStatusListener，否则无法优先加载
+		List<IMatchPriority> interceptorMatchers = new ArrayList<>(
+				InstanceManage.listInstance(IMatchPriority.class, new Class[]{IEnhanceClassMatch.class, IMatcherProxy.class, IConfigReader.class, IAppStatusListener.class}));
 		TYPE_MATCHES.addAll(interceptorMatchers.stream().filter(aop -> aop.match() != null).map(InterceptorMatcher::match).collect(Collectors.toList()));
-		TRANSFORMER_MATCHERS.addAll(interceptorMatchers.stream().map(YMAgent::getMatcherProxy).collect(Collectors.toList()));// 转换IMetricMatcher为MetricMatcherProxy
-		LOG.info("match class:{}", TYPE_MATCHES);
+		TRANSFORMER_MATCHERS.addAll(interceptorMatchers);
+		LOG.info("Priority match class:{}", TYPE_MATCHES);
     	new AgentBuilder.Default()
 				.ignore(isInterface()
 						.or(ElementMatchers.<TypeDescription>isSynthetic())
@@ -121,26 +123,21 @@ public class YMAgent {
 //        		.with(AgentBuilder.LambdaInstrumentationStrategy.ENABLED)
 				.type(new ClassElementMatcher(new CombineOrMatch(TYPE_MATCHES), "class_match"))
 //                .type(ElementMatchers.nameEndsWith("Timed"))
-				.transform(new AgentTransformer(TRANSFORMER_MATCHERS, new CombineOrMatch(ignoreMethodMatches), classMatches, Config.IGNORE_CLASSLOADERNAMES.getValue()))
+				.transform(new AgentTransformer(TRANSFORMER_MATCHERS, new CombineOrMatch(ignoreMethodMatches), CLASS_MATCHES, Config.IGNORE_CLASSLOADERNAMES.getValue()))
 //                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)// 使用后会异常
 				.with(new AgentListener())
 				.installOn(instrumentation);
 	}
 
-	/**
-	 * 前置Match初始化
-	 */
-//    private static void initMatch() {
-//		CLASS_MATCHES.addAll(InstanceManage.listInstance(IEnhanceClassMatch.class, null));
-//		TYPE_MATCHES.addAll(CLASS_MATCHES.stream().filter(aop -> aop.classMatch() != null).map(IEnhanceClassMatch::classMatch).collect(Collectors.toList()));
-//
-//		List<InterceptorMatcher> interceptorMatchers = new ArrayList<>(
-//				InstanceManage.listInstance(InterceptorMatcher.class, new Class[]{IAppStatusListener.class}));
-//
-//		TYPE_MATCHES.addAll(interceptorMatchers.stream().filter(aop -> aop.match() != null).map(InterceptorMatcher::match).collect(Collectors.toList()));
-//		TRANSFORMER_MATCHERS.addAll(interceptorMatchers.stream().map(YMAgent::getMatcherProxy).collect(Collectors.toList()));// 转换IMetricMatcher为MetricMatcherProxy
-//		LOG.info("match class:{}", TYPE_MATCHES);
-//    }
+	private static void refreshMatch() {
+		List<IEnhanceClassMatch> classMatches = InstanceManage.listInstance(IEnhanceClassMatch.class);
+		CLASS_MATCHES.addAll(classMatches);
+		TYPE_MATCHES.addAll(classMatches.stream().filter(aop -> aop.classMatch() != null).map(IEnhanceClassMatch::classMatch).collect(Collectors.toList()));
+		List<InterceptorMatcher> interceptorMatchers = new ArrayList<>(InstanceManage.listInstance(InterceptorMatcher.class, new Class[]{IMatchPriority.class}));
+		TYPE_MATCHES.addAll(interceptorMatchers.stream().filter(aop -> aop.match() != null).map(InterceptorMatcher::match).collect(Collectors.toList()));
+		TRANSFORMER_MATCHERS.addAll(interceptorMatchers.stream().map(YMAgent::getMatcherProxy).collect(Collectors.toList()));// 转换IMetricMatcher为MetricMatcherProxy
+		LOG.info("All match class:{}", TYPE_MATCHES);
+	}
 
 	/**
 	 * 用于类加载后新增增强匹配
