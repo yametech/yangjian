@@ -16,7 +16,7 @@ import java.util.Map;
 public class RabbitMqUtil {
 
     private static IReportData report = MultiReportFactory.getReport("collect");
-    private static final LRUCache CONNECT_URL_CACHE = new LRUCache(150);
+    private static final LRUCache CONNECT_URL_CACHE = new LRUCache();
 
     public static void reportDependency(String url) {
         CONNECT_URL_CACHE.computeIfAbsent(url, key -> {

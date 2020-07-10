@@ -45,7 +45,7 @@ import static com.yametech.yangjian.agent.plugin.spring.webflux.context.ContextC
  * @author dengliming
  * @date 2020/6/27
  */
-public class DefaultExchangeFunctionInterceptor implements ISpanCreater<SpanInfo> {
+public class DefaultExchangeFunctionSpanCreater implements ISpanCreater<SpanInfo> {
 
     private MicrosClock MICROS_CLOCK;
     protected Tracer tracer;

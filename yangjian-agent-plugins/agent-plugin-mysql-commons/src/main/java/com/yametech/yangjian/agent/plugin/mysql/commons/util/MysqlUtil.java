@@ -19,6 +19,7 @@ import com.yametech.yangjian.agent.api.base.IReportData;
 import com.yametech.yangjian.agent.api.bean.MetricData;
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.LRUCache;
 import com.yametech.yangjian.agent.api.common.MultiReportFactory;
 import com.yametech.yangjian.agent.plugin.mysql.commons.bean.ConnectionInfo;
 import com.yametech.yangjian.agent.plugin.mysql.commons.bean.SqlBean;
@@ -28,7 +29,6 @@ import com.yametech.yangjian.agent.plugin.mysql.commons.druid.sql.visitor.Parame
 import com.yametech.yangjian.agent.plugin.mysql.commons.druid.sql.visitor.SchemaStatVisitor;
 import com.yametech.yangjian.agent.plugin.mysql.commons.druid.stat.TableStat;
 import com.yametech.yangjian.agent.plugin.mysql.commons.druid.util.JdbcConstants;
-import com.yametech.yangjian.agent.plugin.mysql.commons.druid.util.LRUCache;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -145,7 +145,7 @@ public class MysqlUtil {
     }
 
     private static IReportData report = MultiReportFactory.getReport("collect");
-    private static final LRUCache CONNECT_URL_CACHE = new LRUCache(150);
+    private static final LRUCache CONNECT_URL_CACHE = new LRUCache();
 
     public static void reportDependency(ConnectionInfo connectionInfo, String key) {
         CONNECT_URL_CACHE.computeIfAbsent(key, (k) -> {
