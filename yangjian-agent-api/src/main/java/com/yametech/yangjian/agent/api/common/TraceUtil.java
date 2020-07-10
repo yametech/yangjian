@@ -1,5 +1,6 @@
 package com.yametech.yangjian.agent.api.common;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -38,4 +39,14 @@ public class TraceUtil {
 		return id;
 	}
 
+	/**
+	 * 获取端口号
+	 *
+	 * @param url
+	 * @return
+	 */
+	public static int getPort(URI url) {
+		int port = url.getPort();
+		return port > 0 ? port : "https".equals(url.getScheme().toLowerCase()) ? 443 : 80;
+	}
 }

@@ -22,6 +22,7 @@ import brave.propagation.ExtraFieldPropagation;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
+import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
@@ -62,7 +63,7 @@ public class RestTemplateSpanCreater implements ISpanCreater<SpanInfo> {
                 .name(requestURL.toString())
                 .tag(Constants.Tags.COMPONENT, Constants.Component.SPRING_RESTTEMPLATE)
                 .tag(Constants.Tags.HTTP_METHOD, httpMethod.name())
-                .tag(Constants.Tags.PEER, requestURL.getHost() + ":" + requestURL.getPort())
+                .tag(Constants.Tags.PEER, requestURL.getHost() + ":" + TraceUtil.getPort(requestURL))
                 .start(startTime);
         // 自定义字段为了后续服务拓扑图生成
         ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE, Constants.serviceName());

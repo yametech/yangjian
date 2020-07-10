@@ -25,6 +25,7 @@ import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.common.StringUtil;
+import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
@@ -81,7 +82,7 @@ public class DefaultExchangeFunctionSpanCreater implements ISpanCreater<SpanInfo
                 .name(url.toString())
                 .tag(Constants.Tags.COMPONENT, Constants.Component.SPRING_WEBCLIENT)
                 .tag(Constants.Tags.HTTP_METHOD, clientRequest.method().name())
-                .tag(Constants.Tags.PEER, url.getHost() + ":" + url.getPort())
+                .tag(Constants.Tags.PEER, url.getHost() + ":" + TraceUtil.getPort(url))
                 .start(startTime);
 
         String parentServiceName = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE);
