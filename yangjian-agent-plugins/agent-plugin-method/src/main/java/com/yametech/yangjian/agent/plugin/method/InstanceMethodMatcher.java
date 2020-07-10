@@ -28,7 +28,9 @@ import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
+import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
 import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodInstaceMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodRegexMatch;
 
 /**
@@ -66,7 +68,10 @@ public class InstanceMethodMatcher implements IMetricMatcher, IConfigReader {
     	if(matches == null || matches.isEmpty()) {
     		return null;
     	} else {
-    		return new CombineOrMatch(matches);
+    		return new CombineAndMatch(Arrays.asList(
+                    new CombineOrMatch(matches),
+                    new MethodInstaceMatch()
+            ));
     	}
     }
 

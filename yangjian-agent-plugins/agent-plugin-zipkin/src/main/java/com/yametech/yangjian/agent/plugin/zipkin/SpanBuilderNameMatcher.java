@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.plugin.spring.webflux;
+package com.yametech.yangjian.agent.plugin.zipkin;
 
-import com.yametech.yangjian.agent.api.IMetricMatcher;
+import com.yametech.yangjian.agent.api.InterceptorMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
-import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
 import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodArgumentIndexMatch;
@@ -30,27 +29,22 @@ import java.util.Arrays;
 
 /**
  * @author dengliming
- * @date 2020/3/17
+ * @date 2020/7/9
  */
-public class DispatcherHandlerResultMatcher implements IMetricMatcher {
+public class SpanBuilderNameMatcher implements InterceptorMatcher {
 
     @Override
     public IConfigMatch match() {
+        // zipkin2.Span.Builder.name
         return new CombineAndMatch(Arrays.asList(
-                new ClassMatch("org.springframework.web.reactive.DispatcherHandler"),
-                new MethodNameMatch("handleResult"),
-                new MethodArgumentIndexMatch(0, "org.springframework.web.server.ServerWebExchange")
+                new ClassMatch("zipkin2.Span$Builder"),
+                new MethodNameMatch("name"),
+                new MethodArgumentIndexMatch(0, "java.lang.String")
         ));
     }
 
     @Override
-    public String type() {
-        return Constants.EventType.HTTP_SERVER;
-    }
-
-    @Override
     public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
-        return new LoadClassKey("com.yametech.yangjian.agent.plugin.spring.webflux.DispatcherHandlerResultConvert");
+        return new LoadClassKey("com.yametech.yangjian.agent.plugin.zipkin.SpanBuilderNameInterceptor");
     }
-
 }

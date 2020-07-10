@@ -26,7 +26,6 @@ import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.common.BaseMatcherProxy;
 import com.yametech.yangjian.agent.core.core.classloader.InterceptorInstanceLoader;
 import com.yametech.yangjian.agent.core.metric.base.ConvertMethodAOP;
-import com.yametech.yangjian.agent.core.metric.base.ConvertStatisticMethodAOP;
 import com.yametech.yangjian.agent.core.metric.base.MetricEventBus;
 import com.yametech.yangjian.agent.core.util.Util;
 
@@ -72,9 +71,7 @@ public class MetricMatcherProxy extends BaseMatcherProxy<IMetricMatcher, BaseCon
 //		if(typeClass.containsKey(type)) {
 //			convertCls = typeClass.get(type).getName();
 //		}
-		if(MethodType.STATIC.equals(type)) {
-			convertCls = ConvertStatisticMethodAOP.class.getName();
-		} else if(MethodType.INSTANCE.equals(type)) {
+		if (MethodType.STATIC.equals(type) || MethodType.INSTANCE.equals(type)) {
 			convertCls = ConvertMethodAOP.class.getName();
 		}
 		return convertCls == null ? null : new LoadClassKey(convertCls, "ConvertAOP:" + convertClass.getCls());

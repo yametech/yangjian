@@ -13,25 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.api.convert;
-
-import java.lang.reflect.Method;
-import java.util.List;
+package com.yametech.yangjian.agent.plugin.zipkin.context;
 
 /**
- * 注意：实现类不能同时实现SPI接口
- * 
- * @author liuzhao
+ * @author dengliming
+ * @date 2020/7/9
  */
-public interface IStatisticMethodBeforeAsyncConvert extends IAsyncConvert, IConvertBase {
-	
-	/**
-	 * 实例方法在调用前使用参数同步转换为临时对象
-	 * @param allArguments	所有参数
-	 * @param method	方法定义
-	 * @return 临时对象列表
-	 * @throws Throwable	转换异常
-	 */
-	List<Object> convert(Object[] allArguments, Method method) throws Throwable;
-	
+public class ContextConstants {
+
+    public static String SPAN_NAME_KEY = "_sn_";
+
 }

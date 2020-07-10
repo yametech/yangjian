@@ -57,6 +57,11 @@
 		    <artifactId>brave</artifactId>
 		    <version>${brave.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>io.zipkin.brave</groupId>
+            <artifactId>brave-context-slf4j</artifactId>
+            <version>${brave.version}</version>
+        </dependency>
 		<dependency>
             <groupId>com.github.yametech</groupId>
             <artifactId>yangjian-agent-client</artifactId>
@@ -161,6 +166,7 @@
                             <include>io.zipkin.brave:brave</include>
                             <include>io.zipkin.zipkin2:zipkin</include>
                             <include>io.zipkin.reporter2:zipkin-reporter</include>
+                            <include>io.zipkin.brave:brave-context-slf4j</include>
                         </includes>
                     </artifactSet>
                     <filters>

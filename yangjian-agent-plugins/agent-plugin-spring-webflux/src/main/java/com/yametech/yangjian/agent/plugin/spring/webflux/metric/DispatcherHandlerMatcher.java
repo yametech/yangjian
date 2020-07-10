@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.plugin.spring.webflux;
+package com.yametech.yangjian.agent.plugin.spring.webflux.metric;
 
 import com.yametech.yangjian.agent.api.IMetricMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
@@ -44,7 +44,7 @@ public class DispatcherHandlerMatcher implements IMetricMatcher {
 
     @Override
     public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
-        return new LoadClassKey("com.yametech.yangjian.agent.plugin.spring.webflux.DispatcherHandlerConvert");
+        return new LoadClassKey("com.yametech.yangjian.agent.plugin.spring.webflux.metric.DispatcherHandlerConvert");
     }
 
 }
