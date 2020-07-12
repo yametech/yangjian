@@ -46,7 +46,6 @@ public class DefaultClientResponseMatcher implements IEnhanceClassMatch, Interce
         return new CombineAndMatch(Arrays.asList(
                 classMatch(),
                 new MethodArgumentIndexMatch(0, "org.springframework.http.client.reactive.ClientHttpResponse"),
-                new MethodArgumentIndexMatch(4, "java.util.function.Supplier"),
                 new MethodConstructorMatch()
         ));
     }
