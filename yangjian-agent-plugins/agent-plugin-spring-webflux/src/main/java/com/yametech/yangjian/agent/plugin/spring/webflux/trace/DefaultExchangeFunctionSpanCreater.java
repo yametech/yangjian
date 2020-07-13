@@ -93,28 +93,22 @@ public class DefaultExchangeFunctionSpanCreater implements ISpanCreater<SpanInfo
         }
 
         return ((Mono) ret).doOnSuccess(res -> {
-            try (Tracer.SpanInScope spanInScope = tracer.withSpanInScope(span)) {
-                if (t != null) {
-                    span.error(t);
-                }
-                if (StringUtil.notEmpty(span.context().parentIdString()) && StringUtil.notEmpty(parentServiceName)) {
-                    span.tag(Constants.Tags.PARENT_SERVICE_NAME, parentServiceName);
-                }
+            if (t != null) {
+                span.error(t);
+            }
 
-                if (res instanceof IContext) {
-                    HttpStatus httpStatus = (HttpStatus) ((IContext) res)._getAgentContext(RESPONSE_STATUS_CONTEXT_KEY);
-                    if (httpStatus != null) {
-                        span.tag(Constants.Tags.STATUS_CODE, Integer.toString(httpStatus.value()));
-                    }
+            if (res instanceof IContext) {
+                HttpStatus httpStatus = (HttpStatus) ((IContext) res)._getAgentContext(RESPONSE_STATUS_CONTEXT_KEY);
+                if (httpStatus != null) {
+                    span.tag(Constants.Tags.STATUS_CODE, Integer.toString(httpStatus.value()));
                 }
-            } finally {
-                span.finish();
             }
         }).doOnError(error -> {
+            if (error != null) {
+                span.error((Throwable) error);
+            }
+        }).doFinally(s -> {
             try (Tracer.SpanInScope spanInScope = tracer.withSpanInScope(span)) {
-                if (error != null) {
-                    span.error((Throwable) error);
-                }
                 if (StringUtil.notEmpty(span.context().parentIdString()) && StringUtil.notEmpty(parentServiceName)) {
                     span.tag(Constants.Tags.PARENT_SERVICE_NAME, parentServiceName);
                 }
