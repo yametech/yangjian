@@ -50,6 +50,6 @@ public class DefaultExchangeFunctionMatcher implements ITraceMatcher {
 
     @Override
     public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
-        return new LoadClassKey("com.yametech.yangjian.agent.plugin.spring.webflux.trace.DefaultExchangeFunctionInterceptor");
+        return new LoadClassKey("com.yametech.yangjian.agent.plugin.spring.webflux.trace.DefaultExchangeFunctionSpanCreater");
     }
 }

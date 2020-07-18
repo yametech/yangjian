@@ -25,6 +25,7 @@ import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.common.StringUtil;
+import com.yametech.yangjian.agent.api.common.TraceUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
@@ -45,7 +46,7 @@ import static com.yametech.yangjian.agent.plugin.spring.webflux.context.ContextC
  * @author dengliming
  * @date 2020/6/27
  */
-public class DefaultExchangeFunctionInterceptor implements ISpanCreater<SpanInfo> {
+public class DefaultExchangeFunctionSpanCreater implements ISpanCreater<SpanInfo> {
 
     private MicrosClock MICROS_CLOCK;
     protected Tracer tracer;
@@ -81,7 +82,7 @@ public class DefaultExchangeFunctionInterceptor implements ISpanCreater<SpanInfo
                 .name(url.toString())
                 .tag(Constants.Tags.COMPONENT, Constants.Component.SPRING_WEBCLIENT)
                 .tag(Constants.Tags.HTTP_METHOD, clientRequest.method().name())
-                .tag(Constants.Tags.PEER, url.getHost() + ":" + url.getPort())
+                .tag(Constants.Tags.PEER, url.getHost() + ":" + TraceUtil.getPort(url))
                 .start(startTime);
 
         String parentServiceName = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE);
@@ -92,28 +93,22 @@ public class DefaultExchangeFunctionInterceptor implements ISpanCreater<SpanInfo
         }
 
         return ((Mono) ret).doOnSuccess(res -> {
-            try (Tracer.SpanInScope spanInScope = tracer.withSpanInScope(span)) {
-                if (t != null) {
-                    span.error(t);
-                }
-                if (StringUtil.notEmpty(span.context().parentIdString()) && StringUtil.notEmpty(parentServiceName)) {
-                    span.tag(Constants.Tags.PARENT_SERVICE_NAME, parentServiceName);
-                }
+            if (t != null) {
+                span.error(t);
+            }
 
-                if (res instanceof IContext) {
-                    HttpStatus httpStatus = (HttpStatus) ((IContext) res)._getAgentContext(RESPONSE_STATUS_CONTEXT_KEY);
-                    if (httpStatus != null) {
-                        span.tag(Constants.Tags.STATUS_CODE, Integer.toString(httpStatus.value()));
-                    }
+            if (res instanceof IContext) {
+                HttpStatus httpStatus = (HttpStatus) ((IContext) res)._getAgentContext(RESPONSE_STATUS_CONTEXT_KEY);
+                if (httpStatus != null) {
+                    span.tag(Constants.Tags.STATUS_CODE, Integer.toString(httpStatus.value()));
                 }
-            } finally {
-                span.finish();
             }
         }).doOnError(error -> {
+            if (error != null) {
+                span.error((Throwable) error);
+            }
+        }).doFinally(s -> {
             try (Tracer.SpanInScope spanInScope = tracer.withSpanInScope(span)) {
-                if (error != null) {
-                    span.error((Throwable) error);
-                }
                 if (StringUtil.notEmpty(span.context().parentIdString()) && StringUtil.notEmpty(parentServiceName)) {
                     span.tag(Constants.Tags.PARENT_SERVICE_NAME, parentServiceName);
                 }

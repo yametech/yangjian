@@ -15,7 +15,6 @@
  */
 package com.yametech.yangjian.agent.api.common;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
