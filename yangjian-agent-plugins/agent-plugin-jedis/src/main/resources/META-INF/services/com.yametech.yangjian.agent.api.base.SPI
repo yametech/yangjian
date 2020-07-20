@@ -7,3 +7,4 @@ com.yametech.yangjian.agent.plugin.jedis.JedisConstructorMatcher$JedisConstructo
 com.yametech.yangjian.agent.plugin.jedis.JedisConstructorMatcher$JedisConstructorWithShardInfoArgMatcher
 com.yametech.yangjian.agent.plugin.jedis.JedisClusterConstructorMatcher$JedisClusterConstructorWithHostAndPortArgMatcher
 com.yametech.yangjian.agent.plugin.jedis.JedisClusterConstructorMatcher$JedisClusterConstructorWithListHostAndPortArgMatcher
+com.yametech.yangjian.agent.plugin.jedis.JedisSentinelConstructorMatcher
