@@ -72,7 +72,7 @@ public class JedisConvert implements IMethodAsyncConvert, IConfigReader {
             }
             for (String keyRule : matchKeyRules) {
                 Integer num = matchKeyNums.getOrDefault(keyRule, 0);
-                matchKeyNums.put(key, num + 1);
+                matchKeyNums.put(keyRule, num + 1);
             }
         }
         return matchKeyNums.entrySet()
