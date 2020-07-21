@@ -22,6 +22,7 @@ import com.rabbitmq.client.AMQP;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
 import com.yametech.yangjian.agent.plugin.rabbitmq.bean.MqInfo;
@@ -95,9 +96,13 @@ public class ProducerSpanCreater extends AbstractSpanCreater {
                 .name(SPAN_NAME)
                 .tag(Constants.Tags.COMPONENT, Constants.Component.RABBITMQ)
                 .tag(Constants.Tags.PEER, mqInfo.getIpPorts())
-                .tag(Constants.Tags.MQ_TOPIC, exChangeName)
-                .tag(Constants.Tags.MQ_QUEUE, queueName)
                 .start(startTime);
+        if (StringUtil.notEmpty(exChangeName)) {
+            span.tag(Constants.Tags.MQ_TOPIC, exChangeName);
+        }
+        if (StringUtil.notEmpty(queueName)) {
+            span.tag(Constants.Tags.MQ_QUEUE, queueName);
+        }
 
         injector.inject(span.context(), headers);
         // 加上这一步主要是因为原来这个参数可能为空所以重新赋值

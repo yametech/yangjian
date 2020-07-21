@@ -24,6 +24,7 @@ import com.rabbitmq.client.Envelope;
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
 import com.yametech.yangjian.agent.plugin.rabbitmq.bean.MqInfo;
@@ -67,17 +68,28 @@ public class ConsumerSpanCreater extends AbstractSpanCreater {
         if (startTime == -1L) {
             return null;
         }
-        Envelope envelope = (Envelope) allArguments[1];
+
         AMQP.BasicProperties properties = (AMQP.BasicProperties) allArguments[2];
-        TraceContextOrSamplingFlags traceContextOrSamplingFlags = extractor.extract(properties.getHeaders());
+        TraceContextOrSamplingFlags traceContextOrSamplingFlags = null;
+        if (properties != null) {
+            traceContextOrSamplingFlags = extractor.extract(properties.getHeaders());
+        }
         Span span = traceContextOrSamplingFlags != null ? tracer.nextSpan(traceContextOrSamplingFlags) : tracer.nextSpan();
         span.kind(Span.Kind.CONSUMER)
                 .name(SPAN_NAME)
                 .tag(Constants.Tags.COMPONENT, Constants.Component.RABBITMQ)
                 .tag(Constants.Tags.PEER, mqInfo.getIpPorts())
-                .tag(Constants.Tags.MQ_TOPIC, envelope.getExchange())
-                .tag(Constants.Tags.MQ_QUEUE, envelope.getRoutingKey())
                 .start(startTime);
+
+        if (allArguments[1] instanceof Envelope) {
+            Envelope envelope = (Envelope) allArguments[1];
+            if (StringUtil.notEmpty(envelope.getExchange())) {
+                span.tag(Constants.Tags.MQ_TOPIC, envelope.getExchange());
+            }
+            if (StringUtil.notEmpty(envelope.getRoutingKey())) {
+                span.tag(Constants.Tags.MQ_QUEUE, envelope.getRoutingKey());
+            }
+        }
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }
 }
