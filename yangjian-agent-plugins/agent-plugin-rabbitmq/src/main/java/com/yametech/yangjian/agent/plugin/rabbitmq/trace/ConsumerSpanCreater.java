@@ -71,7 +71,7 @@ public class ConsumerSpanCreater extends AbstractSpanCreater {
 
         AMQP.BasicProperties properties = (AMQP.BasicProperties) allArguments[2];
         TraceContextOrSamplingFlags traceContextOrSamplingFlags = null;
-        if (properties != null) {
+        if (properties != null && properties.getHeaders() != null) {
             traceContextOrSamplingFlags = extractor.extract(properties.getHeaders());
         }
         Span span = traceContextOrSamplingFlags != null ? tracer.nextSpan(traceContextOrSamplingFlags) : tracer.nextSpan();
