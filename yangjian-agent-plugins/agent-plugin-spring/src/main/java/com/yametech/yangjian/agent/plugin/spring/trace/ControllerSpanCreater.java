@@ -59,7 +59,11 @@ public class ControllerSpanCreater implements ISpanCreater<SpanInfo> {
     @Override
     public BeforeResult<SpanInfo> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
         try {
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            ServletRequestAttributes requestAttributes = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes());
+            if (requestAttributes == null) {
+                return null;
+            }
+            HttpServletRequest request = requestAttributes.getRequest();
             if (request == null) {
                 return null;
             }
@@ -106,7 +110,8 @@ public class ControllerSpanCreater implements ISpanCreater<SpanInfo> {
         try {
             HttpServletResponse response = (HttpServletResponse) CONTEXT_LOCAL.get();
             if (response == null) {
-                response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+                ServletRequestAttributes requestAttributes = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes());
+                response = requestAttributes != null ? requestAttributes.getResponse() : null;
             }
 
             if (response != null) {
