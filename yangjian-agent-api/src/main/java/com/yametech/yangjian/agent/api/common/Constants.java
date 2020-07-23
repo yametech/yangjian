@@ -112,6 +112,9 @@ public class Constants {
         public static final String COMPONENT = "_component";
         public static final String DATABASE = "_database";
         public static final String PARENT_SERVICE_NAME = "_parent_service_name";
+        public static final String AGENT_SIGN = "_agent_sign";
+        // 部署模式 如：Redis的单机模式single、集群模式cluster、哨兵sentinel
+        public static final String DB_MODE = "_mode";
     }
 
     public static class Component {
@@ -131,8 +134,29 @@ public class Constants {
         public static final String SPRING_WEBCLIENT = "spring-webclient";
     }
 
+    /**
+     * 自定义请求头部key（在请求链路中传递）
+     */
     public static class ExtraHeaderKey {
         public static final String USER_ID = "x-user-id";
         public static final String REFERER_SERVICE = "x-referer-service";
+        // 探针唯一标识
+        public static final String AGENT_SIGN = "x-agent-sign";
+    }
+
+    /**
+     * 部署模式（目前redis组件使用）
+     */
+    public static class DbMode {
+        // 集群模式
+        public static final String CLUSTER = "cluster";
+        // 哨兵模式
+        public static final String SENTINEL = "sentinel";
+        // Redis节点模式
+        public static final String SINGLE = "single";
+        // 云托管模式(Redisson使用)
+        public static final String REPLICATED = "replicated";
+        // 主从模式
+        public static final String MASTER_SLAVE = "master-slave";
     }
 }
