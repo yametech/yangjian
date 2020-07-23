@@ -77,15 +77,18 @@ public class DefaultExchangeFunctionSpanCreater implements ISpanCreater<SpanInfo
         }
         ClientRequest clientRequest = (ClientRequest) allArguments[0];
         URI url = clientRequest.url();
+        String requestUrl = url.toString();
         Span span = tracer.nextSpan()
                 .kind(Span.Kind.SERVER)
-                .name(url.toString())
+                .name(requestUrl)
                 .tag(Constants.Tags.COMPONENT, Constants.Component.SPRING_WEBCLIENT)
                 .tag(Constants.Tags.HTTP_METHOD, clientRequest.method().name())
                 .tag(Constants.Tags.PEER, url.getHost() + ":" + TraceUtil.getPort(url))
                 .start(startTime);
 
-        String parentServiceName = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE);
+        // 自定义字段为了后续服务拓扑图生成
+        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE, Constants.serviceName());
+        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.AGENT_SIGN, StringUtil.filterUrlParams(requestUrl));
         Map<String, String> headers = new HashMap<>();
         injector.inject(span.context(), headers);
         if (clientRequest instanceof IContext) {
@@ -109,9 +112,6 @@ public class DefaultExchangeFunctionSpanCreater implements ISpanCreater<SpanInfo
             }
         }).doFinally(s -> {
             try (Tracer.SpanInScope spanInScope = tracer.withSpanInScope(span)) {
-                if (StringUtil.notEmpty(span.context().parentIdString()) && StringUtil.notEmpty(parentServiceName)) {
-                    span.tag(Constants.Tags.PARENT_SERVICE_NAME, parentServiceName);
-                }
             } finally {
                 span.finish();
             }

@@ -17,13 +17,17 @@ package com.yametech.yangjian.agent.plugin.spring.webflux.metric;
 
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
-import com.yametech.yangjian.agent.api.convert.IMethodConvert;
+import com.yametech.yangjian.agent.api.common.StringUtil;
+import com.yametech.yangjian.agent.api.convert.IMethodCallbackConvert;
 import com.yametech.yangjian.agent.plugin.spring.webflux.bean.RequestEvent;
 import com.yametech.yangjian.agent.plugin.spring.webflux.context.ContextConstants;
+import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * 拦截该方法为了传递请求的开始时间
@@ -31,14 +35,24 @@ import java.util.Map;
  * @author dengliming
  * @date 2020/3/17
  */
-public class DispatcherHandlerConvert implements IMethodConvert {
+public class DispatcherHandlerConvert implements IMethodCallbackConvert {
 
     @Override
-    public List<TimeEvent> convert(Object thisObj, long startTime, Object[] allArguments, Method method,
-                                   Object ret, Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
-        if (allArguments[0] instanceof IContext) {
-            ((IContext) allArguments[0])._setAgentContext(ContextConstants.REQUEST_EVENT_CONTEXT_KEY, new RequestEvent().setStartTime(System.currentTimeMillis()));
+    public Object convert(Consumer<List<TimeEvent>> eventCallback, Object thisObj, long startTime, Object[] allArguments,
+                          Method method, Object ret, Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
+        if (!(allArguments[0] instanceof IContext)) {
+            return ret;
         }
-        return null;
+        ((IContext) allArguments[0])._setAgentContext(ContextConstants.REQUEST_EVENT_CONTEXT_KEY, new RequestEvent().setStartTime(System.currentTimeMillis()));
+
+        return ((Mono) ret)
+                .doFinally(res -> {
+                    RequestEvent requestEvent = (RequestEvent) ((IContext) allArguments[0])._getAgentContext(ContextConstants.REQUEST_EVENT_CONTEXT_KEY);
+                    if (requestEvent != null && StringUtil.notEmpty(requestEvent.getMethodName())) {
+                        TimeEvent event = get(requestEvent.getStartTime());
+                        event.setIdentify(requestEvent.getMethodName());
+                        eventCallback.accept(Arrays.asList(event));
+                    }
+                });
     }
 }

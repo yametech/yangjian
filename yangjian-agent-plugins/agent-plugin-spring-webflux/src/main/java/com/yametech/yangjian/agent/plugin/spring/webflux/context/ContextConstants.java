@@ -15,6 +15,7 @@
  */
 package com.yametech.yangjian.agent.plugin.spring.webflux.context;
 
+
 /**
  * @author dengliming
  * @date 2020/3/18
@@ -24,5 +25,8 @@ public class ContextConstants {
     public static String REQUEST_EVENT_CONTEXT_KEY = "__req_event___";
     public static String RESPONSE_STATUS_CONTEXT_KEY = "__res_status__";
     public static String REQUEST_HEADER_CONTEXT_KEY = "__req_header__";
+
+
+    public static final String SERVER_SPAN_CONTEXT = "TracingWebFilter.activeSpanContext";
 
 }

@@ -20,6 +20,7 @@ import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
+import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
 import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodArgumentIndexMatch;
@@ -32,6 +33,11 @@ import java.util.Arrays;
  * @date 2020/3/17
  */
 public class DispatcherHandlerMatcher implements IMetricMatcher {
+
+    @Override
+    public String type() {
+        return Constants.EventType.HTTP_SERVER;
+    }
 
     @Override
     public IConfigMatch match() {
