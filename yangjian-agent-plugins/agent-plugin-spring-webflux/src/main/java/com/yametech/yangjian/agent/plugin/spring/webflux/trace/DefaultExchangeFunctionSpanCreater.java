@@ -79,7 +79,7 @@ public class DefaultExchangeFunctionSpanCreater implements ISpanCreater<SpanInfo
         URI url = clientRequest.url();
         String requestUrl = url.toString();
         Span span = tracer.nextSpan()
-                .kind(Span.Kind.SERVER)
+                .kind(Span.Kind.CLIENT)
                 .name(requestUrl)
                 .tag(Constants.Tags.COMPONENT, Constants.Component.SPRING_WEBCLIENT)
                 .tag(Constants.Tags.HTTP_METHOD, clientRequest.method().name())
