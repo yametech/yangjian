@@ -103,7 +103,8 @@ public class KafkaConsumerSpanCreater implements ISpanCreater<Void> {
                     .finish();
         }
         // 此处为了将context传递到当前线程、连接后面在该线程的链路
-        currentTraceContext.maybeScope(context == null ? null : context.context());
+        // 暂时去掉 根据官方api说明scope一定要关闭 这里存在风险
+        // currentTraceContext.maybeScope(context == null ? null : context.context());
         return ret;
     }
 }
