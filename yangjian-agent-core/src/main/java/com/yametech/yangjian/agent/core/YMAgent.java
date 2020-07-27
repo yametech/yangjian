@@ -51,7 +51,7 @@ import static net.bytebuddy.matcher.ElementMatchers.isInterface;
 
 public class YMAgent {
 	private static final ILogger LOG = LoggerFactory.getLogger(YMAgent.class);
-	private static final String[] IGNORE_CLASS_CONFIG = new String[] {"^net\\.bytebuddy\\.", "^org\\.slf4j\\.", // ".*\\$auxiliary\\$.*", 
+	private static final String[] IGNORE_CLASS_CONFIG = new String[] {"^com\\.yametech\\.yangjian\\.agent\\.thirdparty\\.", "^net\\.bytebuddy\\.", "^org\\.slf4j\\.", // ".*\\$auxiliary\\$.*",
 			"^org\\.apache\\.logging\\.", "^org\\.groovy\\.", "^sun\\.reflect\\.", // ".*javassist.*", ".*\\.asm\\..*", 这两个会有误拦截：com.alibaba.dubbo.rpc.proxy.javassist.JavassistProxyFactory
 			"^org\\.apache\\.skywalking\\.", "^javassist\\."};//, "^com\\.yametech\\.yangjian\\.agent\\."};
 	private static final String[] IGNORE_METHOD_CONFIG = new String[] {".*toString\\(\\)$", ".*equals\\(java.lang.Object\\)$",
