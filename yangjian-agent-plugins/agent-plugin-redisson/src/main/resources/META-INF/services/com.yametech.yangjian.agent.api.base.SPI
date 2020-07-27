@@ -3,3 +3,4 @@ com.yametech.yangjian.agent.plugin.redisson.context.ConnectionManagerMatcher
 com.yametech.yangjian.agent.plugin.redisson.context.RedisClientMatcher
 com.yametech.yangjian.agent.plugin.redisson.context.RedisConnectionMatcher
 com.yametech.yangjian.agent.plugin.redisson.trace.RedisConnectionTraceMatcher
+com.yametech.yangjian.agent.plugin.redisson.context.RedissonCreateMatcher

@@ -23,11 +23,12 @@ import java.util.Arrays;
  * @author dengliming
  * @date 2019/12/4
  */
-public class RedisTest {
+public class JedisSingleTest {
 
     public static void main(String[] args) {
         //t();
         //t1();
+        t();
     }
 
     public static void t() {
@@ -40,12 +41,13 @@ public class RedisTest {
             //选择DB0数据库
             jedis.select(0);
             //Set<String> keyList = jedis.keys("*");
-            String key1 = "test2", key2 = "key2";
+            String key1 = "TS:2", key2 = "test1";
             //none(key不存在),string(字符串),list(列表),set(集合),zset(有序集),hash(哈希表)
             //String type = jedis.type(key1);
             //jedis.hset(key2, "a","12");
             jedis.set(key1.getBytes(), "12".getBytes());
-
+            jedis.set(key1.getBytes(), "13".getBytes());
+            System.out.println("====================================>>>>>>>" + jedis.get(key1));
         }
     }
 

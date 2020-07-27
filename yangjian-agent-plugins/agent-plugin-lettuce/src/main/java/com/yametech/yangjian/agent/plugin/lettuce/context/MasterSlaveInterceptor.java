@@ -15,37 +15,46 @@
  */
 package com.yametech.yangjian.agent.plugin.lettuce.context;
 
-import com.yametech.yangjian.agent.api.base.IContext;
+import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
-import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
+import com.yametech.yangjian.agent.api.interceptor.IStaticMethodAOP;
 import com.yametech.yangjian.agent.plugin.lettuce.util.RedisUtil;
 import io.lettuce.core.RedisURI;
-import io.lettuce.core.cluster.RedisClusterClient;
 
-import static com.yametech.yangjian.agent.plugin.lettuce.context.ContextConstants.REDIS_URL_CONTEXT_KEY;
+import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * @author dengliming
- * @date 2020/6/14
+ * @date 2020/7/21
  */
-public class RedisClusterClientInterceptor implements IConstructorListener {
+public class MasterSlaveInterceptor implements IStaticMethodAOP {
 
     @Override
-    public void constructor(Object thisObj, Object[] allArguments) throws Throwable {
-        @SuppressWarnings("unchecked") Iterable<RedisURI> redisURIs = (Iterable<RedisURI>) allArguments[1];
+    public BeforeResult before(Object[] allArguments, Method method) throws Throwable {
+        @SuppressWarnings("unchecked") Iterable<RedisURI> redisURIs = (Iterable<RedisURI>) allArguments[2];
         if (redisURIs == null) {
-            return;
+            return null;
         }
-        RedisClusterClient redisClusterClient = (RedisClusterClient) thisObj;
+
         StringBuilder peer = new StringBuilder();
         for (RedisURI redisURI : redisURIs) {
+            // 过滤哨兵的配置
+            if (redisURI.getSentinels() != null && !redisURI.getSentinels().isEmpty()) {
+                return null;
+            }
             peer.append(redisURI.getHost()).append(":").append(redisURI.getPort()).append(",");
         }
         if (peer.length() > 0) {
             peer.deleteCharAt(peer.length() - 1);
         }
         String redisUrl = peer.toString();
-        ((IContext) redisClusterClient.getOptions())._setAgentContext(REDIS_URL_CONTEXT_KEY, redisUrl);
-        RedisUtil.reportDependency(redisUrl, Constants.DbMode.CLUSTER);
+        RedisUtil.reportDependency(redisUrl, Constants.DbMode.MASTER_SLAVE);
+        return null;
+    }
+
+    @Override
+    public Object after(Object[] allArguments, Method method, BeforeResult beforeResult, Object ret, Throwable t, Map globalVar) throws Throwable {
+        return ret;
     }
 }

@@ -16,6 +16,7 @@
 package com.yametech.yangjian.agent.plugin.jedis;
 
 import com.yametech.yangjian.agent.api.base.IContext;
+import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
 import com.yametech.yangjian.agent.plugin.jedis.context.ContextConstants;
 import com.yametech.yangjian.agent.plugin.jedis.util.RedisUtil;
@@ -38,7 +39,7 @@ public abstract class JedisConstructorInterceptor implements IConstructorListene
             if (uri != null) {
                 String url = uri.getHost() + ":" + uri.getPort();
                 ((IContext) thisObj)._setAgentContext(REDIS_URL_CONTEXT_KEY, url);
-                RedisUtil.reportDependency(url);
+                RedisUtil.reportDependency(url, Constants.DbMode.SINGLE);
             }
         }
     }
@@ -54,7 +55,7 @@ public abstract class JedisConstructorInterceptor implements IConstructorListene
             }
             String url = host + ":" + port;
             ((IContext) thisObj)._setAgentContext(REDIS_URL_CONTEXT_KEY, url);
-            RedisUtil.reportDependency(url);
+            RedisUtil.reportDependency(url, Constants.DbMode.SINGLE);
         }
     }
 
@@ -65,7 +66,7 @@ public abstract class JedisConstructorInterceptor implements IConstructorListene
             if (shardInfo != null) {
                 String url = shardInfo.getHost() + ":" + shardInfo.getPort();
                 ((IContext) thisObj)._setAgentContext(ContextConstants.REDIS_URL_CONTEXT_KEY, url);
-                RedisUtil.reportDependency(url);
+                RedisUtil.reportDependency(url, Constants.DbMode.SINGLE);
             }
         }
     }

@@ -75,6 +75,10 @@ public class DubboServerSpanCreater extends DubboSpanCreater<IDubboServerCustom>
 		if (StringUtil.notEmpty(span.context().parentIdString()) && StringUtil.notEmpty(parentServiceName)) {
 			span.tag(Constants.Tags.PARENT_SERVICE_NAME, parentServiceName);
 		}
+		String agentSign = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.AGENT_SIGN);
+		if (StringUtil.notEmpty(agentSign)) {
+			span.tag(Constants.Tags.AGENT_SIGN, agentSign);
+		}
 		return spanInit(span, invocation.getArguments(), custom);
 	}
 }

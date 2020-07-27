@@ -16,6 +16,7 @@
 package com.yametech.yangjian.agent.plugin.jedis;
 
 import com.yametech.yangjian.agent.api.base.IContext;
+import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
 import com.yametech.yangjian.agent.plugin.jedis.util.RedisUtil;
 import redis.clients.jedis.HostAndPort;
@@ -41,7 +42,7 @@ public abstract class JedisClusterConstructorInterceptor implements IConstructor
 
             String url = redisConnInfo.toString();
             ((IContext) thisObj)._setAgentContext(REDIS_URL_CONTEXT_KEY, url);
-            RedisUtil.reportDependency(url);
+            RedisUtil.reportDependency(url, Constants.DbMode.CLUSTER);
         }
     }
 
@@ -53,7 +54,7 @@ public abstract class JedisClusterConstructorInterceptor implements IConstructor
             if (hostAndPort != null) {
                 String url = hostAndPort.getHost() + ":" + hostAndPort.getPort();
                 ((IContext) thisObj)._setAgentContext(REDIS_URL_CONTEXT_KEY, url);
-                RedisUtil.reportDependency(url);
+                RedisUtil.reportDependency(url, Constants.DbMode.CLUSTER);
             }
         }
     }

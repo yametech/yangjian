@@ -5,3 +5,4 @@ com.yametech.yangjian.agent.plugin.lettuce.context.AbstractRedisClientMatcher
 com.yametech.yangjian.agent.plugin.lettuce.trace.ChannelWriteTraceMatcher
 com.yametech.yangjian.agent.plugin.lettuce.context.ClientOptionsMatcher
 com.yametech.yangjian.agent.plugin.lettuce.context.DefaultEndpointConstructorMatcher
+com.yametech.yangjian.agent.plugin.lettuce.context.MasterSlaveMatcher

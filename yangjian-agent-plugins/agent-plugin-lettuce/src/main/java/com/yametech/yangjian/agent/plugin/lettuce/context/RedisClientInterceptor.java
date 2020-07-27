@@ -16,6 +16,7 @@
 package com.yametech.yangjian.agent.plugin.lettuce.context;
 
 import com.yametech.yangjian.agent.api.base.IContext;
+import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
 import com.yametech.yangjian.agent.plugin.lettuce.util.RedisUtil;
 import io.lettuce.core.RedisClient;
@@ -34,20 +35,18 @@ public class RedisClientInterceptor implements IConstructorListener {
     @Override
     public void constructor(Object thisObj, Object[] allArguments) throws Throwable {
         RedisURI redisURI = (RedisURI) allArguments[1];
-        RedisClient redisClient = (RedisClient) thisObj;
-        if (redisClient.getOptions() instanceof IContext) {
-            String url = getRedisUrl(redisURI);
-            ((IContext) redisClient.getOptions())._setAgentContext(REDIS_URL_CONTEXT_KEY, url);
-            RedisUtil.reportDependency(url);
-        }
-    }
-
-    private String getRedisUrl(RedisURI redisURI) {
         if (redisURI == null) {
-            return null;
+            return;
         }
+        RedisClient redisClient = (RedisClient) thisObj;
+        if (!(redisClient.getOptions() instanceof IContext)) {
+            return;
+        }
+
+        String url = null;
         // EMPTY_URI
         if (redisURI.getPort() == 0) {
+            // 哨兵模式
             List<RedisURI> redisURIList = redisURI.getSentinels();
             if (redisURIList != null && redisURIList.size() > 0) {
                 StringBuilder sb = new StringBuilder();
@@ -55,10 +54,13 @@ public class RedisClientInterceptor implements IConstructorListener {
                     sb.append(redisURI1.getHost()).append(":").append(redisURI1.getPort()).append(",");
                 }
                 sb.deleteCharAt(sb.length() - 1);
-                return sb.toString();
+                url = sb.toString();
+                RedisUtil.reportDependency(url, Constants.DbMode.SENTINEL);
             }
+        } else {
+            url = redisURI.getHost() + ":" + redisURI.getPort();
+            RedisUtil.reportDependency(url, Constants.DbMode.SINGLE);
         }
-
-        return redisURI.getHost() + ":" + redisURI.getPort();
+        ((IContext) redisClient.getOptions())._setAgentContext(REDIS_URL_CONTEXT_KEY, url);
     }
 }

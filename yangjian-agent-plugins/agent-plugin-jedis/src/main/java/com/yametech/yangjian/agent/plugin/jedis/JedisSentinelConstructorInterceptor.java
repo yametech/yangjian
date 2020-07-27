@@ -15,6 +15,7 @@
  */
 package com.yametech.yangjian.agent.plugin.jedis;
 
+import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
 import com.yametech.yangjian.agent.plugin.jedis.util.RedisUtil;
 
@@ -34,6 +35,6 @@ public class JedisSentinelConstructorInterceptor implements IConstructorListener
             redisConnInfo.append(hostAndPort).append(",");
         }
         String url = String.join(",", hostAndPorts);
-        RedisUtil.reportDependency(url);
+        RedisUtil.reportDependency(url, Constants.DbMode.SENTINEL);
     }
 }

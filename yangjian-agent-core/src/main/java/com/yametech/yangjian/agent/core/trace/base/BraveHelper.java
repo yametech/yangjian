@@ -41,7 +41,11 @@ public class BraveHelper {
 				.spanReporter(spanReporter)
 				// 这里自定义error tag解析为了限制异常信息的长度
 				.errorParser(new ErrorTagParser())
-				.propagationFactory(ExtraFieldPropagation.newFactory(B3Propagation.FACTORY, Constants.ExtraHeaderKey.USER_ID, Constants.ExtraHeaderKey.REFERER_SERVICE))
+				.propagationFactory(ExtraFieldPropagation.newFactory(
+						B3Propagation.FACTORY,
+						Constants.ExtraHeaderKey.USER_ID,
+						Constants.ExtraHeaderKey.REFERER_SERVICE,
+						Constants.ExtraHeaderKey.AGENT_SIGN))
 				.currentTraceContext(ThreadLocalCurrentTraceContext.newBuilder()
 				      .addScopeDecorator(StrictScopeDecorator.create())
 					  .addScopeDecorator(MDCScopeDecorator.create())

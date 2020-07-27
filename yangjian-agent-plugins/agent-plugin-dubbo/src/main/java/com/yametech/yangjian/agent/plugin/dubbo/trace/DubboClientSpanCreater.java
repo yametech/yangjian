@@ -63,11 +63,13 @@ public class DubboClientSpanCreater extends DubboSpanCreater<IDubboClientCustom>
 		if (startTime == -1L) {
 			return null;
 		}
+		String methodId = getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes());
 		Span span = tracer.nextSpan()
 				.kind(Kind.CLIENT)
-				.name(getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes()))
+				.name(methodId)
 				.start(startTime);
 		ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE, Constants.serviceName());
+		ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.AGENT_SIGN, methodId);
 		injector.inject(span.context(), rpcContext.getAttachments());
 		return spanInit(span, invocation.getArguments(), custom);
 	}
