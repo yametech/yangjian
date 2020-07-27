@@ -33,10 +33,12 @@ import static com.yametech.yangjian.agent.plugin.spring.webflux.context.ContextC
 public class FilteringWebHandlerInterceptor implements ISpanCreater {
 
     private Tracing tracing;
+    private ISpanSample spanSample;
 
     @Override
     public void init(Tracing tracing, ISpanSample spanSample) {
         this.tracing = tracing;
+        this.spanSample = spanSample;
     }
 
     @Override
@@ -49,6 +51,9 @@ public class FilteringWebHandlerInterceptor implements ISpanCreater {
         ServerWebExchange exchange = (ServerWebExchange) allArguments[0];
         // 已经在链路上直接返回
         if (exchange.getAttribute(SERVER_SPAN_CONTEXT) != null) {
+            return ret;
+        }
+        if (!spanSample.sample()) {
             return ret;
         }
         return new TracingOperator((Mono<Void>) ret, (ServerWebExchange) allArguments[0], tracing);

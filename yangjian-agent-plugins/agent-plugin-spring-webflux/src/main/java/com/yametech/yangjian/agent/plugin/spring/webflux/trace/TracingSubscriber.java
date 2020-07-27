@@ -56,7 +56,7 @@ public class TracingSubscriber implements CoreSubscriber<Void> {
             final ServerHttpRequest request = exchange.getRequest();
             span.tag(Constants.Tags.HTTP_METHOD, request.getMethodValue());
             span.tag(Constants.Tags.PEER, request.getURI().toString());
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOG.error(e, "onSubscribe error.");
         }
         subscriber.onSubscribe(subscription);
@@ -70,9 +70,13 @@ public class TracingSubscriber implements CoreSubscriber<Void> {
 
     @Override
     public void onError(final Throwable throwable) {
-        span.error(throwable);
-        span.finish();
-        exchange.getAttributes().remove(SERVER_SPAN_CONTEXT);
+        try {
+            span.error(throwable);
+            span.finish();
+            exchange.getAttributes().remove(SERVER_SPAN_CONTEXT);
+        } catch (Throwable e) {
+            LOG.error(e, "onError error.");
+        }
         subscriber.onError(throwable);
     }
 
@@ -87,7 +91,7 @@ public class TracingSubscriber implements CoreSubscriber<Void> {
                     .ifPresent(httpStatus -> span.tag(Constants.Tags.STATUS_CODE, String.valueOf(httpStatus.value())));
             span.finish();
             exchange.getAttributes().remove(SERVER_SPAN_CONTEXT);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOG.error(e, "onComplete error.");
         }
         subscriber.onComplete();

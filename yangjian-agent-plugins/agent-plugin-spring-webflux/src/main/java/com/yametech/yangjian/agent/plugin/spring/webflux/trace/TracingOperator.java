@@ -87,7 +87,7 @@ public class TracingOperator extends MonoOperator<Void, Void> {
             try (final Tracer.SpanInScope scope = tracer.withSpanInScope(span)) {
                 source.subscribe(new TracingSubscriber(subscriber, exchange, context, span));
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOG.error(e, "subscribe error.");
             source.subscribe(subscriber);
         }
