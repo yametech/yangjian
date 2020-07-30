@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
+import com.yametech.yangjian.agent.api.common.StringUtil;
 import org.apache.dubbo.rpc.Result;
 import org.apache.dubbo.rpc.RpcContext;
 import org.apache.dubbo.rpc.RpcException;
@@ -43,125 +44,134 @@ import brave.internal.Platform;
 import static com.yametech.yangjian.agent.api.common.Constants.Tags.STATUS_CODE;
 
 public abstract class DubboSpanCreater<T extends ISpanCustom> implements ISpanCreater<SpanInfo>, ICustomLoad<T> {
-	protected static final MicrosClock MICROS_CLOCK = new MicrosClock();
-	private List<IDubboCustom> customs;
-	protected Tracer tracer;
-	private ISpanSample spanSample;
-	
-	@Override
-	public void init(Tracing tracing, ISpanSample spanSample) {
-		this.tracer = tracing.tracer();
-		this.spanSample = spanSample;
-	}
-	
-	@Override
-	public void custom(List<T> customs) {
-		this.customs = customs.stream().map(t -> (IDubboCustom)t).collect(Collectors.toList());
-	}
-	
-	protected BeforeResult<SpanInfo> spanInit(Span span, Object[] allArguments, IDubboCustom custom) {
-		InetSocketAddress remoteAddress = RpcContext.getContext().getRemoteAddress();
-	    if (remoteAddress != null) {
-	    	span.remoteIpAndPort(Platform.get().getHostString(remoteAddress), remoteAddress.getPort());
-	    }
-		span.tag(Constants.Tags.COMPONENT, Constants.Component.DUBBO)
-				.tag(Constants.Tags.PEER, Platform.get().getHostString(remoteAddress) + ":" + remoteAddress.getPort());
-	    setTags(span, allArguments, custom);
-	    return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
-	}
-	
-	@Override
-	public Object after(Object thisObj, Object[] allArguments, Method method, Object ret, Throwable t, BeforeResult<SpanInfo> beforeResult) {
-		if(beforeResult == null || beforeResult.getLocalVar() == null || beforeResult.getLocalVar().getSpan() == null) {
-			return ret;
-		}
-		SpanInfo span = beforeResult.getLocalVar();
-	    Throwable exception = t;
-	    if (exception == null) {
-	    	Result result = (Result) ret;
-	    	if (result.hasException()) {
-	    		exception = result.getException();
-	    	}
-	    }
-	    if(exception != null) {
-	    	span.getSpan().error(exception);
-			if (exception instanceof RpcException) {
-				span.getSpan().tag(STATUS_CODE, Integer.toString(((RpcException) exception).getCode()));
-			}
-	    }
-		span.getSpan().finish();
-		if(span.getScope() != null) {
-			span.getScope().close();
-		}
-		return ret;
-	}
-	
-	/**
-	 * 获取匹配的custom，如果有多个使用第一个
-	 * @param interfaceCls
-	 * @param methodName
-	 * @param parameterTypes
-	 * @return
-	 */
-	protected IDubboCustom getCustom(Class<?> interfaceCls, String methodName, Class<?>[] parameterTypes) {
-		if(customs == null) {
-			return null;
-		}
-		for(IDubboCustom custom : customs) {
-			if(custom.filter(interfaceCls, methodName, parameterTypes)) {
-				return custom;
-			}
-		}
-		return null;
-	}
+    protected static final MicrosClock MICROS_CLOCK = new MicrosClock();
+    private List<IDubboCustom> customs;
+    protected Tracer tracer;
+    private ISpanSample spanSample;
 
-	/**
-	 * 是否生成Span
-	 * @param allArguments
-	 * @return
-	 */
-	protected boolean generateSpan(Object[] allArguments, IDubboCustom custom) {
-		if(custom != null) {
-			return custom.sample(allArguments, spanSample);
-		}
-		return spanSample.sample();
-	}
-	
-	/**
-	 * 获取span名称
-	 * @param className
-	 * @param methodName
-	 * @param parameterTypes
-	 * @return
-	 */
-	protected String getSpanName(String className, String methodName, Class<?>[] parameterTypes) {
-		StringBuilder name = new StringBuilder();
-		name.append(className)
-			.append('.').append(methodName)
-			.append('(');
-		for (Class<?> classes : parameterTypes) {
-			name.append(classes.getSimpleName() + ",");
+    @Override
+    public void init(Tracing tracing, ISpanSample spanSample) {
+        this.tracer = tracing.tracer();
+        this.spanSample = spanSample;
+    }
+
+    @Override
+    public void custom(List<T> customs) {
+        this.customs = customs.stream().map(t -> (IDubboCustom) t).collect(Collectors.toList());
+    }
+
+    protected BeforeResult<SpanInfo> spanInit(Span span, Object[] allArguments, IDubboCustom custom) {
+        InetSocketAddress remoteAddress = RpcContext.getContext().getRemoteAddress();
+        if (remoteAddress != null) {
+            span.remoteIpAndPort(Platform.get().getHostString(remoteAddress), remoteAddress.getPort());
+        }
+        span.tag(Constants.Tags.COMPONENT, Constants.Component.DUBBO)
+                .tag(Constants.Tags.PEER, Platform.get().getHostString(remoteAddress) + ":" + remoteAddress.getPort());
+        setTags(span, allArguments, custom);
+        return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
+    }
+
+    @Override
+    public Object after(Object thisObj, Object[] allArguments, Method method, Object ret, Throwable t, BeforeResult<SpanInfo> beforeResult) {
+        if (beforeResult == null || beforeResult.getLocalVar() == null || beforeResult.getLocalVar().getSpan() == null) {
+            return ret;
+        }
+        SpanInfo span = beforeResult.getLocalVar();
+        Throwable exception = t;
+        if (exception == null) {
+            Result result = (Result) ret;
+            if (result.hasException()) {
+                exception = result.getException();
+            }
+        }
+        if (exception != null) {
+            span.getSpan().error(exception);
+            if (exception instanceof RpcException) {
+                span.getSpan().tag(STATUS_CODE, Integer.toString(((RpcException) exception).getCode()));
+            }
+        }
+        span.getSpan().finish();
+        if (span.getScope() != null) {
+            span.getScope().close();
+        }
+        return ret;
+    }
+
+    /**
+     * 获取匹配的custom，如果有多个使用第一个
+     *
+     * @param interfaceCls
+     * @param methodName
+     * @param parameterTypes
+     * @return
+     */
+    protected IDubboCustom getCustom(Class<?> interfaceCls, String methodName, Class<?>[] parameterTypes) {
+        if (customs == null) {
+            return null;
+        }
+        for (IDubboCustom custom : customs) {
+            if (custom.filter(interfaceCls, methodName, parameterTypes)) {
+                return custom;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 是否生成Span
+     *
+     * @param allArguments
+     * @return
+     */
+    protected boolean generateSpan(Object[] allArguments, IDubboCustom custom) {
+        if (custom != null) {
+            return custom.sample(allArguments, spanSample);
+        }
+        return spanSample.sample();
+    }
+
+    /**
+     * 获取span名称
+     *
+     * @param className
+     * @param methodName
+     * @param parameterTypes
+     * @return
+     */
+    protected String getSpanName(String className, String methodName, Class<?>[] parameterTypes) {
+        StringBuilder name = new StringBuilder();
+        name.append(className)
+                .append('.').append(methodName)
+                .append('(');
+        for (Class<?> classes : parameterTypes) {
+            name.append(classes.getSimpleName() + ",");
         }
         if (parameterTypes.length > 0) {
-        	name.delete(name.length() - 1, name.length());
+            name.delete(name.length() - 1, name.length());
         }
         name.append(")");
         return name.toString();
-	}
-	
-	/**
-	 * 设置tags
-	 * @param span
-	 * @param arguments
-	 */
-	protected void setTags(Span span, Object[] arguments, IDubboCustom custom) {
-		if(custom == null) {
-			return;
-		}
-		Map<String, String> tags = custom.tags(arguments);
-		if(tags != null) {
-			tags.forEach(span::tag);
-		}
-	}
-	
+    }
+
+    /**
+     * 设置tags
+     *
+     * @param span
+     * @param arguments
+     */
+    protected void setTags(Span span, Object[] arguments, IDubboCustom custom) {
+        if (custom == null) {
+            return;
+        }
+        Map<String, String> tags = custom.tags(arguments);
+        if (tags != null) {
+			for (Map.Entry<String, String> entry : tags.entrySet()) {
+				if (StringUtil.isEmpty(entry.getKey()) || StringUtil.isEmpty(entry.getValue())) {
+					continue;
+				}
+				span.tag(entry.getKey(), entry.getValue());
+			}
+        }
+    }
+
 }

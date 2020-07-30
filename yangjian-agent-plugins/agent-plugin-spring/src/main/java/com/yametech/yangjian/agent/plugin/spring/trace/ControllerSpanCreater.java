@@ -58,6 +58,7 @@ public class ControllerSpanCreater implements ISpanCreater<SpanInfo> {
 
     @Override
     public BeforeResult<SpanInfo> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
+        Span span = null;
         try {
             ServletRequestAttributes requestAttributes = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes());
             if (requestAttributes == null) {
@@ -74,7 +75,7 @@ public class ControllerSpanCreater implements ISpanCreater<SpanInfo> {
             if (startTime == -1L) {
                 return null;
             }
-            Span span = tracer.nextSpan(extractor.extract(request))
+            span = tracer.nextSpan(extractor.extract(request))
                     .kind(Span.Kind.SERVER)
                     .name(MethodUtil.getSimpleMethodId(method))
                     .tag(Constants.Tags.COMPONENT, Constants.Component.SPRING_MVC)
@@ -87,16 +88,19 @@ public class ControllerSpanCreater implements ISpanCreater<SpanInfo> {
             }
             final Map<String, String[]> parameterMap = request.getParameterMap();
             if (parameterMap != null && !parameterMap.isEmpty()) {
-                parameterMap.forEach((k, v) -> {
+                for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
                     // 这里判断是因为极端情况下key有可能为空 例如：http://xxxxx.com/t?=123
-                    if (StringUtil.isEmpty(k)) {
-                        return;
+                    if (StringUtil.isEmpty(entry.getKey())) {
+                        continue;
                     }
-                    span.tag(k, Arrays.toString(v));
-                });
+                    span.tag(entry.getKey(), Arrays.toString(entry.getValue()));
+                }
             }
             return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
         } catch (Throwable t) {
+            if (span != null) {
+                span.finish();
+            }
             // 防止方法异常导致没有执行after方法，所以这里直接remove
             CONTEXT_LOCAL.remove();
             throw t;

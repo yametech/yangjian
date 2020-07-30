@@ -38,10 +38,6 @@ public class ControllerConvert implements IMethodConvert {
 	@Override
 	public List<TimeEvent> convert( Object thisObj, long startTime, Object[] allArguments, Method method, Object ret,
 			Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
-//		System.err.println(thisObj.getClass().getClassLoader());
-//		System.err.println(this.getClass().getClassLoader());
-//		System.err.println(Thread.currentThread().getContextClassLoader());
-		
 		if (!(thisObj instanceof InvocableHandlerMethod)) {
             return null;
         }

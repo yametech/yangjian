@@ -16,9 +16,13 @@
 package com.yametech.yangjian.agent.plugin.spring.webflux.trace;
 
 import brave.Span;
+import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.plugin.spring.webflux.bean.RequestEvent;
+import com.yametech.yangjian.agent.plugin.spring.webflux.context.ContextConstants;
 import org.reactivestreams.Subscription;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.reactive.HandlerMapping;
@@ -71,11 +75,13 @@ public class TracingSubscriber implements CoreSubscriber<Void> {
     @Override
     public void onError(final Throwable throwable) {
         try {
+            setSpanName();
             span.error(throwable);
-            span.finish();
             exchange.getAttributes().remove(SERVER_SPAN_CONTEXT);
         } catch (Throwable e) {
             LOG.error(e, "onError error.");
+        } finally {
+            span.finish();
         }
         subscriber.onError(throwable);
     }
@@ -83,16 +89,14 @@ public class TracingSubscriber implements CoreSubscriber<Void> {
     @Override
     public void onComplete() {
         try {
-            Object pathPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
-            if (pathPattern != null) {
-                span.name(((PathPattern) pathPattern).getPatternString());
-            }
+            setSpanName();
             Optional.ofNullable(exchange.getResponse().getStatusCode())
                     .ifPresent(httpStatus -> span.tag(Constants.Tags.STATUS_CODE, String.valueOf(httpStatus.value())));
-            span.finish();
             exchange.getAttributes().remove(SERVER_SPAN_CONTEXT);
         } catch (Throwable e) {
             LOG.error(e, "onComplete error.");
+        } finally {
+            span.finish();
         }
         subscriber.onComplete();
     }
@@ -100,5 +104,26 @@ public class TracingSubscriber implements CoreSubscriber<Void> {
     @Override
     public Context currentContext() {
         return context;
+    }
+
+    private void setSpanName() {
+        String spanName = null;
+        if (exchange instanceof IContext) {
+            RequestEvent requestEvent = (RequestEvent) ((IContext) exchange)._getAgentContext(ContextConstants.REQUEST_EVENT_CONTEXT_KEY);
+            if (requestEvent != null) {
+                spanName = requestEvent.getMethodName();
+            }
+        }
+
+        if (StringUtil.isEmpty(spanName)) {
+            Object pathPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+            if (pathPattern != null) {
+                spanName = ((PathPattern) pathPattern).getPatternString();
+            }
+        }
+
+        if (StringUtil.notEmpty(spanName)) {
+            span.name(spanName);
+        }
     }
 }
