@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.yametech.yangjian.agent.api.common.BraveUtil.MAP_SETTER;
+import static com.yametech.yangjian.agent.api.common.Constants.MAX_SPAN_NAME_LENGTH;
 import static com.yametech.yangjian.agent.plugin.spring.webflux.context.ContextConstants.REQUEST_HEADER_CONTEXT_KEY;
 import static com.yametech.yangjian.agent.plugin.spring.webflux.context.ContextConstants.RESPONSE_STATUS_CONTEXT_KEY;
 
@@ -88,7 +89,8 @@ public class DefaultExchangeFunctionSpanCreater implements ISpanCreater<SpanInfo
 
         // 自定义字段为了后续服务拓扑图生成
         ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE, Constants.serviceName());
-        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.AGENT_SIGN, StringUtil.filterUrlParams(requestUrl));
+        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.AGENT_SIGN,
+                StringUtil.shorten(StringUtil.filterUrlParams(requestUrl), MAX_SPAN_NAME_LENGTH));
         Map<String, String> headers = new HashMap<>();
         injector.inject(span.context(), headers);
         if (clientRequest instanceof IContext) {

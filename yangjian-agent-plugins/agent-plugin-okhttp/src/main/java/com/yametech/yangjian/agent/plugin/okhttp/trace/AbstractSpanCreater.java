@@ -22,6 +22,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import static com.yametech.yangjian.agent.api.common.Constants.MAX_SPAN_NAME_LENGTH;
+
 /**
  * @author dengliming
  * @date 2020/4/24
@@ -62,7 +64,8 @@ public abstract class AbstractSpanCreater implements ISpanCreater<SpanInfo> {
                 .start(startTime);
         // 自定义字段为了后续服务拓扑图生成
         ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE, Constants.serviceName());
-        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.AGENT_SIGN, StringUtil.filterUrlParams(requestUrl.toString()));
+        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.AGENT_SIGN,
+                StringUtil.shorten(StringUtil.filterUrlParams(requestUrl.toString()), MAX_SPAN_NAME_LENGTH));
         span.remoteIpAndPort(requestUrl.host(), requestUrl.port());
         Field headersField = Request.class.getDeclaredField("headers");
         Field modifiersField = Field.class.getDeclaredField("modifiers");

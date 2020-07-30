@@ -45,6 +45,8 @@ public class Constants {
     public static final String DISABLE_SPI_KEY_PREFIX = "spi.";
     public static final String DEPENDENCY_PATH = "dependency/";
 
+    public static final int MAX_SPAN_NAME_LENGTH = 255;
+
     public static class Status {
     	public static final String STARTING = "starting";// 服务启动中
     	public static final String STARTED = "started";// 服务已启动

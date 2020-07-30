@@ -30,6 +30,8 @@ import com.yametech.yangjian.agent.api.trace.SpanInfo;
 import org.apache.commons.httpclient.*;
 import java.lang.reflect.Method;
 
+import static com.yametech.yangjian.agent.api.common.Constants.MAX_SPAN_NAME_LENGTH;
+
 /**
  * @author dengliming
  * @date 2020/4/25
@@ -69,7 +71,8 @@ public class HttpClientSpanCreater implements ISpanCreater<SpanInfo> {
                 .start(startTime);
         span.remoteIpAndPort(httpMethod.getURI().getHost(), httpMethod.getURI().getPort());
         ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE, Constants.serviceName());
-        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.AGENT_SIGN, StringUtil.filterUrlParams(uri.toString()));
+        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.AGENT_SIGN,
+                StringUtil.shorten(StringUtil.filterUrlParams(uri.toString()), MAX_SPAN_NAME_LENGTH));
         injector.inject(span.context(), httpMethod);
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }
