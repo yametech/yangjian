@@ -87,7 +87,13 @@ public class ControllerSpanCreater implements ISpanCreater<SpanInfo> {
             }
             final Map<String, String[]> parameterMap = request.getParameterMap();
             if (parameterMap != null && !parameterMap.isEmpty()) {
-                parameterMap.forEach((k, v) -> span.tag(k, Arrays.toString(v)));
+                parameterMap.forEach((k, v) -> {
+                    // 这里判断是因为极端情况下key有可能为空 例如：http://xxxxx.com/t?=123
+                    if (StringUtil.isEmpty(k)) {
+                        return;
+                    }
+                    span.tag(k, Arrays.toString(v));
+                });
             }
             return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
         } catch (Throwable t) {
