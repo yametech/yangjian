@@ -34,7 +34,7 @@ public class CombineAndMatch implements IConfigMatch {
 	
 	@Override
 	public boolean isMatch(MethodDefined methodDefined) {
-		boolean notMatch = matches.stream().parallel().anyMatch(match -> !match.isMatch(methodDefined));
+		boolean notMatch = matches.stream().anyMatch(match -> !match.isMatch(methodDefined));
 		return !notMatch;
 	}
 	
