@@ -86,6 +86,10 @@ public class ControllerSpanCreater implements ISpanCreater<SpanInfo> {
             if (StringUtil.notEmpty(span.context().parentIdString()) && StringUtil.notEmpty(parentServiceName)) {
                 span.tag(Constants.Tags.PARENT_SERVICE_NAME, parentServiceName);
             }
+            String agentSign = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.AGENT_SIGN);
+            if (StringUtil.notEmpty(agentSign)) {
+                span.tag(Constants.Tags.AGENT_SIGN, agentSign);
+            }
             final Map<String, String[]> parameterMap = request.getParameterMap();
             if (parameterMap != null && !parameterMap.isEmpty()) {
                 for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
