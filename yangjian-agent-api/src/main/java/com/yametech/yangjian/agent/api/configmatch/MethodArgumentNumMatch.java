@@ -38,7 +38,7 @@ public class MethodArgumentNumMatch implements IConfigMatch {
 	
 	@Override
 	public String toString() {
-		return "argument num is " + argumentNum;
+		return "MethodArgumentNum[" + argumentNum + "]";
 	}
 	
 }

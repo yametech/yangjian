@@ -70,7 +70,7 @@ public class ElementMatcherConvert {
 //    	String methodName = inDefinedShape.isMethod() ? inDefinedShape.getInternalName() : inDefinedShape.getDeclaringType().asErasure().getName();
 		return new MethodDefined(classDefined, getMethodAnnotation(inDefinedShape), inDefinedShape.toString(),
 				methodName, getParams(inDefinedShape), inDefinedShape.getReturnType().asErasure().getActualName(),
-				inDefinedShape.isStatic(), inDefinedShape.isConstructor(), inDefinedShape.isMethod());
+				inDefinedShape.isStatic(), inDefinedShape.isConstructor(), !inDefinedShape.isStatic());
 
 //    	System.out.println("class=" + thisClass.getActualName());
 //    	System.out.println("SuperClass=" + getSuperClass(thisClass));
@@ -124,7 +124,7 @@ public class ElementMatcherConvert {
 				}
 				values.put(method.getActualName(), children);
 			} else {
-				LOGGER.warn("can't resolve: {} - {}", annotation.getAnnotationType().getActualName(), method.getActualName());
+				LOGGER.info("can't resolve: {} - {}", annotation.getAnnotationType().getActualName(), method.getActualName());
 			}
 		});
 		return new Annotation(annotation.getAnnotationType().getActualName(), values);

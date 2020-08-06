@@ -32,7 +32,7 @@ public class MethodStatisticMatch implements IConfigMatch {
 	
 	@Override
 	public String toString() {
-		return "Statistic Method";
+		return "MethodStatistic[]";
 	}
 	
 }

@@ -13,26 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yametech.yangjian.agent.api.configmatch;
+package com.yametech.yangjian.agent.client.test;
 
-import com.yametech.yangjian.agent.api.base.IConfigMatch;
-import com.yametech.yangjian.agent.api.bean.MethodDefined;
+import com.yametech.yangjian.agent.client.MetricUtil;
+import org.junit.Test;
 
-/**
- * 构造方法匹配
- * 
- * @author liuzhao
- */
-public class MethodConstructorMatch implements IConfigMatch {
+public class MetricTest {
 	
-	@Override
-	public boolean isMatch(MethodDefined methodDefined) {
-		return methodDefined.isConstructorMethod();
+	@Test
+	public void test() throws Exception {
+		MetricUtil.mark("MetricTest");
 	}
-	
-	@Override
-	public String toString() {
-		return "MethodConstructor[]";
+
+	@Test
+	public void test2() throws Exception {
+		MetricUtil.mark("MetricTest");
 	}
-	
 }

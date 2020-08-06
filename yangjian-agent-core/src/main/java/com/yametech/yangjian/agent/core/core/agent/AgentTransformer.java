@@ -80,7 +80,7 @@ public class AgentTransformer implements AgentBuilder.Transformer {
 			classLoaderName = classLoader.getClass().getName();
 		}
     	if(classLoaderName != null && ignoreClassLoaderName != null && ignoreClassLoaderName.contains(classLoaderName)) {
-    		log.warn("ignore classLoader: {}	{}", classLoaderName, typeDescription);
+    		log.info("ignore classLoader: {}	{}", classLoaderName, typeDescription);
     		return builder;
     	}
 //    	log.info("{}:enhanceContextClass", typeDescription);

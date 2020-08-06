@@ -37,7 +37,7 @@ public class MethodNameMatch implements IConfigMatch {
 	
 	@Override
 	public String toString() {
-		return name;
+		return "MethodName[" + name + "]";
 	}
 	
 }

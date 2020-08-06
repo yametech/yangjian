@@ -37,7 +37,7 @@ public class ClassMatch implements IConfigMatch {
 	
 	@Override
 	public String toString() {
-		return cls;
+		return "Class[" + cls + "]";
 	}
 	
 }

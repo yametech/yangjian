@@ -35,7 +35,7 @@ public class MethodMetricMatcher implements IMetricMatcher {
                         new MethodNameMatch("mark"),
                         new MethodArgumentNumMatch(3),
                         new MethodArgumentIndexMatch(0, "java.lang.String"),
-                        new MethodArgumentIndexMatch(1, "java.lang.int"),
+                        new MethodArgumentIndexMatch(1, "int"),
                         new MethodArgumentIndexMatch(2, "java.util.function.Supplier")
                 )),
                 new CombineAndMatch(Arrays.asList(
@@ -43,7 +43,7 @@ public class MethodMetricMatcher implements IMetricMatcher {
                         new MethodNameMatch("mark"),
                         new MethodArgumentNumMatch(2),
                         new MethodArgumentIndexMatch(0, "java.lang.String"),
-                        new MethodArgumentIndexMatch(1, "java.lang.int")
+                        new MethodArgumentIndexMatch(1, "int")
                 ))
         ));
     }

@@ -32,7 +32,7 @@ public class MethodInstaceMatch implements IConfigMatch {
 	
 	@Override
 	public String toString() {
-		return "Instance Method";
+		return "MethodInstace[]";
 	}
 	
 }

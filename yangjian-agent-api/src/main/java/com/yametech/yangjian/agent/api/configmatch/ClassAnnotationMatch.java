@@ -38,7 +38,7 @@ public class ClassAnnotationMatch implements IConfigMatch {
 	
 	@Override
 	public String toString() {
-		return annotation;
+		return "ClassAnnotation[" + annotation + "]";
 	}
 	
 }

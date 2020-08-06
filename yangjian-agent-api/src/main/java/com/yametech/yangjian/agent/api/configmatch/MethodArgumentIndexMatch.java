@@ -42,7 +42,7 @@ public class MethodArgumentIndexMatch implements IConfigMatch {
 	
 	@Override
 	public String toString() {
-		return "argument index " + index + " is " + type;
+		return "MethodArgumentIndex[" + index + " = " + type + "]";
 	}
 	
 }

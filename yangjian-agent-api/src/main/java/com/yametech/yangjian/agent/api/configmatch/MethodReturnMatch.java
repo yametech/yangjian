@@ -37,7 +37,7 @@ public class MethodReturnMatch implements IConfigMatch {
 	
 	@Override
 	public String toString() {
-		return returnCls;
+		return "MethodReturn[" + returnCls + "]";
 	}
 	
 }

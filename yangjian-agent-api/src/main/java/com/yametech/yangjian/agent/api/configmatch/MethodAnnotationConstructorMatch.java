@@ -43,7 +43,7 @@ public class MethodAnnotationConstructorMatch implements IConfigMatch {
 	
 	@Override
 	public String toString() {
-		return "Constructor has method annotation " + annotation;
+		return "MethodAnnotationConstructor[" + annotation + "]";
 	}
 	
 }
