@@ -224,6 +224,11 @@
                                 <copy file="${project.build.directory}/yangjian-agent-core.jar" tofile="${project.basedir}/../${agent.package.name}/lib/yangjian-agent.jar" overwrite="true" />
 								<!-- 此处不能拷贝src下的文件，所以使用maven-resources-plugin拷贝config -->
 <!-- 								<copy src="${project.basedir}/src/main/resources/agent.properties" dest="${project.basedir}/dist/ecpark-agent/config" forceoverwrite="true" /> -->
+                                <!-- 此文件为每次打包生成的版本号 -->
+                                <tstamp>
+                                    <format property="last.updated" pattern="yyyyMMddHHmm"/>
+                                </tstamp>
+                                <echo message="${last.updated}" file="${project.basedir}/../${agent.package.name}/version.txt"/>
                             </tasks>
                         </configuration>
                     </execution>
