@@ -39,7 +39,7 @@ public class MethodRegexMatch implements IConfigMatch {
 	
 	@Override
 	public String toString() {
-		return pattern.pattern();
+		return "MethodRegex[" + pattern.pattern() + "]";
 	}
 	
 }

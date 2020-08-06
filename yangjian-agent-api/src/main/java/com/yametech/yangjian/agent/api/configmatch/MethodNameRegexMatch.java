@@ -37,6 +37,6 @@ public class MethodNameRegexMatch implements IConfigMatch {
 
 	@Override
 	public String toString() {
-		return pattern.pattern();
+		return "MethodNameRegex[" + pattern.pattern() + "]";
 	}
 }

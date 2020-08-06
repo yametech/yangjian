@@ -37,7 +37,7 @@ public class SuperClassMatch implements IConfigMatch {
 	
 	@Override
 	public String toString() {
-		return superClass;
+		return "SuperClass[" + superClass + "]";
 	}
 	
 }

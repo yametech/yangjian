@@ -32,7 +32,7 @@ public class MethodConstructorMatch implements IConfigMatch {
 	
 	@Override
 	public String toString() {
-		return "Constructor Method";
+		return "MethodConstructor[]";
 	}
 	
 }

@@ -32,6 +32,6 @@ public class AnyMatch implements IConfigMatch {
 
     @Override
     public String toString() {
-        return " Any()";
+        return " Any[]";
     }
 }

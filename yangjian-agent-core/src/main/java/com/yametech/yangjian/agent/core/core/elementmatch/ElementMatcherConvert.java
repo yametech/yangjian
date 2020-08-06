@@ -124,7 +124,7 @@ public class ElementMatcherConvert {
 				}
 				values.put(method.getActualName(), children);
 			} else {
-				LOGGER.warn("can't resolve: {} - {}", annotation.getAnnotationType().getActualName(), method.getActualName());
+				LOGGER.info("can't resolve: {} - {}", annotation.getAnnotationType().getActualName(), method.getActualName());
 			}
 		});
 		return new Annotation(annotation.getAnnotationType().getActualName(), values);

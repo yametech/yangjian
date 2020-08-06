@@ -37,7 +37,7 @@ public class InterfaceMatch implements IConfigMatch {
 	
 	@Override
 	public String toString() {
-		return interfaceName;
+		return "Interface[" + interfaceName + "]";
 	}
 	
 }
