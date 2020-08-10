@@ -71,7 +71,9 @@ public class OperationExecutorSpanCreater implements ISpanCreater<SpanInfo> {
         String database = null;
         if (allArguments[0] instanceof IContext) {
             MongoNamespace namespace = (MongoNamespace) ((IContext) allArguments[0])._getAgentContext(ContextConstants.MONGO_OPERATOR_COLLECTION);
-            database = namespace.getDatabaseName();
+            if (namespace != null) {
+                database = namespace.getDatabaseName();
+            }
         }
 
         Span span = tracer.nextSpan()
