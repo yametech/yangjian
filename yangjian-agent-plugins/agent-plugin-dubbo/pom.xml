@@ -12,6 +12,7 @@
 
     <properties>
 		<dubbo.version>2.7.3</dubbo.version>
+        <alibaba.dubbo.version>2.6.1</alibaba.dubbo.version>
 		<curator-recipes.version>4.1.0</curator-recipes.version>
 		<zkclient.version>0.1</zkclient.version>
 		<zookeeper.version>3.4.13</zookeeper.version>
@@ -24,12 +25,12 @@
             <version>${dubbo.version}</version>
             <scope>provided</scope>
         </dependency>
-<!--         <dependency> -->
-<!--             <groupId>org.springframework</groupId> -->
-<!--             <artifactId>spring-aop</artifactId> -->
-<!--             <version>5.0.8.RELEASE</version> -->
-<!--             <scope>provided</scope> -->
-<!--         </dependency> -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>dubbo</artifactId>
+            <version>${alibaba.dubbo.version}</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/io.zipkin.brave/brave -->
 		<dependency>
 		    <groupId>io.zipkin.brave</groupId>
@@ -48,13 +49,13 @@
 		    <groupId>org.apache.curator</groupId>
 		    <artifactId>curator-recipes</artifactId>
 		    <version>${curator-recipes.version}</version>
-		    <scope>provided</scope>
+		    <scope>test</scope>
 		</dependency>
         <dependency>
 	        <groupId>org.apache.zookeeper</groupId>
 	        <artifactId>zookeeper</artifactId>
 	        <version>${zookeeper.version}</version>
-	        <scope>provided</scope>
+	        <scope>test</scope>
 		</dependency>
         <dependency>
             <groupId>com.github.yametech</groupId>
@@ -63,4 +64,20 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <!-- 以下插件加入是为了方便测试（同时引入apache-dubbo、alibaba-dubbo包会抛出异常 couldn't be instantiated: com.alibaba.dubbo.common.logger.LoggerAdapter.getLogger(Ljava/lang/String;)Lcom/alibaba/dubbo/common/logger/Logger;） -->
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12.2</version>
+                <configuration>
+                    <classpathDependencyExcludes>
+                        <classpathDependencyExclude>com.alibaba:dubbo</classpathDependencyExclude>
+                    </classpathDependencyExcludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
