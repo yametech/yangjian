@@ -15,28 +15,27 @@
  */
 package com.yametech.yangjian.agent.plugin.dubbo.trace;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-
+import brave.Span;
+import brave.Span.Kind;
+import brave.Tracing;
 import brave.propagation.ExtraFieldPropagation;
-import com.yametech.yangjian.agent.api.common.Constants;
-import org.apache.dubbo.rpc.Invocation;
-import org.apache.dubbo.rpc.Invoker;
-import org.apache.dubbo.rpc.RpcContext;
-
+import brave.propagation.TraceContext;
+import com.alibaba.dubbo.rpc.Invocation;
+import com.alibaba.dubbo.rpc.Invoker;
+import com.alibaba.dubbo.rpc.RpcContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.BraveUtil;
+import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
 import com.yametech.yangjian.agent.api.trace.custom.IDubboClientCustom;
 import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
+import com.yametech.yangjian.agent.plugin.dubbo.util.DubboSpanUtil;
 
-import brave.Span;
-import brave.Span.Kind;
-import brave.Tracing;
-import brave.propagation.TraceContext;
+import java.lang.reflect.Method;
+import java.util.Map;
 
-public class DubboClientSpanCreater extends DubboSpanCreater<IDubboClientCustom> {
+public class AlibabaDubboClientSpanCreater extends AlibabaDubboSpanCreater<IDubboClientCustom> {
 	private TraceContext.Injector<Map<String, String>> injector;
 	
 	@Override
@@ -63,7 +62,7 @@ public class DubboClientSpanCreater extends DubboSpanCreater<IDubboClientCustom>
 		if (startTime == -1L) {
 			return null;
 		}
-		String methodId = getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes());
+		String methodId = DubboSpanUtil.getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes());
 		Span span = tracer.nextSpan()
 				.kind(Kind.CLIENT)
 				.name(methodId)

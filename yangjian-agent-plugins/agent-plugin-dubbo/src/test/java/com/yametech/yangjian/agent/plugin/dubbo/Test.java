@@ -16,13 +16,13 @@
 package com.yametech.yangjian.agent.plugin.dubbo;
 
 import com.yametech.yangjian.agent.plugin.dubbo.base.Utils;
-import com.yametech.yangjian.agent.plugin.dubbo.trace.DubboServerSpanCreater;
+import com.yametech.yangjian.agent.plugin.dubbo.trace.ApacheDubboServerSpanCreater;
 
 public class Test {
 	
 	@org.junit.Test
 	public void test(){
-		System.err.println(Utils.superClassGeneric(DubboServerSpanCreater.class, 0));
+		System.err.println(Utils.superClassGeneric(ApacheDubboServerSpanCreater.class, 0));
 	}
 
 

@@ -21,6 +21,7 @@ import java.util.Map;
 import brave.propagation.ExtraFieldPropagation;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.StringUtil;
+import com.yametech.yangjian.agent.plugin.dubbo.util.DubboSpanUtil;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.RpcContext;
@@ -38,7 +39,7 @@ import brave.Tracing;
 import brave.propagation.TraceContext;
 import brave.propagation.TraceContextOrSamplingFlags;
 
-public class DubboServerSpanCreater extends DubboSpanCreater<IDubboServerCustom> {
+public class ApacheDubboServerSpanCreater extends ApacheDubboSpanCreater<IDubboServerCustom> {
 	private TraceContext.Extractor<Map<String, String>> extractor;
 	
 	@Override
@@ -69,7 +70,7 @@ public class DubboServerSpanCreater extends DubboSpanCreater<IDubboServerCustom>
 //		invoker.getInterface().getName();
 		Span span = tracer.nextSpan(extracted)
 				.kind(kind)
-				.name(getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes()))
+				.name(DubboSpanUtil.getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes()))
 				.start(startTime);
 		String parentServiceName = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE);
 		if (StringUtil.notEmpty(span.context().parentIdString()) && StringUtil.notEmpty(parentServiceName)) {

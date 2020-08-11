@@ -15,35 +15,28 @@
  */
 package com.yametech.yangjian.agent.plugin.dubbo.trace;
 
-import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import com.yametech.yangjian.agent.api.common.Constants;
-import com.yametech.yangjian.agent.api.common.MicrosClock;
-import com.yametech.yangjian.agent.api.common.StringUtil;
-import org.apache.dubbo.rpc.Result;
-import org.apache.dubbo.rpc.RpcContext;
-import org.apache.dubbo.rpc.RpcException;
-
-import com.yametech.yangjian.agent.api.bean.BeforeResult;
-import com.yametech.yangjian.agent.api.trace.ICustomLoad;
-import com.yametech.yangjian.agent.api.trace.ISpanCreater;
-import com.yametech.yangjian.agent.api.trace.ISpanCustom;
-import com.yametech.yangjian.agent.api.trace.ISpanSample;
-import com.yametech.yangjian.agent.api.trace.SpanInfo;
-import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
-
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
 import brave.internal.Platform;
+import com.alibaba.dubbo.rpc.Result;
+import com.alibaba.dubbo.rpc.RpcContext;
+import com.alibaba.dubbo.rpc.RpcException;
+import com.yametech.yangjian.agent.api.bean.BeforeResult;
+import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.MicrosClock;
+import com.yametech.yangjian.agent.api.trace.*;
+import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
+import com.yametech.yangjian.agent.plugin.dubbo.util.DubboSpanUtil;
+
+import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.yametech.yangjian.agent.api.common.Constants.Tags.STATUS_CODE;
 
-public abstract class DubboSpanCreater<T extends ISpanCustom> implements ISpanCreater<SpanInfo>, ICustomLoad<T> {
+public abstract class AlibabaDubboSpanCreater<T extends ISpanCustom> implements ISpanCreater<SpanInfo>, ICustomLoad<T> {
     protected static final MicrosClock MICROS_CLOCK = new MicrosClock();
     private List<IDubboCustom> customs;
     protected Tracer tracer;
@@ -67,7 +60,7 @@ public abstract class DubboSpanCreater<T extends ISpanCustom> implements ISpanCr
         }
         span.tag(Constants.Tags.COMPONENT, Constants.Component.DUBBO)
                 .tag(Constants.Tags.PEER, Platform.get().getHostString(remoteAddress) + ":" + remoteAddress.getPort());
-        setTags(span, allArguments, custom);
+        DubboSpanUtil.setArgumentTags(span, allArguments, custom);
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }
 
@@ -129,49 +122,4 @@ public abstract class DubboSpanCreater<T extends ISpanCustom> implements ISpanCr
         }
         return spanSample.sample();
     }
-
-    /**
-     * 获取span名称
-     *
-     * @param className
-     * @param methodName
-     * @param parameterTypes
-     * @return
-     */
-    protected String getSpanName(String className, String methodName, Class<?>[] parameterTypes) {
-        StringBuilder name = new StringBuilder();
-        name.append(className)
-                .append('.').append(methodName)
-                .append('(');
-        for (Class<?> classes : parameterTypes) {
-            name.append(classes.getSimpleName() + ",");
-        }
-        if (parameterTypes.length > 0) {
-            name.delete(name.length() - 1, name.length());
-        }
-        name.append(")");
-        return name.toString();
-    }
-
-    /**
-     * 设置tags
-     *
-     * @param span
-     * @param arguments
-     */
-    protected void setTags(Span span, Object[] arguments, IDubboCustom custom) {
-        if (custom == null) {
-            return;
-        }
-        Map<String, String> tags = custom.tags(arguments);
-        if (tags != null) {
-			for (Map.Entry<String, String> entry : tags.entrySet()) {
-				if (StringUtil.isEmpty(entry.getKey()) || StringUtil.isEmpty(entry.getValue())) {
-					continue;
-				}
-				span.tag(entry.getKey(), entry.getValue());
-			}
-        }
-    }
-
 }

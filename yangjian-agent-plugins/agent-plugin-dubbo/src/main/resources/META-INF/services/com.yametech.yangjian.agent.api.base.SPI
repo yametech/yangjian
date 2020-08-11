@@ -1,4 +1,6 @@
 com.yametech.yangjian.agent.plugin.dubbo.DubboClientMatcher
 com.yametech.yangjian.agent.plugin.dubbo.DubboServerMatcher
-com.yametech.yangjian.agent.plugin.dubbo.trace.DubboClientTraceMatcher
-com.yametech.yangjian.agent.plugin.dubbo.trace.DubboServerTraceMatcher
+com.yametech.yangjian.agent.plugin.dubbo.trace.DubboClientTraceMatcher$ApacheDubboClientTraceMatcher
+com.yametech.yangjian.agent.plugin.dubbo.trace.DubboClientTraceMatcher$AlibabaDubboClientTraceMatcher
+com.yametech.yangjian.agent.plugin.dubbo.trace.DubboServerTraceMatcher$ApacheDubboServerTraceMatcher
+com.yametech.yangjian.agent.plugin.dubbo.trace.DubboServerTraceMatcher$AlibabaDubboServerTraceMatcher
