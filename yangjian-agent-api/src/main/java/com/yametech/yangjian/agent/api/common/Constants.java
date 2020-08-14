@@ -46,6 +46,7 @@ public class Constants {
     public static final String DEPENDENCY_PATH = "dependency/";
 
     public static final int MAX_SPAN_NAME_LENGTH = 255;
+    public static final int MAX_TAG_LENGTH = 255;
 
     public static class Status {
     	public static final String STARTING = "starting";// 服务启动中

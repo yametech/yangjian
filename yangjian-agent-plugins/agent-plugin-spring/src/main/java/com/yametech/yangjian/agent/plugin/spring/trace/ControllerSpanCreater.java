@@ -37,6 +37,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
 
+import static com.yametech.yangjian.agent.api.common.Constants.MAX_TAG_LENGTH;
 import static com.yametech.yangjian.agent.plugin.spring.trace.HandlerMethodInterceptor.CONTEXT_LOCAL;
 
 /**
@@ -44,13 +45,14 @@ import static com.yametech.yangjian.agent.plugin.spring.trace.HandlerMethodInter
  * @date 2020/4/20
  */
 public class ControllerSpanCreater implements ISpanCreater<SpanInfo> {
-    private static final MicrosClock MICROS_CLOCK = new MicrosClock();
+    private MicrosClock microsClock;
     protected Tracer tracer;
     private ISpanSample spanSample;
     private TraceContext.Extractor<HttpServletRequest> extractor;
 
     @Override
     public void init(Tracing tracing, ISpanSample spanSample) {
+        this.microsClock = new MicrosClock();
         this.tracer = tracing.tracer();
         this.spanSample = spanSample;
         this.extractor = tracing.propagation().extractor(HttpServletRequest::getHeader);
@@ -71,7 +73,7 @@ public class ControllerSpanCreater implements ISpanCreater<SpanInfo> {
             if (!spanSample.sample()) {
                 return null;
             }
-            long startTime = MICROS_CLOCK.nowMicros();
+            long startTime = microsClock.nowMicros();
             if (startTime == -1L) {
                 return null;
             }
@@ -97,7 +99,7 @@ public class ControllerSpanCreater implements ISpanCreater<SpanInfo> {
                     if (StringUtil.isEmpty(entry.getKey())) {
                         continue;
                     }
-                    span.tag(entry.getKey(), Arrays.toString(entry.getValue()));
+                    span.tag(entry.getKey(), StringUtil.shorten(Arrays.toString(entry.getValue()), MAX_TAG_LENGTH));
                 }
             }
             return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
