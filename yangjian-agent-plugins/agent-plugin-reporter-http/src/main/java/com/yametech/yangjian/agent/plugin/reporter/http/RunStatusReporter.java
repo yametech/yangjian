@@ -26,6 +26,9 @@ import com.yametech.yangjian.agent.util.HttpResponse;
 import java.util.*;
 
 /**
+ * 服务运行状态上报
+ * 注：agent.properties配置report=http-status、report.http-status.url=xxx
+ *
  * @author dengliming
  * @date 2020/8/17
  */

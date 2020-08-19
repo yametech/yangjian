@@ -33,7 +33,7 @@ import com.yametech.yangjian.agent.util.HttpResponse;
 /**
  * HTTP上报
  * <p>
- * 注：agent.properties配置report=http
+ * 注：agent.properties配置report=http-span、report.http-span.url=xxx
  *
  * @author dengliming
  * @date 2020/3/5
