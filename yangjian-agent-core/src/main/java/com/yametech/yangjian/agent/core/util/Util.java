@@ -128,17 +128,21 @@ public class Util {
 	}
 	
 	/**
-	 * 获取本机IP
+	 * 获取本机IP（获取本地所有IP地址）
+	 *
 	 * @param includeStart	包含的前缀匹配，可为null
 	 * @param excludeStart	排除的前缀匹配，可为null
 	 * @return
 	 */
 	public static String getIpAddress(String[] includeStart, String[] excludeStart) {
+		StringBuilder sb = new StringBuilder();
 		try {
 			Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
 			InetAddress ip = null;
+			List<String> ipList = new ArrayList<>();
 			while (allNetInterfaces.hasMoreElements()) {
 				NetworkInterface netInterface = allNetInterfaces.nextElement();
+				// 过滤 127.0.0.1和非活跃网卡
 				if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {
 					continue;
 				}
@@ -148,30 +152,34 @@ public class Util {
 					if (!(ip instanceof Inet4Address)) {
 						continue;
 					}
-					if(excludeStart != null) {
-						boolean isContinue = false;
-						for(String start : excludeStart) {
-							if(ip.getHostAddress().startsWith(start)) {
-								isContinue = true;
-								break;
-							}
-						}
-						if(isContinue) {
-							continue;
-						}
-					}
-					if(includeStart == null) {
-						return ip.getHostAddress();
-					}
-					for(String start : includeStart) {
-						if(ip.getHostAddress().startsWith(start)) {
-							return ip.getHostAddress();
+					ipList.add(ip.getHostAddress());
+				}
+			}
+
+			ipList.stream().filter(ipAddress -> {
+				if (excludeStart != null) {
+					for (String start : excludeStart) {
+						if (ipAddress.startsWith(start)) {
+							return false;
 						}
 					}
 				}
+				if (includeStart == null) {
+					return true;
+				}
+				for (String start : includeStart) {
+					if (ipAddress.startsWith(start)) {
+						return true;
+					}
+				}
+				return false;
+			}).forEach(ipAddress -> sb.append(ipAddress).append(","));
+
+			if (sb.length() > 0) {
+				sb.deleteCharAt(sb.length() - 1);
 			}
 		} catch (Exception e) {}
-		return null;
+		return sb.toString();
 	}
-	
+
 }

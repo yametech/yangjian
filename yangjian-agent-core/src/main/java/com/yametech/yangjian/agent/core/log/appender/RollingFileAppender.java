@@ -49,11 +49,11 @@ import com.yametech.yangjian.agent.core.log.impl.LogMessageHolder;
  * @description: 日志文件实现类
  **/
 public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<LogMessageHolder> {
-	
-	private static final String DISCARDED_LOG = "log.discarded";
+
+    private static final String DISCARDED_LOG = "log.discarded";
     private static final int RING_BUFFER_SIZE = 512;
-    private static final String LOG_FILE_PREFIX = "statistic.";
-    private static Pattern LOG_NAME_PATTERN = Pattern.compile("statistic\\.(\\d{8})\\.(\\d+)\\.log");
+    private static final String LOG_FILE_PREFIX_KEY = "log.file.prefix";
+    private static final String DEFAULT_LOG_FILE_PREFIX = "statistic";
     private static String DATE_PATTERN = "yyyyMMdd";
     private static final long ONE_DAY_MILLISECONDS = 24 * 60 * 60 * 1000L;
     private static final String AGENT_LOG_THREAD_PREFIX = "agent-log-writer";
@@ -66,7 +66,9 @@ public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<Lo
     private long currentFileSize;
     private int lineNum;
     private boolean discardedLog = false;
-    
+    private String logFilePrefix;
+    private Pattern logNamePattern;
+
     private static final int PRINT_INTERVAL_SECOND = 10;
     private AtomicLong printTime = new AtomicLong(0);// 打印时间
     private AtomicLong discardNum = new AtomicLong(0);// 总共丢弃的数据量
@@ -79,9 +81,12 @@ public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<Lo
         this.dir = getAppenderDir(appenderName);
         this.maxFileSize = Long.valueOf(Config.getKv(Constants.LOG_MAX_FILE_SIZE, LoggerFactory.DEFAULT_MAX_FILE_SIZE.toString()));
         this.maxFileNum = Integer.valueOf(Config.getKv(Constants.LOG_MAX_FILE_NUM, LoggerFactory.DEFAULT_MAX_FILE_NUM.toString()));
-        if(Config.getKv(DISCARDED_LOG) != null) {
-        	this.discardedLog = Boolean.valueOf(Config.getKv(DISCARDED_LOG));
+        if (Config.getKv(DISCARDED_LOG) != null) {
+            this.discardedLog = Boolean.valueOf(Config.getKv(DISCARDED_LOG));
         }
+        // 过滤.字符
+        this.logFilePrefix = Config.getKv(LOG_FILE_PREFIX_KEY, DEFAULT_LOG_FILE_PREFIX).replaceAll("\\.", "");
+        this.logNamePattern = Pattern.compile(logFilePrefix + "\\.(\\d{8})\\.(\\d+)\\.log");
         Disruptor<LogMessageHolder> disruptor = new Disruptor<>(
                 () -> new LogMessageHolder(),
                 RING_BUFFER_SIZE,
@@ -107,9 +112,9 @@ public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<Lo
     @Override
     public void onEvent(LogMessageHolder msgHolder, long sequence, boolean endOfBatch) {
         if (isStreamEnable()) {
-        	if(discardedLog) {
-        		printMetric();
-        	}
+            if (discardedLog) {
+                printMetric();
+            }
             try {
                 write(msgHolder.getMessage(), endOfBatch);
             } catch (IOException e) {
@@ -120,43 +125,43 @@ public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<Lo
             }
         }
     }
-    
+
     private void printMetric() {
-    	long seconds = printTime.get();
-    	long nowSecond = Instant.now().getEpochSecond();
-    	if(seconds < nowSecond - PRINT_INTERVAL_SECOND && printTime.compareAndSet(seconds, nowSecond)) {
-    		ResourceHolder.log.info("totalNum={}&periodTotalNum={}&discardNum={}&periodDiscardNum={}", 
-    				totalNum.get(), periodTotalNum.getAndSet(0), discardNum.get(), periodDiscardNum.getAndSet(0));
-    	}
+        long seconds = printTime.get();
+        long nowSecond = Instant.now().getEpochSecond();
+        if (seconds < nowSecond - PRINT_INTERVAL_SECOND && printTime.compareAndSet(seconds, nowSecond)) {
+            ResourceHolder.log.info("totalNum={}&periodTotalNum={}&discardNum={}&periodDiscardNum={}",
+                    totalNum.get(), periodTotalNum.getAndSet(0), discardNum.get(), periodDiscardNum.getAndSet(0));
+        }
     }
-    
+
     private static class ResourceHolder {// 保证惰加载
         static ILogger log = com.yametech.yangjian.agent.api.log.LoggerFactory.getLogger(ResourceHolder.class);
     }
 
     @Override
     public void append(LogEvent logEvent) {
-    	if(discardedLog) {// 防止日志量过多时阻塞，增加日志输出监控（丢弃多少条，发布多少条）
-    		try {
-    			long sequence = ringBuffer.tryNext();
-    			LogMessageHolder messageHolder = ringBuffer.get(sequence);
-    			messageHolder.setMessage(logEvent.getMessage());
-    			ringBuffer.publish(sequence);
-    		} catch (InsufficientCapacityException e) {
-    			discardNum.getAndIncrement();
-    			periodDiscardNum.getAndIncrement();
-    		}
-    		totalNum.getAndIncrement();
-    		periodTotalNum.getAndIncrement();
-    	} else {
-    		long next = ringBuffer.next();
-    		try {
-    			LogMessageHolder messageHolder = ringBuffer.get(next);
-    			messageHolder.setMessage(logEvent.getMessage());
-    		} finally {
-    			ringBuffer.publish(next);
-    		}
-    	}
+        if (discardedLog) {// 防止日志量过多时阻塞，增加日志输出监控（丢弃多少条，发布多少条）
+            try {
+                long sequence = ringBuffer.tryNext();
+                LogMessageHolder messageHolder = ringBuffer.get(sequence);
+                messageHolder.setMessage(logEvent.getMessage());
+                ringBuffer.publish(sequence);
+            } catch (InsufficientCapacityException e) {
+                discardNum.getAndIncrement();
+                periodDiscardNum.getAndIncrement();
+            }
+            totalNum.getAndIncrement();
+            periodTotalNum.getAndIncrement();
+        } else {
+            long next = ringBuffer.next();
+            try {
+                LogMessageHolder messageHolder = ringBuffer.get(next);
+                messageHolder.setMessage(logEvent.getMessage());
+            } finally {
+                ringBuffer.publish(next);
+            }
+        }
     }
 
     private void write(String message, boolean endOfBatch) throws IOException {
@@ -186,7 +191,7 @@ public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<Lo
     }
 
     private String getFileNamePrefix() {
-        return LOG_FILE_PREFIX + new SimpleDateFormat(DATE_PATTERN).format(new Date());
+        return logFilePrefix + "." + new SimpleDateFormat(DATE_PATTERN).format(new Date());
     }
 
     private File createFile(int fileIndex) {
@@ -227,7 +232,7 @@ public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<Lo
         for (int i = 0; i < children.length; i++) {
             File child = children[i];
             String name = child.getName();
-            Matcher matcher = LOG_NAME_PATTERN.matcher(name);
+            Matcher matcher = logNamePattern.matcher(name);
             if (matcher.find()) {
                 String date = matcher.group(1);
                 int num = Integer.valueOf(matcher.group(2));
@@ -240,8 +245,8 @@ public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<Lo
         int outOf = children.length - maxFileNum;
         if (outOf > 0) {
             for (int i = 0; outOf > 0; outOf--, i++) {
-                if(!fileInfos.get(i).file.delete()) {
-                	
+                if (!fileInfos.get(i).file.delete()) {
+
                 }
             }
         }

@@ -45,23 +45,24 @@ public final class LoggerFactory {
      * @return  xx
      */
     private static ILoggerServiceProvider getProvider() {
-        if (PROVIDER == null) {
-            synchronized (LoggerFactory.class) {
-                if (PROVIDER == null) {
-                    try {
-                        ServiceLoader<ILoggerServiceProvider> serviceLoader = ServiceLoader.load(ILoggerServiceProvider.class);
-                        List<ILoggerServiceProvider> providerList = new ArrayList<>();
-                        for (ILoggerServiceProvider provider : serviceLoader) {
-                            providerList.add(provider);
-                        }
-                        PROVIDER = providerList != null && !providerList.isEmpty() ? providerList.get(0) : new NOPLoggerProvider();
-                    } catch (Exception e) {
-                        PROVIDER = new NOPLoggerProvider();
-                        printLog("Found logger provider error.", e);
+        if (PROVIDER != null) {
+            return PROVIDER;
+        }
+        synchronized (LoggerFactory.class) {
+            if (PROVIDER == null) {
+                try {
+                    ServiceLoader<ILoggerServiceProvider> serviceLoader = ServiceLoader.load(ILoggerServiceProvider.class);
+                    List<ILoggerServiceProvider> providerList = new ArrayList<>();
+                    for (ILoggerServiceProvider provider : serviceLoader) {
+                        providerList.add(provider);
                     }
-                    PROVIDER.initialize();
-                    printLog(String.format("Found logger provider [%s]", PROVIDER.getClass()));
+                    PROVIDER = providerList != null && !providerList.isEmpty() ? providerList.get(0) : new NOPLoggerProvider();
+                } catch (Exception e) {
+                    PROVIDER = new NOPLoggerProvider();
+                    printLog("Found logger provider error.", e);
                 }
+                PROVIDER.initialize();
+                printLog(String.format("Found logger provider [%s]", PROVIDER.getClass()));
             }
         }
         return PROVIDER;
