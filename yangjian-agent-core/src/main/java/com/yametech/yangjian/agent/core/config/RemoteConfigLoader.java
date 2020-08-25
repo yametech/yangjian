@@ -118,12 +118,13 @@ public class RemoteConfigLoader implements IConfigLoader, ISchedule {
      */
     private void refreshConfig(boolean first) {
         String url = Config.getKv(Constants.CONFIG_REMOTE_URL);
+        String env = Config.getKv(Constants.SERVICE_ENV, "");
         String serviceName = Config.SERVICE_NAME.getValue();
         // 要配置远程url和应用名才去获取远程配置
         if (StringUtil.isEmpty(url) || StringUtil.isEmpty(serviceName)) {
             return;
         }
-        url = url + "?appName=" + serviceName;
+        url = url + "?appName=" + serviceName + "&env=" + env;
         try {
             Map<String, String> configMap = getRemoteServerConfig(url, MAX_RETRY);
             // 规定接口没有配置也要返回空值覆盖

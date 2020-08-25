@@ -24,6 +24,11 @@ public class Constants {
     public static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
     public static final String SYSTEM_PROPERTIES_PREFIX = "MonitorAgent.";
     public static final String SERVICE_NAME = "service.name";
+    public static final String SERVICE_ENV = "service.env";
+    public static final String AGENT_VERSION = "agent.version";
+    public static final String DEFAULT_SERVICE_ENV = "dev";
+    public static final String ENV_PRO = "pro";
+    public static final String ENV_PROD = "prod";
 
     public static final String CONFIG_PATH = "config.path";
     public static final String CONFIG_REMOTE_URL = "config.remote_url";

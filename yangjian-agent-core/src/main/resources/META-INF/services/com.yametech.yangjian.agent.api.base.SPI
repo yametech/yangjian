@@ -1,3 +1,5 @@
+# 加载本地环境标识配置
+com.yametech.yangjian.agent.core.config.EnvironmentLoader
 # 加载本地配置
 com.yametech.yangjian.agent.core.config.LocalConfigLoader
 # 加载远程配置

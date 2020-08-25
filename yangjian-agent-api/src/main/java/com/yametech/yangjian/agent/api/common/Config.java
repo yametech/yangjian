@@ -72,12 +72,19 @@ public class Config {
 		Properties prop = new Properties();
 		try (InputStreamReader reader = new InputStreamReader(new FileInputStream(configFile), StandardCharsets.UTF_8)) {
 			prop.load(reader);
-			prop.entrySet().forEach(entry -> {
-				String key = entry.getKey() == null ? null : entry.getKey().toString();
-				String value = entry.getValue() == null ? null : entry.getValue().toString();
-				Config.setConfig(key, value);
-			});
 		}
+		addConfigProperties(prop);
+	}
+
+	public static void addConfigProperties(Properties prop) {
+    	if (prop == null) {
+    		return;
+		}
+		prop.entrySet().forEach(entry -> {
+			String key = entry.getKey() == null ? null : entry.getKey().toString();
+			String value = entry.getValue() == null ? null : entry.getValue().toString();
+			Config.setConfig(key, value);
+		});
 	}
 
 	/**
