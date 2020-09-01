@@ -138,6 +138,7 @@ public class Constants {
         public static final String MONGO = "mongodb";
         public static final String SPRING_WEBFLUX = "spring-webflux";
         public static final String SPRING_MVC = "spring-mvc";
+        public static final String JFINAL = "jfinal";
         public static final String SPRING_RESTTEMPLATE = "spring-resttemplate";
         public static final String SPRING_WEBCLIENT = "spring-webclient";
     }

@@ -30,6 +30,7 @@
         <module>agent-plugin-lettuce</module>
         <module>agent-plugin-resttemplate</module>
         <module>agent-plugin-zipkin</module>
+        <module>agent-plugin-jfinal</module>
     </modules>
 
     <properties>
