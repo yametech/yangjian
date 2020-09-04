@@ -47,7 +47,6 @@ public class BraveHelper {
 						Constants.ExtraHeaderKey.AGENT_SIGN))
 				.currentTraceContext(ThreadLocalCurrentTraceContext.newBuilder()
 				      .addScopeDecorator(StrictScopeDecorator.create())
-					  //.addScopeDecorator(MDCScopeDecorator.create())
 				      .build());
 		if (sampler != null) {
 			builder.sampler(sampler);
