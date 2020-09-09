@@ -15,12 +15,15 @@
  */
 package com.yametech.yangjian.agent.api;
 
+import com.yametech.yangjian.agent.api.common.StringUtil;
 import org.junit.Test;
 
 public class UnitTest {
-	
-	@Test
-	public void test() throws Exception {
-		
-	}
+
+    @Test
+    public void test() {
+        System.err.println(StringUtil.join(null));
+        System.err.println(StringUtil.join(new Object[0]));
+        System.err.println(StringUtil.join(new String[]{"111", "2222", "333"}));
+    }
 }
