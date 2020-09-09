@@ -1,0 +1,3 @@
+com.yametech.yangjian.agent.plugin.log4j2.trace.DefaultLogEventFactoryMatcher
+com.yametech.yangjian.agent.plugin.log4j2.trace.ReusableLogEventFactoryMatcher
+com.yametech.yangjian.agent.plugin.log4j2.trace.RingBufferLogEventMatcher
