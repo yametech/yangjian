@@ -28,14 +28,37 @@
         </developer>
     </developers>
 
-    <modules>
-        <module>yangjian-agent-api</module>
-        <module>yangjian-agent-util</module>
-        <module>yangjian-agent-core</module>
-        <module>yangjian-agent-plugins</module>
-        <module>yangjian-agent-client</module>
-        <!--         <module>yangjian-agent-benchmark</module> -->
-    </modules>
+    <profiles>
+        <profile>
+            <id>agent</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>yangjian-agent-api</module>
+                <module>yangjian-agent-util</module>
+                <module>yangjian-agent-core</module>
+                <module>yangjian-agent-plugins</module>
+                <module>yangjian-agent-client</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>all</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>yangjian-agent-api</module>
+                <module>yangjian-agent-util</module>
+                <module>yangjian-agent-core</module>
+                <module>yangjian-agent-plugins</module>
+                <module>yangjian-agent-client</module>
+                <module>yangjian-agent-benchmark</module>
+                <module>yangjian-agent-server</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
