@@ -20,9 +20,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
 import com.yametech.yangjian.agent.api.common.MethodUtil;
+import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.convert.IMethodConvert;
+
+import static com.yametech.yangjian.agent.plugin.dubbo.context.ContextConstants.DUBBO_GROUP;
 
 /**
  * 将dubbo消费端注册的接口调用，转换成实际调用的接口，dubbo使用了代理所以需要转换
@@ -43,7 +47,21 @@ public class DubboClientConvert implements IMethodConvert {
 			return null;
 		}
 		TimeEvent event = get(startTime);
-		event.setIdentify(MethodUtil.getSimpleMethodId((Method) allArguments[1]));
+		String dubboGroup = getDubboGroup(thisObj);
+		String identify = MethodUtil.getSimpleMethodId((Method) allArguments[1]);
+		// example: group1/com.alibaba.foo.FooService()
+		if (StringUtil.notEmpty(dubboGroup)) {
+			identify = dubboGroup + "/" + identify;
+		}
+		event.setIdentify(identify);
 		return Arrays.asList(event);
+	}
+
+	private String getDubboGroup(Object thisObj) {
+		if (!(thisObj instanceof IContext)) {
+			return null;
+		}
+
+		return (String) ((IContext) thisObj)._getAgentContext(DUBBO_GROUP);
 	}
 }

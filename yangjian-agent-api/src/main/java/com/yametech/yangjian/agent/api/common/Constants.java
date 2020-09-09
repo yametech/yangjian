@@ -123,6 +123,7 @@ public class Constants {
         public static final String AGENT_SIGN = "_parent_agent_sign";
         // 部署模式 如：Redis的单机模式single、集群模式cluster、哨兵sentinel
         public static final String DB_MODE = "_mode";
+        public static final String DUBBO_GROUP = "dubbo.group";
     }
 
     public static class Component {

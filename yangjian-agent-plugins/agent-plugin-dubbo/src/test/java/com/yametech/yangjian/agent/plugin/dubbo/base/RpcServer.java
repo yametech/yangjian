@@ -90,6 +90,7 @@ public class RpcServer extends Rpc<RpcServer> {
 		config.setInterface(cls);
 		config.setRef(instance);
 		config.setVersion(version);
+		config.setGroup("test");
 		// 添加监控配置
 		MonitorConfig monitorConfig = new MonitorConfig();
 		monitorConfig.setProtocol("registry");

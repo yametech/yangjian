@@ -93,6 +93,7 @@ public class RpcClient extends Rpc<RpcClient> {
 			reference.setApplication(getApplication());
 			reference.setInterface(cls);
 			reference.setVersion(version);
+			reference.setGroup("test");
 			if(async) {
 				reference.setAsync(async);
 			}

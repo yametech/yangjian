@@ -20,12 +20,14 @@ import brave.Span.Kind;
 import brave.Tracing;
 import brave.propagation.ExtraFieldPropagation;
 import brave.propagation.TraceContext;
+import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.rpc.Invocation;
 import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.BraveUtil;
 import com.yametech.yangjian.agent.api.common.Constants;
+import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
 import com.yametech.yangjian.agent.api.trace.custom.IDubboClientCustom;
@@ -35,42 +37,50 @@ import com.yametech.yangjian.agent.plugin.dubbo.util.DubboSpanUtil;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-public class AlibabaDubboClientSpanCreater extends AlibabaDubboSpanCreater<IDubboClientCustom> {
-	private TraceContext.Injector<Map<String, String>> injector;
-	
-	@Override
-	public void init(Tracing tracing, ISpanSample spanSample) {
-		super.init(tracing, spanSample);
-		this.injector = tracing.propagation().injector(BraveUtil.MAP_SETTER);
-	}
-	
-	@Override
-	public BeforeResult<SpanInfo> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
-		RpcContext rpcContext = RpcContext.getContext();
-		Kind kind = rpcContext.isConsumerSide() ? Kind.CLIENT : Kind.SERVER;
-		if(!kind.equals(Kind.CLIENT)) {
-			return null;
-		}
-		Invoker<?> invoker = (Invoker<?>) allArguments[0];
-		Invocation invocation = (Invocation) allArguments[1];
-		IDubboCustom custom = getCustom(invoker.getInterface(), invocation.getMethodName(), invocation.getParameterTypes());
-		if(!generateSpan(invocation.getArguments(), custom)) {// 不需要生成
-			return null;
-		}
+import static com.yametech.yangjian.agent.api.common.Constants.Tags.DUBBO_GROUP;
 
-		long startTime = MICROS_CLOCK.nowMicros();
-		if (startTime == -1L) {
-			return null;
-		}
-		String methodId = DubboSpanUtil.getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes());
-		Span span = tracer.nextSpan()
-				.kind(Kind.CLIENT)
-				.name(methodId)
-				.start(startTime);
-		ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE, Constants.serviceName());
-		ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.AGENT_SIGN, methodId);
-		injector.inject(span.context(), rpcContext.getAttachments());
-		return spanInit(span, invocation.getArguments(), custom);
-	}
-	
+public class AlibabaDubboClientSpanCreater extends AlibabaDubboSpanCreater<IDubboClientCustom> {
+    private TraceContext.Injector<Map<String, String>> injector;
+
+    @Override
+    public void init(Tracing tracing, ISpanSample spanSample) {
+        super.init(tracing, spanSample);
+        this.injector = tracing.propagation().injector(BraveUtil.MAP_SETTER);
+    }
+
+    @Override
+    public BeforeResult<SpanInfo> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
+        RpcContext rpcContext = RpcContext.getContext();
+        Kind kind = rpcContext.isConsumerSide() ? Kind.CLIENT : Kind.SERVER;
+        if (!kind.equals(Kind.CLIENT)) {
+            return null;
+        }
+        Invoker<?> invoker = (Invoker<?>) allArguments[0];
+        Invocation invocation = (Invocation) allArguments[1];
+        IDubboCustom custom = getCustom(invoker.getInterface(), invocation.getMethodName(), invocation.getParameterTypes());
+        // 判断是否需要生成span
+        if (!generateSpan(invocation.getArguments(), custom)) {
+            return null;
+        }
+
+        long startTime = MICROS_CLOCK.nowMicros();
+        if (startTime == -1L) {
+            return null;
+        }
+        URL url = invoker.getUrl();
+        String group = url.getParameter("group");
+        String methodId = DubboSpanUtil.getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes());
+        Span span = tracer.nextSpan()
+                .kind(Kind.CLIENT)
+                .name(methodId)
+                .start(startTime);
+        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE, Constants.serviceName());
+        if (StringUtil.notEmpty(group)) {
+            span.tag(DUBBO_GROUP, group);
+            methodId = group + "/" + methodId;
+        }
+        ExtraFieldPropagation.set(span.context(), Constants.ExtraHeaderKey.AGENT_SIGN, methodId);
+        injector.inject(span.context(), rpcContext.getAttachments());
+        return spanInit(span, invocation.getArguments(), custom);
+    }
 }
