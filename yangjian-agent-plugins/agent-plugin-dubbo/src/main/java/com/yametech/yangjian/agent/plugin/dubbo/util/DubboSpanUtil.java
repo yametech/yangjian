@@ -27,6 +27,7 @@ import java.util.Map;
  */
 public class DubboSpanUtil {
 
+    private static final String GROUP_PARAM_PREFIX = "group=";
 
     /**
      * 获取span名称
@@ -70,5 +71,26 @@ public class DubboSpanUtil {
                 span.tag(entry.getKey(), entry.getValue());
             }
         }
+    }
+
+    /**
+     * 通过refer参数获取dubbo的分组
+     *
+     * @param refer
+     * @return
+     */
+    public static String getDubboGroup(String refer) {
+        int startIdx = refer.indexOf(GROUP_PARAM_PREFIX);
+        if (startIdx == -1) {
+            return null;
+        }
+        int endIdx = refer.indexOf("&", startIdx);
+        String group;
+        if (endIdx == -1) {
+            group = refer.substring(startIdx + GROUP_PARAM_PREFIX.length());
+        } else {
+            group = refer.substring(startIdx + GROUP_PARAM_PREFIX.length(), endIdx);
+        }
+        return group;
     }
 }

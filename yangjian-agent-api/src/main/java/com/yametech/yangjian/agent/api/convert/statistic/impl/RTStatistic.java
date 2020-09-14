@@ -53,7 +53,7 @@ public class RTStatistic extends BaseStatistic {
 	public Map<String, Object> statisticKV() {
 		Map<String, Object> kvs = new HashMap<>();
 		kvs.put("num", num.sum());
-		kvs.put("error_num", errorNum.sum());
+		kvs.put("error_total", errorNum.sum());
 		kvs.put("rt_total", total.sum());
 		kvs.put("rt_min", min.get());
 		kvs.put("rt_max", max.get());

@@ -17,7 +17,11 @@
 package com.yametech.yangjian.agent.plugin.dubbo.context;
 
 import com.yametech.yangjian.agent.api.base.IContext;
+import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.interceptor.IConstructorListener;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.plugin.dubbo.util.DubboSpanUtil;
 
 import static com.yametech.yangjian.agent.plugin.dubbo.context.ContextConstants.DUBBO_GROUP;
 
@@ -28,6 +32,8 @@ import static com.yametech.yangjian.agent.plugin.dubbo.context.ContextConstants.
  */
 public class AlibabaInvokerInvocationHandlerInterceptor implements IConstructorListener {
 
+    private static final ILogger LOG = LoggerFactory.getLogger(AlibabaInvokerInvocationHandlerInterceptor.class);
+
     @Override
     public void constructor(Object thisObj, Object[] allArguments) throws Throwable {
         if (!(thisObj instanceof IContext)) {
@@ -35,6 +41,16 @@ public class AlibabaInvokerInvocationHandlerInterceptor implements IConstructorL
         }
 
         com.alibaba.dubbo.common.URL url = ((com.alibaba.dubbo.rpc.Invoker) allArguments[0]).getUrl();
-        ((IContext) thisObj)._setAgentContext(DUBBO_GROUP, url.getParameter("group"));
+        String group = url.getParameter("group");
+        if (StringUtil.isEmpty(group)) {
+            group = DubboSpanUtil.getDubboGroup(url.getParameterAndDecoded("refer"));
+        }
+
+        if (StringUtil.notEmpty(group)) {
+            ((IContext) thisObj)._setAgentContext(DUBBO_GROUP, group);
+        }
+        LOG.info("AlibabaInvokerInvocationHandlerInterceptor({})", url.toString());
     }
+
+
 }

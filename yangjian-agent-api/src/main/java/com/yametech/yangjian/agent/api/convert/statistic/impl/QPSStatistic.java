@@ -42,7 +42,7 @@ public class QPSStatistic extends BaseStatistic {
 	public Map<String, Object> statisticKV() {
 		Map<String, Object> kvs = new HashMap<>();
 		kvs.put("num", num.sum());
-		kvs.put("error_num", errorNum.sum());
+		kvs.put("error_total", errorNum.sum());
 		return kvs;
 	}
 
