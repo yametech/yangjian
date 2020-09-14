@@ -39,7 +39,7 @@ public class RestTemplateConvert implements IMethodConvert {
         if (StringUtil.isEmpty(requestUrl)) {
             return null;
         }
-        TimeEvent event = get(startTime);
+        TimeEvent event = get(startTime, t);
         event.setIdentify(StringUtil.filterUrlParams(requestUrl));
         return Arrays.asList(event);
     }

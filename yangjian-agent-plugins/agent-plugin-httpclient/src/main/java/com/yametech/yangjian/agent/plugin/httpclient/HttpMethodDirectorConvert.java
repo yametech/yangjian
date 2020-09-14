@@ -33,7 +33,7 @@ import java.util.Map;
  * @date 2019/11/21
  */
 public class HttpMethodDirectorConvert implements IMethodConvert {
-    
+
     @Override
     public List<TimeEvent> convert( Object thisObj, long startTime, Object[] allArguments, Method method, Object ret,
     		Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
@@ -43,9 +43,9 @@ public class HttpMethodDirectorConvert implements IMethodConvert {
     	    return null;
         }
         // 过滤url上的查询参数
-        TimeEvent event = get(startTime);
+        TimeEvent event = get(startTime, t);
 		event.setIdentify(requestUrl);
 		return Arrays.asList(event);
     }
-    
+
 }

@@ -38,11 +38,11 @@ public class DefaultExchangeFunctionConvert implements IMethodCallbackConvert {
         ClientRequest clientRequest = (ClientRequest) allArguments[0];
         String url = clientRequest.url().toString();
         return ((Mono) ret)
-                .doFinally(res -> eventCallback.accept(buildTimeEvent(startTime, url)));
+                .doFinally(res -> eventCallback.accept(buildTimeEvent(startTime, url, t)));
     }
 
-    private List<TimeEvent> buildTimeEvent(long startTime, String identify) {
-        TimeEvent timeEvent = get(startTime);
+    private List<TimeEvent> buildTimeEvent(long startTime, String identify, Throwable t) {
+        TimeEvent timeEvent = get(startTime, t);
         timeEvent.setIdentify(identify);
         return Arrays.asList(timeEvent);
     }

@@ -29,6 +29,7 @@ public class TimeEvent {
     private String identify;
     private long useTime;// 耗时
     private long number = 1;// 数量，默认为1，批量操作时该值为批量数量
+    private long errorNum = 0;// 异常数量 默认为0
     protected static final StatisticType[] DEFAULT_STATISTIC_TYPES = new StatisticType[]{StatisticType.RT};
 
     public TimeEvent() {
@@ -82,10 +83,18 @@ public class TimeEvent {
         this.number = number;
     }
 
+    public long getErrorNum() {
+        return errorNum;
+    }
+
+    public void setErrorNum(long errorNum) {
+        this.errorNum = errorNum;
+    }
+
     public StatisticType[] getStatisticTypes() {
         return statisticTypes;
     }
-    
+
     public void setStatisticTypes(StatisticType[] statisticTypes) {
 		this.statisticTypes = statisticTypes;
 	}

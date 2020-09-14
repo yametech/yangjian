@@ -35,7 +35,7 @@ import java.util.Map;
  * @date 2019/11/21
  */
 public class CloseableHttpClientConvert implements IMethodConvert {
-	
+
 	@Override
 	public List<TimeEvent> convert(Object thisObj, long startTime, Object[] allArguments, Method method, Object ret,
 			Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
@@ -51,9 +51,9 @@ public class CloseableHttpClientConvert implements IMethodConvert {
         if (StringUtil.isEmpty(requestUrl)) {
             return null;
         }
-        TimeEvent event = get(startTime);
+        TimeEvent event = get(startTime, t);
 		event.setIdentify(requestUrl);
 		return Arrays.asList(event);
 	}
-	
+
 }

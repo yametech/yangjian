@@ -42,7 +42,7 @@ public class ControllerConvert implements IMethodConvert {
             return null;
         }
         InvocableHandlerMethod handlerMethod = (InvocableHandlerMethod) thisObj;
-        TimeEvent event = get(startTime);
+        TimeEvent event = get(startTime, t);
 		event.setIdentify(MethodUtil.getSimpleMethodId(handlerMethod.getMethod()));
 		return Arrays.asList(event);
     }

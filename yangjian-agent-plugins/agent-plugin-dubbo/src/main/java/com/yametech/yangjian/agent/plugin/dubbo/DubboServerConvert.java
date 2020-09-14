@@ -46,7 +46,7 @@ public class DubboServerConvert implements IMethodConvert {
         }
         String methodName = (String) allArguments[1];
         Class<?>[] parameterTypes = (Class<?>[]) allArguments[2];
-        TimeEvent event = get(startTime);
+        TimeEvent event = get(startTime, t);
 		event.setIdentify(MethodUtil.getSimpleMethodId(ClassUtil.getOriginalClass(proxy), methodName, parameterTypes));
 		return Arrays.asList(event);
     }

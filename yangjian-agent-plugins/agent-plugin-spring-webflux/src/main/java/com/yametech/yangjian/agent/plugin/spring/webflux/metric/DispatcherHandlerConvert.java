@@ -49,7 +49,7 @@ public class DispatcherHandlerConvert implements IMethodCallbackConvert {
                 .doFinally(res -> {
                     RequestEvent requestEvent = (RequestEvent) ((IContext) allArguments[0])._getAgentContext(ContextConstants.REQUEST_EVENT_CONTEXT_KEY);
                     if (requestEvent != null && StringUtil.notEmpty(requestEvent.getMethodName())) {
-                        TimeEvent event = get(requestEvent.getStartTime());
+                        TimeEvent event = get(requestEvent.getStartTime(), t);
                         event.setIdentify(requestEvent.getMethodName());
                         eventCallback.accept(Arrays.asList(event));
                     }

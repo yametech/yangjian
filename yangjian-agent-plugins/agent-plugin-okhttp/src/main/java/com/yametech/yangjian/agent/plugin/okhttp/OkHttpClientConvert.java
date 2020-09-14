@@ -36,7 +36,7 @@ import java.util.Map;
  * @date 2019/11/22
  */
 public class OkHttpClientConvert implements IMethodConvert {
-	
+
 	@Override
 	public List<TimeEvent> convert(Object thisObj, long startTime, Object[] allArguments, Method method, Object ret,
 			Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
@@ -52,7 +52,7 @@ public class OkHttpClientConvert implements IMethodConvert {
         if (StringUtil.isEmpty(requestUrl)) {
             return null;
         }
-        TimeEvent event = get(startTime);
+        TimeEvent event = get(startTime, t);
 		event.setIdentify(StringUtil.filterUrlParams(requestUrl));
 		return Arrays.asList(event);
     }

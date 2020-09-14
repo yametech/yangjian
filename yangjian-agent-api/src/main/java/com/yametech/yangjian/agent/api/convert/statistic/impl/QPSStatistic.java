@@ -24,32 +24,36 @@ import com.yametech.yangjian.agent.api.convert.statistic.StatisticType;
 
 public class QPSStatistic extends BaseStatistic {
 	private LongAdder num = new LongAdder();// 当前秒数的总调用次数
-	
+	private LongAdder errorNum = new LongAdder();// 当前秒数的总异常次数
+
 	@Override
 	protected void clear() {
 		num.reset();
+		errorNum.reset();
 	}
-	
+
 	@Override
 	public void combine(TimeEvent timeEvent) {
 		this.num.add(timeEvent.getNumber());
+		this.errorNum.add(timeEvent.getErrorNum());
 	}
-	
+
 	@Override
 	public Map<String, Object> statisticKV() {
 		Map<String, Object> kvs = new HashMap<>();
 		kvs.put("num", num.sum());
+		kvs.put("error_num", errorNum.sum());
 		return kvs;
 	}
-	
+
 	@Override
 	public StatisticType statisticType() {
 		return StatisticType.QPS;
 	}
-	
+
 	@Override
 	public String toString() {
-		return super.toString() + " : " + num.sum();
+		return super.toString() + " : " + num.sum() + " " + errorNum.sum();
 	}
 
 }

@@ -36,7 +36,7 @@ public class MethodHandlerAdapterConvert implements IMethodConvert {
             return null;
         }
         Method handlerMethod = (Method) allArguments[0];
-        TimeEvent event = get(startTime);
+        TimeEvent event = get(startTime, t);
         event.setIdentify(MethodUtil.getSimpleMethodId(handlerMethod));
         return Arrays.asList(event);
     }

@@ -41,12 +41,12 @@ import static com.yametech.yangjian.agent.plugin.dubbo.context.ContextConstants.
 public class DubboClientConvert implements IMethodConvert {
 
 	@Override
-	public List<TimeEvent> convert(Object thisObj, long startTime, Object[] allArguments, 
+	public List<TimeEvent> convert(Object thisObj, long startTime, Object[] allArguments,
 			Method method, Object ret, Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
 		if (allArguments[1] == null) {
 			return null;
 		}
-		TimeEvent event = get(startTime);
+		TimeEvent event = get(startTime, t);
 		String dubboGroup = getDubboGroup(thisObj);
 		String identify = MethodUtil.getSimpleMethodId((Method) allArguments[1]);
 		// example: group1/com.alibaba.foo.FooService()

@@ -18,16 +18,23 @@ package com.yametech.yangjian.agent.api.convert;
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
 
 public interface IConvertBase {
-	
+
 	/**
 	 * @param startTime	开始事件
 	 * @return	获取默认TimeEvent
 	 */
 	default TimeEvent get(long startTime) {
+		return get(startTime, null);
+	}
+
+	default TimeEvent get(long startTime, Throwable t) {
 		TimeEvent event = new TimeEvent();
 		long now = System.currentTimeMillis();
 		event.setEventTime(now);
-        event.setUseTime(now - startTime);
-        return event;
+		event.setUseTime(now - startTime);
+		if (t != null) {
+			event.setErrorNum(event.getNumber());
+		}
+		return event;
 	}
 }
