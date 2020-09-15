@@ -80,6 +80,9 @@ public class DubboSpanUtil {
      * @return
      */
     public static String getDubboGroup(String refer) {
+        if (refer == null) {
+            return null;
+        }
         int startIdx = refer.indexOf(GROUP_PARAM_PREFIX);
         if (startIdx == -1) {
             return null;
