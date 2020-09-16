@@ -21,6 +21,7 @@ import brave.Tracing;
 import brave.propagation.ExtraFieldPropagation;
 import brave.propagation.TraceContext;
 import brave.propagation.TraceContextOrSamplingFlags;
+import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.config.model.ApplicationModel;
 import com.alibaba.dubbo.config.model.ProviderModel;
 import com.alibaba.dubbo.rpc.Invocation;
@@ -36,13 +37,13 @@ import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
 import com.yametech.yangjian.agent.api.trace.custom.IDubboServerCustom;
 import com.yametech.yangjian.agent.plugin.dubbo.util.ClassUtil;
 import com.yametech.yangjian.agent.plugin.dubbo.util.DubboSpanUtil;
-import com.alibaba.dubbo.common.URL;
 
 import java.lang.reflect.Method;
 import java.util.Map;
 
 import static com.alibaba.dubbo.common.Constants.GROUP_KEY;
 import static com.alibaba.dubbo.common.Constants.VERSION_KEY;
+import static com.yametech.yangjian.agent.plugin.dubbo.context.ContextConstants.INTF_MAPPING_CACHE;
 
 
 public class AlibabaDubboServerSpanCreater extends AlibabaDubboSpanCreater<IDubboServerCustom> {
@@ -73,8 +74,7 @@ public class AlibabaDubboServerSpanCreater extends AlibabaDubboSpanCreater<IDubb
         }
         TraceContextOrSamplingFlags extracted = extractor.extract(invocation.getAttachments());// 注入请求中带的链路信息
         // 获取实现类接口
-        Class implClass = getImplClass(invoker.getUrl());
-        String className = implClass != null ? implClass.getName() : invoker.getInterface().getName();
+        String className = getRefClassName(invoker);
         Span span = tracer.nextSpan(extracted)
                 .kind(kind)
                 .name(DubboSpanUtil.getSpanName(className, invocation.getMethodName(), invocation.getParameterTypes()))
@@ -90,6 +90,16 @@ public class AlibabaDubboServerSpanCreater extends AlibabaDubboSpanCreater<IDubb
         return spanInit(span, invocation.getArguments(), custom);
     }
 
+    private String getRefClassName(Invoker<?> invoker) {
+        String className = invoker.getInterface().getName();
+        String implName = INTF_MAPPING_CACHE.get(className);
+        if (StringUtil.notEmpty(implName)) {
+            return implName;
+        }
+        Class implClass = getImplClass(invoker.getUrl());
+        return implClass != null ? implClass.getName() : className;
+    }
+
     /**
      * 获取dubbo provider实际接口的实现类
      *
@@ -101,13 +111,18 @@ public class AlibabaDubboServerSpanCreater extends AlibabaDubboSpanCreater<IDubb
             return null;
         }
 
-        String pathKey = getPathKey(url);
-        if (pathKey == null) {
-            return null;
-        }
-        ProviderModel providerModel = ApplicationModel.getProviderModel(pathKey);
-        if (providerModel != null) {
-            return ClassUtil.getOriginalClass(providerModel.getServiceInstance());
+        try {
+            String pathKey = getPathKey(url);
+            if (pathKey == null) {
+                return null;
+            }
+
+            ProviderModel providerModel = ApplicationModel.getProviderModel(pathKey);
+            if (providerModel != null) {
+                return ClassUtil.getOriginalClass(providerModel.getServiceInstance());
+            }
+        } catch (Throwable t) {
+            // dubbo-2.5版本以下此处可能会抛出NoClassDefFoundError，这里暂时忽略
         }
         return null;
     }
@@ -124,7 +139,7 @@ public class AlibabaDubboServerSpanCreater extends AlibabaDubboSpanCreater<IDubb
         if (group != null && group.length() > 0) {
             buf.append(group).append("/");
         }
-        buf.append(path);
+        buf.append(inf);
         if (version != null && version.length() > 0) {
             buf.append(":").append(version);
         }

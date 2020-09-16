@@ -96,14 +96,42 @@ public class ApacheDubboServerSpanCreater extends ApacheDubboSpanCreater<IDubboS
             return null;
         }
 
-        String pathKey = url.getPathKey();
-        if (pathKey == null) {
+        try {
+            String pathKey = getPathKey(url);
+            if (pathKey == null) {
+                return null;
+            }
+
+            ProviderModel providerModel = ApplicationModel.getProviderModel(pathKey);
+            if (providerModel != null) {
+                return ClassUtil.getOriginalClass(providerModel.getServiceInstance());
+            }
+        } catch (Throwable t) { }
+        return null;
+    }
+
+    /**
+     * dubbo-2.7.0 URL没有getPathKey方法所以参考实现copy到这里
+     *
+     * @param url
+     * @return
+     */
+    private String getPathKey(URL url) {
+        String path = url.getPath();
+        String inf = StringUtil.notEmpty(path) ? path : url.getServiceInterface();
+        if (inf == null) {
             return null;
         }
-        ProviderModel providerModel = ApplicationModel.getProviderModel(pathKey);
-        if (providerModel != null) {
-            return ClassUtil.getOriginalClass(providerModel.getServiceInstance());
+        StringBuilder buf = new StringBuilder();
+        String group = url.getParameter("group");
+        String version = url.getParameter("version");
+        if (group != null && group.length() > 0) {
+            buf.append(group).append("/");
         }
-        return null;
+        buf.append(inf);
+        if (version != null && version.length() > 0) {
+            buf.append(":").append(version);
+        }
+        return buf.toString();
     }
 }

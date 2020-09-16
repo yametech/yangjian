@@ -16,6 +16,8 @@
 
 package com.yametech.yangjian.agent.plugin.dubbo.context;
 
+import com.yametech.yangjian.agent.api.common.LRUCache;
+
 /**
  * @author dengliming
  */
@@ -24,4 +26,5 @@ public class ContextConstants {
     public static String DUBBO_VERSION = "_dv_";
     public static String DUBBO_GROUP = "_dg_";
 
+    public static final LRUCache<String, String> INTF_MAPPING_CACHE = new LRUCache();
 }
