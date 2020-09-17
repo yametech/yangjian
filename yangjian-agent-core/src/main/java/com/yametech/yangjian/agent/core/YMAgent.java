@@ -67,7 +67,7 @@ public class YMAgent {
 
 	/**
 	 * -javaagent:E:\eclipse-workspace\tool-ecpark-monitor\ecpark-agent\dist\ecpark-agent\ecpark-agent.jar=args -Dskywalking.agent.service_name=testlog
-	 * 
+	 *
 	 * @param arguments		javaagent=号后的文本，例如：-javaagent:E:\eclipse-workspace\tool-ecpark-monitor\ecpark-agent\target\ecpark-agent.jar=arg=123，此时arguments=arg=123
 	 * @param instrumentation	类增强
 	 */
@@ -151,7 +151,7 @@ public class YMAgent {
 			TYPE_MATCHES.add(matcher.match());
 		}
 	}
-    
+
     private static InterceptorMatcher getMatcherProxy(InterceptorMatcher matcher) {
     	Entry<Class<?>, Class<?>> proxy = MatchProxyManage.getProxy(matcher.getClass());
     	if(proxy == null) {
@@ -162,9 +162,8 @@ public class YMAgent {
 			InstanceManage.registryInit(proxyMatcher);
     		LOG.info("{} proxy {}", matcher.getClass(),proxyMatcher.getClass());
     		return proxyMatcher;
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e) {
-			LOG.warn(e, "Convert proxy exception：{}", matcher.getClass());
+		} catch (Throwable t) {
+			LOG.warn(t, "Convert proxy exception：{}", matcher.getClass());
 			return matcher;
 		}
     }
@@ -178,12 +177,12 @@ public class YMAgent {
     	}
     	return matches;
     }
-    
+
     /**
      *	 注册关闭通知，注意关闭应用不能使用kill -9，会导致下面的方法不执行
      */
     private static void addShutdownHook() {
     	Runtime.getRuntime().addShutdownHook(new Thread(InstanceManage::afterStop));
     }
-    
+
 }

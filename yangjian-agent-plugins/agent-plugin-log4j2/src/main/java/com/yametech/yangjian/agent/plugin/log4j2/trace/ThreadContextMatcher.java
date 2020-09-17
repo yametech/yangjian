@@ -32,7 +32,7 @@ public class ThreadContextMatcher implements IConfigMatch {
         try {
             Class threadContextClass = Class.forName("org.apache.logging.log4j.ThreadContext");
             return true;
-        } catch (ClassNotFoundException e) {
+        } catch (Throwable t) {
         }
         return false;
     }

@@ -53,7 +53,7 @@ public class ClassUtil {
                 if (result != null) {
                     return result;
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 // ignore
             }
         }

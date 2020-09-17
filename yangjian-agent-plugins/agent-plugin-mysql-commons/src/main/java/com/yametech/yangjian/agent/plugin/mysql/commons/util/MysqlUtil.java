@@ -21,6 +21,8 @@ import com.yametech.yangjian.agent.api.bean.TimeEvent;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.LRUCache;
 import com.yametech.yangjian.agent.api.common.MultiReportFactory;
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.plugin.mysql.commons.bean.ConnectionInfo;
 import com.yametech.yangjian.agent.plugin.mysql.commons.bean.SqlBean;
 import com.yametech.yangjian.agent.plugin.mysql.commons.druid.sql.SQLUtils;
@@ -40,6 +42,9 @@ import java.util.Map;
  * @date 2019/11/28
  */
 public class MysqlUtil {
+
+    private static final ILogger LOG = LoggerFactory.getLogger(MysqlUtil.class);
+
     private static final String SQL_EXCLUDE_COLUMUN_PREFIX = "@@";
     private static final String SQL_EXCLUDE_WARNING_PREFIX = "WARNINGS";
     private static final String SQL_EXCLUDE_SUFFIX = "where 1 = 2";
@@ -72,38 +77,42 @@ public class MysqlUtil {
      */
     public static List<TimeEvent> buildSqlTimeEvent(SqlBean sqlBean) {
         List<TimeEvent> timeEvents = new ArrayList<>();
-        List<SQLStatement> stmtList = SQLUtils.parseStatements(sqlBean.getSql(), JdbcConstants.MYSQL);
-        if (stmtList != null && stmtList.size() > 0) {
-            // 只处理第一条
-            SQLStatement stmt = stmtList.get(0);
-            // 统计SQL中使用的表、操作
-            SchemaStatVisitor statVisitor = SQLUtils.createSchemaStatVisitor(JdbcConstants.MYSQL);
-            stmt.accept(statVisitor);
+        try {
+            List<SQLStatement> stmtList = SQLUtils.parseStatements(sqlBean.getSql(), JdbcConstants.MYSQL);
+            if (stmtList != null && stmtList.size() > 0) {
+                // 只处理第一条
+                SQLStatement stmt = stmtList.get(0);
+                // 统计SQL中使用的表、操作
+                SchemaStatVisitor statVisitor = SQLUtils.createSchemaStatVisitor(JdbcConstants.MYSQL);
+                stmt.accept(statVisitor);
 
-            // 遍历获取每张表的delete、update、insert、select次数
-            for (Map.Entry<TableStat.Name, TableStat> entry : statVisitor.getTables().entrySet()) {
-                TableStat tableStat = entry.getValue();
-                if (tableStat.getInsertCount() > 0) {
-                    timeEvents.add(initMysqlTimeEvent(sqlBean, Constants.EventType.MYSQL_TABLE, entry.getKey() +
-                            Constants.IDENTIFY_SEPARATOR + Constants.DbOperation.INSERT, tableStat.getInsertCount()));
+                // 遍历获取每张表的delete、update、insert、select次数
+                for (Map.Entry<TableStat.Name, TableStat> entry : statVisitor.getTables().entrySet()) {
+                    TableStat tableStat = entry.getValue();
+                    if (tableStat.getInsertCount() > 0) {
+                        timeEvents.add(initMysqlTimeEvent(sqlBean, Constants.EventType.MYSQL_TABLE, entry.getKey() +
+                                Constants.IDENTIFY_SEPARATOR + Constants.DbOperation.INSERT, tableStat.getInsertCount()));
+                    }
+                    if (tableStat.getUpdateCount() > 0) {
+                        timeEvents.add(initMysqlTimeEvent(sqlBean, Constants.EventType.MYSQL_TABLE, entry.getKey() +
+                                Constants.IDENTIFY_SEPARATOR + Constants.DbOperation.UPDATE, tableStat.getUpdateCount()));
+                    }
+                    if (tableStat.getSelectCount() > 0) {
+                        timeEvents.add(initMysqlTimeEvent(sqlBean, Constants.EventType.MYSQL_TABLE, entry.getKey() +
+                                Constants.IDENTIFY_SEPARATOR + Constants.DbOperation.SELECT, tableStat.getSelectCount()));
+                    }
+                    if (tableStat.getDeleteCount() > 0) {
+                        timeEvents.add(initMysqlTimeEvent(sqlBean, Constants.EventType.MYSQL_TABLE, entry.getKey() +
+                                Constants.IDENTIFY_SEPARATOR + Constants.DbOperation.DELETE, tableStat.getDeleteCount()));
+                    }
                 }
-                if (tableStat.getUpdateCount() > 0) {
-                    timeEvents.add(initMysqlTimeEvent(sqlBean, Constants.EventType.MYSQL_TABLE, entry.getKey() +
-                            Constants.IDENTIFY_SEPARATOR + Constants.DbOperation.UPDATE, tableStat.getUpdateCount()));
-                }
-                if (tableStat.getSelectCount() > 0) {
-                    timeEvents.add(initMysqlTimeEvent(sqlBean, Constants.EventType.MYSQL_TABLE, entry.getKey() +
-                            Constants.IDENTIFY_SEPARATOR + Constants.DbOperation.SELECT, tableStat.getSelectCount()));
-                }
-                if (tableStat.getDeleteCount() > 0) {
-                    timeEvents.add(initMysqlTimeEvent(sqlBean, Constants.EventType.MYSQL_TABLE, entry.getKey() +
-                            Constants.IDENTIFY_SEPARATOR + Constants.DbOperation.DELETE, tableStat.getDeleteCount()));
-                }
+
+                // 参数化sql 如：select * from t where id = 1会变成select * from t where id = ?, 方便sql统计
+                String parameterizedSql = ParameterizedOutputVisitorUtils.parameterize(sqlBean.getSql(), JdbcConstants.MYSQL);
+                timeEvents.add(initMysqlTimeEvent(sqlBean, Constants.EventType.MYSQL_SQL, parameterizedSql, 1));
             }
-
-            // 参数化sql 如：select * from t where id = 1会变成select * from t where id = ?, 方便sql统计
-            String parameterizedSql = ParameterizedOutputVisitorUtils.parameterize(sqlBean.getSql(), JdbcConstants.MYSQL);
-            timeEvents.add(initMysqlTimeEvent(sqlBean, Constants.EventType.MYSQL_SQL, parameterizedSql, 1));
+        } catch (Throwable t) {
+            LOG.error(t, "buildSqlTimeEvent(sql:{}) error.", sqlBean.getSql());
         }
         return timeEvents;
     }
