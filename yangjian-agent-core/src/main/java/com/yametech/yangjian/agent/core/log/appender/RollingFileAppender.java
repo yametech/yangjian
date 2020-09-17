@@ -240,6 +240,11 @@ public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<Lo
             }
         }
 
+        // 该目录不为空并且存在错误格式的日志时
+        if (fileInfos.size() == 0) {
+            return createFile(1);
+        }
+
         Collections.sort(fileInfos, (f1, f2) -> f1.date.equals(f2.date) ? f1.num - f2.num : f1.date.compareTo(f2.date));
 
         int outOf = children.length - maxFileNum;
