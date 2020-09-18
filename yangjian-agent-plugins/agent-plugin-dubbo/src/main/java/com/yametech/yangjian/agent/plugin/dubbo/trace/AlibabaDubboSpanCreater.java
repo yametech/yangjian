@@ -19,6 +19,7 @@ import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
 import brave.internal.Platform;
+import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.rpc.Result;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.dubbo.rpc.RpcException;
@@ -34,6 +35,9 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.alibaba.dubbo.common.Constants.CONSUMER_SIDE;
+import static com.alibaba.dubbo.common.Constants.PROVIDER_SIDE;
+import static com.alibaba.dubbo.common.Constants.SIDE_KEY;
 import static com.yametech.yangjian.agent.api.common.Constants.Tags.STATUS_CODE;
 
 public abstract class AlibabaDubboSpanCreater<T extends ISpanCustom> implements ISpanCreater<SpanInfo>, ICustomLoad<T> {
@@ -54,12 +58,13 @@ public abstract class AlibabaDubboSpanCreater<T extends ISpanCustom> implements 
     }
 
     protected BeforeResult<SpanInfo> spanInit(Span span, Object[] allArguments, IDubboCustom custom) {
+        span.tag(Constants.Tags.COMPONENT, Constants.Component.DUBBO);
         InetSocketAddress remoteAddress = RpcContext.getContext().getRemoteAddress();
         if (remoteAddress != null) {
-            span.remoteIpAndPort(Platform.get().getHostString(remoteAddress), remoteAddress.getPort());
+            String host = Platform.get().getHostString(remoteAddress);
+            span.remoteIpAndPort(host, remoteAddress.getPort());
+            span.tag(Constants.Tags.PEER, host + ":" + remoteAddress.getPort());
         }
-        span.tag(Constants.Tags.COMPONENT, Constants.Component.DUBBO)
-                .tag(Constants.Tags.PEER, Platform.get().getHostString(remoteAddress) + ":" + remoteAddress.getPort());
         DubboSpanUtil.setArgumentTags(span, allArguments, custom);
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }
@@ -121,5 +126,12 @@ public abstract class AlibabaDubboSpanCreater<T extends ISpanCustom> implements 
             return custom.sample(allArguments, spanSample);
         }
         return spanSample.sample();
+    }
+
+    protected boolean isConsumerSide(RpcContext rpcContext, URL invokerUrl) {
+        if (rpcContext.getUrl() != null) {
+            return rpcContext.isConsumerSide();
+        }
+        return invokerUrl.getParameter(SIDE_KEY, PROVIDER_SIDE).equals(CONSUMER_SIDE);
     }
 }

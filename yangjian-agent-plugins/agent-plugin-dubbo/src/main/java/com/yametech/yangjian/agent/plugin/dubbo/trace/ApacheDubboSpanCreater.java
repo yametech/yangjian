@@ -25,6 +25,7 @@ import com.yametech.yangjian.agent.api.common.MicrosClock;
 import com.yametech.yangjian.agent.api.trace.*;
 import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
 import com.yametech.yangjian.agent.plugin.dubbo.util.DubboSpanUtil;
+import org.apache.dubbo.common.URL;
 import org.apache.dubbo.rpc.Result;
 import org.apache.dubbo.rpc.RpcContext;
 import org.apache.dubbo.rpc.RpcException;
@@ -35,6 +36,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.yametech.yangjian.agent.api.common.Constants.Tags.STATUS_CODE;
+import static org.apache.dubbo.common.constants.CommonConstants.CONSUMER_SIDE;
+import static org.apache.dubbo.common.constants.CommonConstants.PROVIDER_SIDE;
+import static org.apache.dubbo.common.constants.CommonConstants.SIDE_KEY;
 
 public abstract class ApacheDubboSpanCreater<T extends ISpanCustom> implements ISpanCreater<SpanInfo>, ICustomLoad<T> {
     protected static final MicrosClock MICROS_CLOCK = new MicrosClock();
@@ -54,12 +58,13 @@ public abstract class ApacheDubboSpanCreater<T extends ISpanCustom> implements I
     }
 
     protected BeforeResult<SpanInfo> spanInit(Span span, Object[] allArguments, IDubboCustom custom) {
+        span.tag(Constants.Tags.COMPONENT, Constants.Component.DUBBO);
         InetSocketAddress remoteAddress = RpcContext.getContext().getRemoteAddress();
         if (remoteAddress != null) {
-            span.remoteIpAndPort(Platform.get().getHostString(remoteAddress), remoteAddress.getPort());
+            String host = Platform.get().getHostString(remoteAddress);
+            span.remoteIpAndPort(host, remoteAddress.getPort());
+            span.tag(Constants.Tags.PEER, host + ":" + remoteAddress.getPort());
         }
-        span.tag(Constants.Tags.COMPONENT, Constants.Component.DUBBO)
-                .tag(Constants.Tags.PEER, Platform.get().getHostString(remoteAddress) + ":" + remoteAddress.getPort());
         DubboSpanUtil.setArgumentTags(span, allArguments, custom);
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }
@@ -121,5 +126,13 @@ public abstract class ApacheDubboSpanCreater<T extends ISpanCustom> implements I
             return custom.sample(allArguments, spanSample);
         }
         return spanSample.sample();
+    }
+
+    protected boolean isConsumerSide(RpcContext rpcContext, URL invokeUrl) {
+        // 这里URL可能会为空
+        if (rpcContext.getUrl() != null) {
+            return rpcContext.isConsumerSide();
+        }
+        return invokeUrl.getParameter(SIDE_KEY, PROVIDER_SIDE).equals(CONSUMER_SIDE);
     }
 }

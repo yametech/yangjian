@@ -58,11 +58,11 @@ public class AlibabaDubboServerSpanCreater extends AlibabaDubboSpanCreater<IDubb
     @Override
     public BeforeResult<SpanInfo> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
         RpcContext rpcContext = RpcContext.getContext();
-        Kind kind = rpcContext.isConsumerSide() ? Kind.CLIENT : Kind.SERVER;
+        Invoker<?> invoker = (Invoker<?>) allArguments[0];
+        Kind kind = isConsumerSide(rpcContext, invoker.getUrl()) ? Kind.CLIENT : Kind.SERVER;
         if (!kind.equals(Kind.SERVER)) {
             return null;
         }
-        Invoker<?> invoker = (Invoker<?>) allArguments[0];
         Invocation invocation = (Invocation) allArguments[1];
         IDubboCustom custom = getCustom(invoker.getInterface(), invocation.getMethodName(), invocation.getParameterTypes());
         if (!generateSpan(invocation.getArguments(), custom)) {// 不需要生成
