@@ -15,7 +15,7 @@
         <alibaba.dubbo.version>2.6.1</alibaba.dubbo.version>
 		<curator-recipes.version>4.1.0</curator-recipes.version>
 		<zkclient.version>0.1</zkclient.version>
-		<zookeeper.version>3.4.13</zookeeper.version>
+		<zookeeper.version>3.4.14</zookeeper.version>
     </properties>
 
     <dependencies>
