@@ -68,9 +68,7 @@ public class JedisPluginTest extends AbstractAgentTest {
             jedis.hset(key2, "k1", "13");
             jedis.get(key1);
         }
-        System.out.println("=====================================================>>>>>>start");
         List<Span> spans = mockTracerServer.waitForSpans(3, Duration.ofSeconds(5).toMillis());
-        System.out.println("=====================================================>>>>>>end");
         assertNotNull(spans);
         assertEquals(3, spans.size());
     }
@@ -81,9 +79,7 @@ public class JedisPluginTest extends AbstractAgentTest {
             jedis.select(0);
             jedis.sadd("set", "k1");
         }
-        System.out.println("=====================================================>>>>>>start1");
         List<Span> spans = mockTracerServer.waitForSpans(1, Duration.ofSeconds(5).toMillis());
-        System.out.println("=====================================================>>>>>>end1");
         assertNotNull(spans);
         assertEquals(1, spans.size());
     }
@@ -94,9 +90,7 @@ public class JedisPluginTest extends AbstractAgentTest {
             jedis.select(0);
             jedis.lpush("list:1", "k1");
         }
-        System.out.println("=====================================================>>>>>>start2");
         List<Span> spans = mockTracerServer.waitForSpans(1, Duration.ofSeconds(5).toMillis());
-        System.out.println("=====================================================>>>>>>end2");
         assertNotNull(spans);
         assertEquals(1, spans.size());
     }
