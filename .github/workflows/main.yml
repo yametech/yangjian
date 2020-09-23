@@ -12,7 +12,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Maven
-      run: sudo mvn clean package -Pall -X -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dgpg.skip --file pom.xml
+      run: sudo mvn clean install -Pall -X -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dgpg.skip --file pom.xml
 
     - name: Integration Tests
-      run: sudo mvn clean package -X -Pintegration-tests-only -Dmaven.javadoc.skip=true -Dgpg.skip --file pom.xml
+      run: sudo mvn clean verify -X -Pintegration-tests-only -Dmaven.javadoc.skip=true -Dgpg.skip --file pom.xml
