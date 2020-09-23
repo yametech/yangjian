@@ -44,7 +44,8 @@ public class JedisPluginTest extends AbstractAgentTest {
     @Before
     public void setUp() {
         redisServer = RedisServer.builder()
-                .setting("maxheap 64m")
+                // maxheap
+                .setting("maxmemory 64m")
                 .port(6379)
                 .setting("bind localhost")
                 .build();
