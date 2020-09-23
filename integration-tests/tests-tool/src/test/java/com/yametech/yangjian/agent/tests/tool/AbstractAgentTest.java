@@ -36,6 +36,7 @@ public abstract class AbstractAgentTest {
     public static void setup() {
         mockTracerServer = new MockTracerServer();
         mockTracerServer.start();
+        System.setProperty("log.config.path", "/data/www/soft/ecpark-agent/config/log.properties");
         System.setProperty(Constants.SYSTEM_PROPERTIES_PREFIX + Config.SERVICE_NAME.getKey(), "test");
         System.setProperty(Constants.CONFIG_PATH, "/data/www/soft/ecpark-agent/config/agent.properties");
         System.setProperty(Constants.EXTEND_PLUGINS_DIR, "/data/www/soft/ecpark-agent/plugins");
