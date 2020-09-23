@@ -63,8 +63,8 @@
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
-		
-		
+
+
         <dependency>
 		    <groupId>io.zipkin.reporter2</groupId>
 		    <artifactId>zipkin-sender-okhttp3</artifactId>
@@ -122,7 +122,7 @@
 		    <version>3.14.7</version>
 		    <scope>test</scope>
 		</dependency>
-		
+
 
         <!-- 统计使用，如：百分位 -->
 		<!--<dependency>
@@ -130,9 +130,9 @@
 		    <artifactId>stream</artifactId>
 		    <version>2.9.8</version>
 		</dependency>-->
-		
+
     </dependencies>
-    
+
     <build>
         <!-- 打包不带版本号，用于线上更新时不会因版本号改变，造成多个jar包 -->
         <finalName>${project.artifactId}</finalName>
@@ -145,7 +145,7 @@
                     </archive>
                 </configuration>
             </plugin>
-            
+
 			<!-- 将依赖jar包，打包到主jar包中 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -214,7 +214,7 @@
                                 <mkdir dir="${project.basedir}/../${agent.package.name}/lib" />
                                 <mkdir dir="${project.basedir}/../${agent.package.name}/plugins" />
                                 <mkdir dir="${project.basedir}/../${agent.package.name}/logs" />
-                                
+
                                 <copy file="${project.build.directory}/yangjian-agent-core.jar" tofile="${project.basedir}/../${agent.package.name}/lib/yangjian-agent.jar" overwrite="true" />
 								<!-- 此处不能拷贝src下的文件，所以使用maven-resources-plugin拷贝config -->
 <!-- 								<copy src="${project.basedir}/src/main/resources/agent.properties" dest="${project.basedir}/dist/ecpark-agent/config" forceoverwrite="true" /> -->
@@ -259,30 +259,52 @@
 						</configuration>
 					</execution>
 					<!-- 研发测试使用 -->
-<!-- 					<execution> -->
-<!-- 						<id>copy-resources-to-classes</id> -->
-<!-- 						<phase>package</phase> -->
-<!-- 						<goals> -->
-<!-- 							<goal>copy-resources</goal> -->
-<!-- 						</goals> -->
-<!-- 						<configuration> -->
-<!-- 							<encoding>UTF-8</encoding> -->
-<!-- 							<outputDirectory>${project.basedir}/target/config</outputDirectory> -->
-<!-- 							<resources> -->
-<!-- 								<resource> -->
-<!-- 									<directory>src/main/resources/</directory> -->
-<!-- 									<includes> -->
-<!-- 										<include>*.properties</include> -->
-<!-- 										<include>*.xml</include> -->
-<!-- 									</includes> -->
-<!-- 									<filtering>true</filtering> -->
-<!-- 								</resource> -->
-<!-- 							</resources> -->
-<!-- 						</configuration> -->
-<!-- 					</execution> -->
+ 					<!--<execution>
+ 						<id>copy-resources-to-classes</id>
+ 						<phase>package</phase>
+ 						<goals>
+ 							<goal>copy-resources</goal>
+ 						</goals>
+ 						<configuration>
+ 							<encoding>UTF-8</encoding>
+ 							<outputDirectory>${project.basedir}/target/config</outputDirectory>
+ 							<resources>
+ 								<resource>
+ 									<directory>src/main/resources/</directory>
+ 									<includes>
+ 										<include>*.properties</include>
+ 										<include>*.xml</include>
+ 									</includes>
+ 									<filtering>true</filtering>
+ 								</resource>
+ 							</resources>
+ 						</configuration>
+ 					</execution>-->
+
+                    <execution>
+                        <id>ci-copy-resources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <encoding>UTF-8</encoding>
+                            <outputDirectory>/data/www/soft/ecpark-agent/config</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources/</directory>
+                                    <includes>
+                                        <include>*.properties</include>
+                                        <include>*.xml</include>
+                                    </includes>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
 				</executions>
 			</plugin>
-            
+
         </plugins>
     </build>
 </project>

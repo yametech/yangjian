@@ -32,9 +32,9 @@ import com.yametech.yangjian.agent.api.log.LoggerFactory;
 public class SpiLoader {
 	private static final ILogger LOG = LoggerFactory.getLogger(SpiLoader.class);
 	private static final String SPI_BASE_PATH = "META-INF/services/";
-	
+
 	private SpiLoader() {}
-	
+
 	/**
 	 * 读取所有的spi class
 	 */
@@ -55,16 +55,16 @@ public class SpiLoader {
 			}
 		});
     }
-	
+
 	public static List<String> getSpiClass(Class<?> cls) {
         List<String> spiClasses = new ArrayList<>();
         try {
         	Enumeration<URL> urls = AgentClassLoader.getDefault().getResources(SPI_BASE_PATH + cls.getName());
             while (urls.hasMoreElements()) {
             	URL url = urls.nextElement();
-            	if("file".equals(url.getProtocol())) {// 开发环境，在ecpark-agent调试时会重复加载，所以使用protocol过滤
+            	/*if("file".equals(url.getProtocol())) {// 开发环境，在ecpark-agent调试时会重复加载，所以使用protocol过滤
             		continue;
-            	}
+            	}*/
             	try (InputStream input = url.openStream()) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                     String pluginDefine = null;

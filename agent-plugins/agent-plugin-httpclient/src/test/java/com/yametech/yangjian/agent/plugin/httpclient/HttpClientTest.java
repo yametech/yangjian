@@ -15,10 +15,6 @@
  */
 package com.yametech.yangjian.agent.plugin.httpclient;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -32,17 +28,12 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class HttpClientTest {
 
-	@org.junit.Test
-    public void testMutil() throws InterruptedException {
-		long start = System.currentTimeMillis();
-		while(System.currentTimeMillis() - start < 20000) {
-			test();
-			Thread.sleep((long) (Math.random() * 200));
-		}
-	}
-	
     /**
      * 4.1
      */

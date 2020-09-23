@@ -56,7 +56,21 @@
                 <module>agent-client</module>
                 <module>agent-benchmark</module>
                 <module>agent-server</module>
+                <module>integration-tests</module>
             </modules>
+        </profile>
+
+        <profile>
+            <id>integration-tests-only</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>integration-tests</module>
+            </modules>
+            <properties>
+                <build.skip.test>false</build.skip.test>
+            </properties>
         </profile>
     </profiles>
 

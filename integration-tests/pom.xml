@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<groupId>com.github.yametech</groupId>
+		<artifactId>yangjian-agent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>yangjian-integration-tests</artifactId>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>apache-dubbo-tests</module>
+		<module>httpclient-tests</module>
+		<module>jedis-tests</module>
+		<module>mysql-jdbc-tests</module>
+		<module>okhttp-tests</module>
+		<module>tests-tool</module>
+	</modules>
+
+	<dependencies>
+		<dependency>
+            <groupId>com.github.yametech</groupId>
+            <artifactId>yangjian-agent-api</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+            <!-- 此处使用provided防止自定义plugin依赖util后使用了依赖的包，导致运行时无法拿到类（在core中会更改依赖jar包路径） -->
+        </dependency>
+
+		<dependency>
+			<groupId>com.github.yametech</groupId>
+			<artifactId>yangjian-agent-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.yametech</groupId>
+			<artifactId>yangjian-agent-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.undertow</groupId>
+			<artifactId>undertow-core</artifactId>
+			<version>2.0.22.Final</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy-agent</artifactId>
+			<version>1.10.14</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.tomakehurst</groupId>
+			<artifactId>wiremock-standalone</artifactId>
+			<version>2.18.0</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

@@ -50,7 +50,7 @@
             <version>${project.version}</version>
         </dependency>
 	</dependencies>
-    
+
     <build>
         <!-- 打包不带版本号，用于线上更新时不会因版本号改变，造成多个jar包 -->
 <!--         <finalName>${project.artifactId}</finalName> -->
@@ -66,11 +66,18 @@
                         </goals>
                         <configuration>
                             <tasks>
-                            	<copy todir="${project.basedir}/../../${agent.package.name}/plugins" overwrite="true" > 
+                            	<copy todir="${project.basedir}/../../${agent.package.name}/plugins" overwrite="true" >
 		                            <fileset dir="${project.build.directory}" erroronmissingdir="false">
 		                                <include name="agent-plugin-*-SNAPSHOT.jar"/>
 		                            </fileset>
 		                        </copy>
+
+                                <!-- for ci test -->
+                                <copy todir="/data/www/soft/ecpark-agent/plugins" overwrite="true" >
+                                    <fileset dir="${project.build.directory}" erroronmissingdir="false">
+                                        <include name="agent-plugin-*-SNAPSHOT.jar"/>
+                                    </fileset>
+                                </copy>
                             </tasks>
                         </configuration>
                     </execution>
