@@ -15,4 +15,4 @@ jobs:
       run: mvn clean package -Pall -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dgpg.skip --file pom.xml
 
     - name: Integration Tests
-        run: mvn clean test -Pintegration-tests-only -Dmaven.javadoc.skip=true -Dgpg.skip --file pom.xml
+      run: mvn clean test -Pintegration-tests-only -Dmaven.javadoc.skip=true -Dgpg.skip --file pom.xml
