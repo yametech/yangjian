@@ -63,8 +63,4 @@ public abstract class AbstractAgentTest {
     public void before() {
         mockTracerServer.clear();
     }
-
-    public static MockTracerServer getMockTracerServer() {
-        return mockTracerServer;
-    }
 }
