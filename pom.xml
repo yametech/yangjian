@@ -56,7 +56,6 @@
                 <module>agent-client</module>
                 <module>agent-benchmark</module>
                 <module>agent-server</module>
-                <module>integration-tests</module>
             </modules>
         </profile>
 
