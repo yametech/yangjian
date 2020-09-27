@@ -80,13 +80,8 @@ public class AlibabaDubboServerSpanCreater extends AlibabaDubboSpanCreater<IDubb
                 .name(DubboSpanUtil.getSpanName(className, invocation.getMethodName(), invocation.getParameterTypes()))
                 .start(startTime);
         String parentServiceName = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.REFERER_SERVICE);
-        if (StringUtil.notEmpty(span.context().parentIdString()) && StringUtil.notEmpty(parentServiceName)) {
-            span.tag(Constants.Tags.PARENT_SERVICE_NAME, parentServiceName);
-        }
         String agentSign = ExtraFieldPropagation.get(span.context(), Constants.ExtraHeaderKey.AGENT_SIGN);
-        if (StringUtil.notEmpty(agentSign)) {
-            span.tag(Constants.Tags.AGENT_SIGN, agentSign);
-        }
+        DubboSpanUtil.tagAgentSign(span, parentServiceName, agentSign, invoker.getInterface().getName());
         return spanInit(span, invocation.getArguments(), custom);
     }
 

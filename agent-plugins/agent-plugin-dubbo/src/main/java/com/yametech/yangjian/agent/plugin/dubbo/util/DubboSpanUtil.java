@@ -16,6 +16,7 @@
 package com.yametech.yangjian.agent.plugin.dubbo.util;
 
 import brave.Span;
+import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
 
@@ -95,5 +96,47 @@ public class DubboSpanUtil {
             group = refer.substring(startIdx + GROUP_PARAM_PREFIX.length(), endIdx);
         }
         return group;
+    }
+
+    /**
+     * 设置调用方的服务名和方法标识（用于采集服务调用关联关系）
+     *
+     * @param span
+     * @param parentServiceName
+     * @param agentSign
+     * @param interfaceName
+     */
+    public static void tagAgentSign(Span span, String parentServiceName, String agentSign, String interfaceName) {
+        if (StringUtil.isEmpty(span.context().parentIdString()) || StringUtil.isEmpty(parentServiceName)
+                || StringUtil.isEmpty(agentSign)) {
+            return;
+        }
+        if (verifyAgentSign(agentSign, interfaceName)) {
+            span.tag(Constants.Tags.PARENT_SERVICE_NAME, parentServiceName);
+            span.tag(Constants.Tags.AGENT_SIGN, agentSign);
+        }
+    }
+
+    /**
+     * 校验接口名是否一致
+     *
+     * @param agentSign
+     * @param interfaceName
+     * @return
+     */
+    private static boolean verifyAgentSign(String agentSign, String interfaceName) {
+        int endIndex = agentSign.lastIndexOf(".");
+        if (endIndex == -1) {
+            return false;
+        }
+        int startIndex = 0;
+        // 含有分组标识
+        int groupIndex = agentSign.indexOf("/");
+        if (groupIndex != -1) {
+            startIndex = groupIndex + 1;
+        }
+
+        agentSign = agentSign.substring(startIndex, endIndex);
+        return interfaceName.equals(agentSign);
     }
 }
