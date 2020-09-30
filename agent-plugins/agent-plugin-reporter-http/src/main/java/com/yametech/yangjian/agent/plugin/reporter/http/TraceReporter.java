@@ -13,25 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.yametech.yangjian.agent.plugin.reporter.http;
 
 /**
- * 服务运行状态上报
- * 注：agent.properties配置report.runStatus.async=http-status、report.http-status.url=xxx
+ * HTTP上报
+ * <p>
+ * 注：agent.properties配置report.spanListener=http-span、report.http-span.url=xxx
  *
  * @author dengliming
- * @date 2020/8/17
+ * @date 2020/3/5
  */
-public class RunStatusReporter extends AbstractHttpReporter {
+public class TraceReporter extends AbstractHttpReporter {
 
     @Override
     public String type() {
-        return "http-status";
+        return "http-span";
     }
 
     @Override
     public String getConfigKey() {
-        return "report.http-status.url";
+        return "report.http-span.url";
     }
+
 }

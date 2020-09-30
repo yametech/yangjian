@@ -100,26 +100,14 @@ public class MockTracerServer {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws Exception {
-            BufferedReader reader = null;
             StringBuilder builder = new StringBuilder();
-
-            try {
-                reader = new BufferedReader(new InputStreamReader(exchange.getInputStream()));
-
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     builder.append(line);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
             }
 
             String body = builder.toString();

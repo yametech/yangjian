@@ -13,7 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.yametech.yangjian.agent.plugin.reporter.http;
+
+import com.yametech.yangjian.agent.api.IConfigReader;
+import com.yametech.yangjian.agent.api.IReport;
+import com.yametech.yangjian.agent.api.bean.ConfigNotifyType;
+import com.yametech.yangjian.agent.api.common.StringUtil;
+import com.yametech.yangjian.agent.util.HttpClient;
+import com.yametech.yangjian.agent.util.HttpRequest;
+import com.yametech.yangjian.agent.util.HttpResponse;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -21,30 +30,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.yametech.yangjian.agent.api.IConfigReader;
-import com.yametech.yangjian.agent.api.IReport;
-import com.yametech.yangjian.agent.api.bean.ConfigNotifyType;
-import com.yametech.yangjian.agent.api.common.Constants;
-import com.yametech.yangjian.agent.api.common.StringUtil;
-import com.yametech.yangjian.agent.util.HttpClient;
-import com.yametech.yangjian.agent.util.HttpRequest;
-import com.yametech.yangjian.agent.util.HttpResponse;
-
 /**
- * HTTP上报
- * <p>
- * 注：agent.properties配置report=http-span、report.http-span.url=xxx
- *
  * @author dengliming
- * @date 2020/3/5
  */
-public class HttpReporter implements IReport, IConfigReader {
-    private static final String URL_CONFIG_KEY = "report.http-span.url";
-    private static final String SPAN_REPORT_TYPE = "http-span";
+public abstract class AbstractHttpReporter implements IReport, IConfigReader {
+
     /**
      * 上报的URL
      */
-    private String url;
+    protected String url;
+
+    @Override
+    public Set<String> configKey() {
+        String urlConfigKey = getConfigKey();
+        if (urlConfigKey == null) {
+            return null;
+        }
+        return new HashSet<>(Arrays.asList(urlConfigKey.replaceAll("\\.", "\\\\.")));
+    }
+
+    @Override
+    public void configKeyValue(Map<String, String> kv) {
+        String urlConfigKey = getConfigKey();
+        if (urlConfigKey == null) {
+            return;
+        }
+        if (kv.containsKey(urlConfigKey)) {
+            url = kv.get(urlConfigKey);
+        }
+    }
+
+    public abstract String getConfigKey();
 
     @Override
     public boolean report(Object data) {
@@ -69,25 +85,7 @@ public class HttpReporter implements IReport, IConfigReader {
     }
 
     @Override
-    public String type() {
-        return SPAN_REPORT_TYPE;
-    }
-
-    @Override
-    public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList(URL_CONFIG_KEY.replaceAll("\\.", "\\\\.")));
-    }
-
-    @Override
-    public void configKeyValue(Map<String, String> kv) {
-        if (kv.containsKey(URL_CONFIG_KEY)) {
-            url = kv.get(URL_CONFIG_KEY);
-        }
-    }
-
-    @Override
     public ConfigNotifyType notifyType() {
         return ConfigNotifyType.ALWAYS;
     }
-
 }

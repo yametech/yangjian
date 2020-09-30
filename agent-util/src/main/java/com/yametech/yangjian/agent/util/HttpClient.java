@@ -62,7 +62,7 @@ public class HttpClient {
                 response.setData(readResponseAsString(conn.getInputStream()));
             }
         } catch (Exception e) {
-            LOGGER.error(e, "doHttpRequest error.");
+            LOGGER.error(e, "doHttpRequest(url:{}) error.", requestUrl);
         } finally {
             if (conn != null) {
                 conn.disconnect();

@@ -1,2 +1,3 @@
-com.yametech.yangjian.agent.plugin.reporter.http.HttpReporter
+com.yametech.yangjian.agent.plugin.reporter.http.TraceReporter
 com.yametech.yangjian.agent.plugin.reporter.http.RunStatusReporter
+com.yametech.yangjian.agent.plugin.reporter.http.MetricsReporter
