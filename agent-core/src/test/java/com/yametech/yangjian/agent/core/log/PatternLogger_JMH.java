@@ -37,7 +37,7 @@ import com.yametech.yangjian.agent.core.log.impl.PatternLogger;
 /**
  * @author zcn
  * @date: 2019-10-15
- **/
+ */
 @Warmup(iterations = 5, time = 1)
 @Measurement(iterations = 5, time = 1)
 @State(Scope.Benchmark)

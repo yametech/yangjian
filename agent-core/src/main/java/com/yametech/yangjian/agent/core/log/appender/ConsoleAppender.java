@@ -21,7 +21,7 @@ import com.yametech.yangjian.agent.core.log.LogEvent;
 /**
  * @author zcn
  * @date: 2019-10-16
- **/
+ */
 public class ConsoleAppender implements IAppender<LogEvent> {
 
     @Override

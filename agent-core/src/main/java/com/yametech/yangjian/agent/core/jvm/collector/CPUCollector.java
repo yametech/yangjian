@@ -24,7 +24,7 @@ import java.lang.management.ManagementFactory;
 /**
  * @author zcn
  * @date: 2019-10-17
- **/
+ */
 public final class CPUCollector implements IMetricsCollector {
 
     private OperatingSystemMXBean operatingSystemMXBean;

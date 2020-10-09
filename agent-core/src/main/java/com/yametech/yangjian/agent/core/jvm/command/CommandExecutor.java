@@ -25,7 +25,7 @@ import com.yametech.yangjian.agent.api.log.LoggerFactory;
 /**
  * @author zcn
  * @date: 2019-10-18
- **/
+ */
 public class CommandExecutor {
 
     private final static ILogger logger = LoggerFactory.getLogger(CommandExecutor.class);

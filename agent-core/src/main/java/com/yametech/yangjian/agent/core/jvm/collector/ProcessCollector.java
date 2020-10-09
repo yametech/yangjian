@@ -29,7 +29,7 @@ import java.lang.management.ManagementFactory;
 /**
  * @author zcn
  * @date: 2019-10-21
- **/
+ */
 public final class ProcessCollector implements IMetricsCollector {
 
     private static final ILogger logger = LoggerFactory.getLogger(ProcessCollector.class);

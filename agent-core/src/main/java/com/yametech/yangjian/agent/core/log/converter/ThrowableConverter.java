@@ -25,7 +25,7 @@ import com.yametech.yangjian.agent.core.log.LogEvent;
 /**
  * @author zcn
  * @date: 2019-10-14
- **/
+ */
 public class ThrowableConverter implements IConverter<LogEvent> {
 
     private static String SEPARATOR = System.getProperty("line.separator", "\n");

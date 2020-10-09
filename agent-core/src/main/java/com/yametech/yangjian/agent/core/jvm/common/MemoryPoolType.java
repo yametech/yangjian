@@ -18,7 +18,7 @@ package com.yametech.yangjian.agent.core.jvm.common;
 /**
  * @author zcn
  * @date: 2019-10-25
- **/
+ */
 public enum MemoryPoolType {
     CODE_CACHE,
     EDEN,

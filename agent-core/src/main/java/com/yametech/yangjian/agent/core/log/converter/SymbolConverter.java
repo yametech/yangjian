@@ -21,7 +21,7 @@ import com.yametech.yangjian.agent.core.log.LogEvent;
 /**
  * @author zcn
  * @date: 2019-10-15
- **/
+ */
 public class SymbolConverter implements IConverter<LogEvent> {
 
     private String symbol;

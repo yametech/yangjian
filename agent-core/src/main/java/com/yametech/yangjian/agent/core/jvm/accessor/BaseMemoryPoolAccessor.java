@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * @author zcn
  * @date: 2019-10-25
- **/
+ */
 public abstract class BaseMemoryPoolAccessor implements IMemoryPoolAccessor {
 
     private List<MemoryPoolMXBean> beans;

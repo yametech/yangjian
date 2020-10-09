@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * @author zcn
  * @date: 2019-10-15
- **/
+ */
 public class PatternParserTest {
 
     private static Map<String, Class<? extends IConverter>> CONVERTER_MAP;

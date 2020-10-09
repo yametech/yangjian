@@ -27,7 +27,7 @@ import com.yametech.yangjian.agent.core.log.appender.RollingFileAppender;
 /**
  * @author zcn
  * @date: 2019-10-15
- **/
+ */
 public class RollingFileAppenderTest {
 
     @BeforeClass

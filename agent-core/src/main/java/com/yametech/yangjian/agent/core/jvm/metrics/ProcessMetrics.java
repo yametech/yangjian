@@ -18,7 +18,7 @@ package com.yametech.yangjian.agent.core.jvm.metrics;
 /**
  * @author zcn
  * @date: 2019-10-21
- **/
+ */
 public class ProcessMetrics implements IMetrics {
 
     private double cpuUsagePercent = 0.0d;

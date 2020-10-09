@@ -47,7 +47,7 @@ import com.yametech.yangjian.agent.core.log.impl.LogMessageHolder;
  * @author zcn
  * @date: 2019-10-14
  * @description: 日志文件实现类
- **/
+ */
 public class RollingFileAppender implements IAppender<LogEvent>, EventHandler<LogMessageHolder> {
 
     private static final String DISCARDED_LOG = "log.discarded";

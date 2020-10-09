@@ -26,7 +26,7 @@ import com.yametech.yangjian.agent.core.log.appender.RollingFileAppender;
 /**
  * @author zcn
  * @author dengliming
- **/
+ */
 public class AppenderFactory {
     /**
      * 默认根日志实现

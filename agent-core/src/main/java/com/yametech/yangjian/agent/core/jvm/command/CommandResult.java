@@ -18,7 +18,7 @@ package com.yametech.yangjian.agent.core.jvm.command;
 /**
  * @author zcn
  * @date: 2019-10-21
- **/
+ */
 public class CommandResult {
     private boolean isSuccess;
     private byte[] content;

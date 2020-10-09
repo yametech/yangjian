@@ -22,7 +22,7 @@ import org.junit.Test;
 /**
  * @author zcn
  * @date: 2019-10-22
- **/
+ */
 public class ScriptRunnerTest {
 
     @Test

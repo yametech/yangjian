@@ -25,7 +25,7 @@ import com.yametech.yangjian.agent.core.log.impl.PatternLogger;
 /**
  * @author zcn
  * @date: 2019-10-15
- **/
+ */
 public class PatternLoggerTest {
 
     private String pattern = "%timestamp [%level]-[%thread]-[%class.method]: %msg %throwable";

@@ -26,8 +26,7 @@ import com.yametech.yangjian.agent.core.exception.AgentPathException;
 /**
  * @author zcn
  * @date: 2019-10-16
- *
- **/
+ */
 public class AgentPath {
     private static File file;
 
@@ -66,5 +65,5 @@ public class AgentPath {
     	String path = oldPath.substring(0, oldPath.length() - replacePath.length()) + "deploy";
     	return new File(path);
     }
-    
+
 }

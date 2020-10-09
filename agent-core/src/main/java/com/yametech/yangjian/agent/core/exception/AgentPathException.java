@@ -18,7 +18,7 @@ package com.yametech.yangjian.agent.core.exception;
 /**
  * @author zcn
  * @date: 2019-10-16
- **/
+ */
 public class AgentPathException extends RuntimeException{
 
     public AgentPathException(String message){

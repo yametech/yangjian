@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * @author zcn
  * @date: 2019-10-25
- **/
+ */
 public class ParallelMemoryPoolAccessor extends BaseMemoryPoolAccessor {
 
     public ParallelMemoryPoolAccessor(List<MemoryPoolMXBean> beans) {

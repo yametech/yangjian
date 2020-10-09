@@ -41,7 +41,7 @@ import com.yametech.yangjian.agent.core.log.converter.TimestampConverter;
  * @author zcn
  * @date: 2019-10-14
  * @description: 格式化日志输出类。
- **/
+ */
 public class PatternLogger implements ILogger {
 
     private static Map<String, Class<? extends IConverter>> CONVERTER_MAP;

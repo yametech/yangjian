@@ -17,7 +17,7 @@ package com.yametech.yangjian.agent.api.common;
 
 /**
  * @author zcn
- **/
+ */
 public class Constants {
 
     public static final String PATH_SEPARATOR = System.getProperty("file.separator", "/");
@@ -45,7 +45,7 @@ public class Constants {
 
     public static final String IDENTIFY_SEPARATOR = " | ";
     public static final String RABBITMQ_DEFAULT_EXCHANGE = "Default";
-    
+
     public static final String REPORT_CONFIG_KEY_PREFIX = "report";
     public static final String DISABLE_SPI_KEY_PREFIX = "spi.";
     public static final String DEPENDENCY_PATH = "dependency/";
@@ -61,7 +61,7 @@ public class Constants {
     	public static final String STOPPED = "stopped";// 服务已关闭
     	public static final String RESOURCES = "resources";// 资源状态：jvm...
     }
-    
+
     public static class EventType {
         public static final String MYSQL = "mysql";
         public static final String DUBBO_CLIENT = "dubbo-client";
@@ -82,13 +82,13 @@ public class Constants {
         public static final String MYSQL_TABLE = "mysql-table";
         public static final String MYSQL_SQL = "mysql-sql";
     }
-    
+
     public static class ReportType {
     	public static final String LOG = "log";// log上报方式
     	public static final String HTTP = "http";// http上报方式
         public static final String LOG_TRACE = "log-trace";// trace单独日志文件
     }
-    
+
     public static class DbOperation {
         public static final String INSERT = "Insert";
         public static final String DELETE = "Delete";
@@ -96,7 +96,7 @@ public class Constants {
         public static final String SELECT = "Select";
         public static final String GET_CONNECTION = "GetConnection";
     }
-    
+
     public static String serviceName() {
     	return System.getProperty(SYSTEM_PROPERTIES_PREFIX + SERVICE_NAME);
     }

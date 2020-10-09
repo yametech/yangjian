@@ -24,7 +24,7 @@ import com.yametech.yangjian.agent.core.log.converter.SymbolConverter;
  * @author zcn
  * @date: 2019-10-14
  * @description: 日志模式解析类
- **/
+ */
 public class PatternParser {
 
     private Map<String, Class<? extends IConverter>> allConverters;

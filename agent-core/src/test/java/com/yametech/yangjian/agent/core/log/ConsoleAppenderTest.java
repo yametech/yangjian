@@ -25,7 +25,7 @@ import com.yametech.yangjian.agent.core.log.appender.ConsoleAppender;
 /**
  * @author zcn
  * @date: 2019-10-15
- **/
+ */
 public class ConsoleAppenderTest {
     @BeforeClass
     public static void beforeClass(){

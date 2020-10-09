@@ -18,7 +18,7 @@ package com.yametech.yangjian.agent.util;
 /**
  * @author zcn
  * @date: 2019-10-21
- **/
+ */
 public class OSUtil {
 
     public static String OS = System.getProperty("os.name").toLowerCase();

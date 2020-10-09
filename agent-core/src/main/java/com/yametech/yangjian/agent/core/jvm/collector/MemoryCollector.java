@@ -28,7 +28,7 @@ import java.lang.management.MemoryUsage;
 /**
  * @author zcn
  * @date: 2019-10-17
- **/
+ */
 public final class MemoryCollector implements IMetricsCollector {
 
     private static final ILogger logger = LoggerFactory.getLogger(MemoryCollector.class);

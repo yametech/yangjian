@@ -18,7 +18,7 @@ package com.yametech.yangjian.agent.core.log.impl;
 /**
  * @author zcn
  * @date: 2019-10-15
- **/
+ */
 public class LogMessageHolder {
     private String message;
 

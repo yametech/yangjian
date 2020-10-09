@@ -21,7 +21,7 @@ import com.yametech.yangjian.agent.core.log.LogEvent;
 /**
  * @author zcn
  * @date: 2019-10-14
- **/
+ */
 public class LevelConverter implements IConverter<LogEvent> {
     @Override
     public String convert(LogEvent event) {

@@ -34,7 +34,7 @@ import java.util.*;
 /**
  * @author zcn
  * @date: 2019-10-25
- **/
+ */
 public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfigReader {
     private static final ILogger LOG = LoggerFactory.getLogger(JVMMetricsSchedule.class);
     private static final String CONFIG_KEY = "metricOutput.interval.jvm";
@@ -58,7 +58,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfi
         if (kv == null) {
             return;
         }
-        
+
         String intervalStr = kv.get(CONFIG_KEY);
     	if(intervalStr != null) {
     		try {
@@ -68,7 +68,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfi
             }
     	}
     }
-    
+
     @Override
     public void beforeRun() {
         bufferPoolCollector = new BufferPoolCollector();
