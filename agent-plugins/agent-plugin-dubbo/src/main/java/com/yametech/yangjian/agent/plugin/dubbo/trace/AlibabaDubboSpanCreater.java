@@ -129,9 +129,11 @@ public abstract class AlibabaDubboSpanCreater<T extends ISpanCustom> implements 
     }
 
     protected boolean isConsumerSide(RpcContext rpcContext, URL invokerUrl) {
-        if (rpcContext.getUrl() != null) {
+        try {
+            // rpcContext.isConsumerSide() 这里2.6低版本可能会抛异常
             return rpcContext.isConsumerSide();
+        } catch (Throwable e) {
+            return invokerUrl.getParameter(SIDE_KEY, PROVIDER_SIDE).equals(CONSUMER_SIDE);
         }
-        return invokerUrl.getParameter(SIDE_KEY, PROVIDER_SIDE).equals(CONSUMER_SIDE);
     }
 }
