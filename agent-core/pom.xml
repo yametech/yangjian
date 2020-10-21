@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.github.yametech</groupId>
+        <artifactId>yangjian-agent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>yangjian-agent-core</artifactId>
+
+    <properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <build.skip.assembly>false</build.skip.assembly>
+        <build.skip.test>true</build.skip.test>
+		<byte-buddy.version>1.10.3</byte-buddy.version>
+        <powermock.version>1.6.4</powermock.version>
+        <mockito-all.version>1.10.19</mockito-all.version>
+        <jmh.version>1.19</jmh.version>
+        <maven-shade-plugin.version>3.1.1</maven-shade-plugin.version>
+        <maven-resources-plugin.version>2.6</maven-resources-plugin.version>
+        <disruptor.version>3.4.2</disruptor.version>
+        <opentelemetry.version>0.2.4</opentelemetry.version>
+<!--     	<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths> -->
+<!--         <sonar.exclusions> -->
+<!-- 		      src/test/**/*, -->
+<!-- 		      src/test/**/* -->
+<!-- 		</sonar.exclusions> -->
+    </properties>
+
+    <dependencies>
+    	<dependency>
+            <groupId>com.github.yametech</groupId>
+            <artifactId>yangjian-agent-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    	<dependency>
+            <groupId>com.github.yametech</groupId>
+            <artifactId>yangjian-agent-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+		    <groupId>com.lmax</groupId>
+		    <artifactId>disruptor</artifactId>
+		    <version>${disruptor.version}</version>
+		</dependency>
+		<dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>${byte-buddy.version}</version>
+        </dependency>
+        <dependency>
+		    <groupId>io.zipkin.brave</groupId>
+		    <artifactId>brave</artifactId>
+		    <version>${brave.version}</version>
+		</dependency>
+		<dependency>
+            <groupId>com.github.yametech</groupId>
+            <artifactId>yangjian-agent-client</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+
+        <dependency>
+		    <groupId>io.zipkin.reporter2</groupId>
+		    <artifactId>zipkin-sender-okhttp3</artifactId>
+		    <version>2.12.2</version>
+		    <scope>test</scope>
+		</dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>${mockito-all.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>${jmh.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>${jmh.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/io.opentelemetry/opentelemetry-api -->
+		<dependency>
+		    <groupId>io.opentelemetry</groupId>
+		    <artifactId>opentelemetry-api</artifactId>
+		    <version>${opentelemetry.version}</version>
+		    <scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.opentelemetry/opentelemetry-sdk -->
+		<dependency>
+		    <groupId>io.opentelemetry</groupId>
+		    <artifactId>opentelemetry-sdk</artifactId>
+		    <version>${opentelemetry.version}</version>
+		    <scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
+		<dependency>
+		    <groupId>org.assertj</groupId>
+		    <artifactId>assertj-core</artifactId>
+		    <version>3.15.0</version>
+		    <scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>com.squareup.okhttp3</groupId>
+		    <artifactId>mockwebserver</artifactId>
+		    <version>3.14.7</version>
+		    <scope>test</scope>
+		</dependency>
+
+
+        <!-- 统计使用，如：百分位 -->
+		<!--<dependency>
+		    <groupId>com.clearspring.analytics</groupId>
+		    <artifactId>stream</artifactId>
+		    <version>2.9.8</version>
+		</dependency>-->
+
+    </dependencies>
+
+    <build>
+        <!-- 打包不带版本号，用于线上更新时不会因版本号改变，造成多个jar包 -->
+        <finalName>${project.artifactId}</finalName>
+		<plugins>
+			<plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
+
+			<!-- 将依赖jar包，打包到主jar包中 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven-shade-plugin.version}</version>
+                <configuration>
+                    <artifactSet>
+                        <includes>
+                            <include>net.bytebuddy:byte-buddy</include>
+                            <include>com.lmax:disruptor</include>
+                            <include>com.github.yametech:yangjian-agent-util</include>
+                            <include>com.github.yametech:yangjian-agent-api</include>
+                            <include>io.zipkin.brave:brave</include>
+                            <include>io.zipkin.zipkin2:zipkin</include>
+                            <include>io.zipkin.reporter2:zipkin-reporter</include>
+                        </includes>
+                    </artifactSet>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
+                                <exclude>META-INF/versions/9/module-info.class</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                    <relocations>
+                        <relocation>
+                            <pattern>net.bytebuddy</pattern>
+                            <shadedPattern>com.yametech.yangjian.agent.thirdparty.net.bytebuddy</shadedPattern>
+                        </relocation>
+<!--                         <relocation> -->
+<!--                             <pattern>okio</pattern> -->
+<!--                             <shadedPattern>com.yametech.yangjian.agent.thirdparty.okio</shadedPattern> -->
+<!--                         </relocation> -->
+                        <relocation>
+                            <pattern>com.lmax.disruptor</pattern>
+                            <shadedPattern>com.yametech.yangjian.agent.thirdparty.com.lmax.disruptor</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                            	<mkdir dir="${project.basedir}/../${agent.package.name}" />
+                                <mkdir dir="${project.basedir}/../${agent.package.name}/config" />
+                                <mkdir dir="${project.basedir}/../${agent.package.name}/lib" />
+                                <mkdir dir="${project.basedir}/../${agent.package.name}/plugins" />
+                                <mkdir dir="${project.basedir}/../${agent.package.name}/logs" />
+
+                                <copy file="${project.build.directory}/yangjian-agent-core.jar" tofile="${project.basedir}/../${agent.package.name}/lib/yangjian-agent.jar" overwrite="true" />
+								<!-- 此处不能拷贝src下的文件，所以使用maven-resources-plugin拷贝config -->
+<!-- 								<copy src="${project.basedir}/src/main/resources/agent.properties" dest="${project.basedir}/dist/ecpark-agent/config" forceoverwrite="true" /> -->
+                                <!-- 此文件为每次打包生成的版本号 -->
+                                <tstamp>
+                                    <format property="last.updated" pattern="yyyyMMddHHmm"/>
+                                </tstamp>
+                                <echo message="${last.updated}" file="${project.basedir}/../${agent.package.name}/version.txt"/>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>${maven-resources-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<encoding>${project.build.sourceEncoding}</encoding>
+							<!-- 把配置文件拷到config路径下 -->
+							<outputDirectory>${project.basedir}/../${agent.package.name}/config</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.basedir}/src/main/resources/</directory>
+									<!-- <excludes> -->
+									<!-- <exclude>*.sh</exclude> -->
+									<!-- </excludes> -->
+									<includes>
+										<include>*.properties</include>
+										<include>*.xml</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<!-- 研发测试使用 -->
+ 					<!--<execution>
+ 						<id>copy-resources-to-classes</id>
+ 						<phase>package</phase>
+ 						<goals>
+ 							<goal>copy-resources</goal>
+ 						</goals>
+ 						<configuration>
+ 							<encoding>UTF-8</encoding>
+ 							<outputDirectory>${project.basedir}/target/config</outputDirectory>
+ 							<resources>
+ 								<resource>
+ 									<directory>src/main/resources/</directory>
+ 									<includes>
+ 										<include>*.properties</include>
+ 										<include>*.xml</include>
+ 									</includes>
+ 									<filtering>true</filtering>
+ 								</resource>
+ 							</resources>
+ 						</configuration>
+ 					</execution>-->
+
+                    <execution>
+                        <id>ci-copy-resources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <encoding>UTF-8</encoding>
+                            <outputDirectory>/data/www/soft/ecpark-agent/config</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources/</directory>
+                                    <includes>
+                                        <include>*.properties</include>
+                                        <include>*.xml</include>
+                                    </includes>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+				</executions>
+			</plugin>
+
+        </plugins>
+    </build>
+</project>
