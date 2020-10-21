@@ -24,6 +24,7 @@ import com.yametech.yangjian.agent.api.interceptor.IMethodAOP;
 import com.yametech.yangjian.agent.api.interceptor.IStaticMethodAOP;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.client.EventSubscribeParamManage;
 import com.yametech.yangjian.agent.core.eventsubscribe.base.EventSubscribe;
 import com.yametech.yangjian.agent.core.eventsubscribe.eventbus.SubscribeEventBus;
 import com.yametech.yangjian.agent.core.util.Util;
@@ -84,6 +85,7 @@ public class EventDispatcher implements IMethodAOP<Object>, IConstructorListener
 
 	@Override
 	public void constructor(Object thisObj, Object[] allArguments) throws Throwable {
+		before();
 		notify(thisObj, allArguments, null, null, null);
 	}
 
@@ -95,11 +97,12 @@ public class EventDispatcher implements IMethodAOP<Object>, IConstructorListener
 	}
 	
 	private void notify(Object sourceObj, Object[] allArguments, Method method, Object ret, Throwable t) {
+		Map<String, Object> params = EventSubscribeParamManage.stop();
 		if(eventSubscribe != null && !check()) {
 			if(callAsync) {
-				getEventBus().publish(event -> event.reset(eventSubscribe, sourceObj, allArguments, method, ret, t));
+				getEventBus().publish(event -> event.reset(eventSubscribe, sourceObj, allArguments, params, method, ret, t));
 			} else {
-				eventSubscribe.notify(sourceObj, allArguments, method, ret, t);
+				eventSubscribe.notify(sourceObj, allArguments, params, method, ret, t);
 			}
 		}
 	}
@@ -135,14 +138,20 @@ public class EventDispatcher implements IMethodAOP<Object>, IConstructorListener
         }
         return false;
 	}
-	
+
+	private void before() {
+		EventSubscribeParamManage.start();
+	}
+
 	@Override
 	public BeforeResult<Object> before(Object[] allArguments, Method method) throws Throwable {
+		before();
 		return null;
 	}
 	
 	@Override
 	public BeforeResult<Object> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
+		before();
 		return null;
 	}
 

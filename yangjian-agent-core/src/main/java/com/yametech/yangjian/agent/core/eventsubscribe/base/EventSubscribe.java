@@ -19,6 +19,7 @@ import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.common.MethodUtil;
 import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
+import com.yametech.yangjian.agent.client.bean.EventSubscribeContext;
 import com.yametech.yangjian.agent.core.util.RateLimit;
 
 import java.lang.reflect.Method;
@@ -32,10 +33,10 @@ public class EventSubscribe {
 	private static final RateLimit LIMITER = RateLimit.create(10);
 	private final Map<String, Integer> extraArgumentIndex = new HashMap<>();
 	private final Map<Method, SubscribeInfo> subscribes = new ConcurrentHashMap<>();
-	private MethodDefined methodDefined;
-	private String className;
-	private String methodName;
-	private String[] params;
+	private final MethodDefined methodDefined;
+	private final String className;
+	private final String methodName;
+	private final String[] params;
 
 	public EventSubscribe(MethodDefined methodDefined) {
 		this.methodDefined = methodDefined;
@@ -45,6 +46,7 @@ public class EventSubscribe {
 		extraArgumentIndex.put(this.className, 0);
 		extraArgumentIndex.put(methodDefined.getMethodRet(), 1);
 		extraArgumentIndex.put(Throwable.class.getTypeName(), 2);
+		extraArgumentIndex.put(EventSubscribeContext.class.getTypeName(), 3);
 	}
 
 	/**
@@ -56,13 +58,13 @@ public class EventSubscribe {
 	 * @param ret
 	 * @param t
 	 */
-	public void notify(Object sourceObj, Object[] allArguments, Method method, Object ret, Throwable t) {
+	public void notify(Object sourceObj, Object[] allArguments, Map<String, Object> extraParams, Method method, Object ret, Throwable t) {
 		if(subscribes.size() == 0) {
 			return;
 		}
 		subscribes.forEach((subscribeMethod, instance) -> {
 			try {
-				subscribeMethod.invoke(instance.getInstance(), getArguments(instance, subscribeMethod, sourceObj, allArguments, ret, t));
+				subscribeMethod.invoke(instance.getInstance(), getArguments(instance, subscribeMethod, sourceObj, allArguments, ret, t, extraParams));
 			} catch (Exception e) {
 				if(LIMITER.tryAcquire()) {
 					LOG.warn(e, "event subscribe consume exception: {} {}", method, subscribeMethod);
@@ -81,9 +83,10 @@ public class EventSubscribe {
 	 * @param t
 	 * @return
 	 */
-	private Object[] getArguments(SubscribeInfo info, Method subscribeMethod, Object sourceObj, Object[] arguments, Object ret, Throwable t) {
+	private Object[] getArguments(SubscribeInfo info, Method subscribeMethod, Object sourceObj, Object[] arguments, Object ret, Throwable t, Map<String, Object> params) {
+		EventSubscribeContext context = new EventSubscribeContext().setExtraParams(params);
 		if(info.isIgnoreParams()) {
-			return setExtraParams(info, info.getDefaultArgumentsCopy(), sourceObj, ret, t);// 注意：后三个参数的顺序不能变，必须与extraArgumentIndex中put的顺序一致
+			return setExtraParams(info, info.getDefaultArgumentsCopy(), sourceObj, ret, t, context);// 注意：后几个参数的顺序不能变，必须与extraArgumentIndex中put的序号一致
 		}
 		int argLength = arguments == null ? 0 : arguments.length;
 		if(subscribeMethod.getParameterCount() == argLength) {
@@ -95,7 +98,7 @@ public class EventSubscribe {
 		if(argLength > 0) {
 			System.arraycopy(arguments, 0, newArguments, 0, argLength);
 		}
-		return setExtraParams(info, newArguments, sourceObj, ret, t);
+		return setExtraParams(info, newArguments, sourceObj, ret, t, context);// 注意：后几个参数的顺序不能变，必须与extraArgumentIndex中put的序号一致
 	}
 	
 	private Object[] setExtraParams(SubscribeInfo info, Object[] newArguments, Object... extraArguments) {

@@ -17,6 +17,7 @@
 package com.yametech.yangjian.agent.core.eventsubscribe.eventbus;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
 import com.yametech.yangjian.agent.core.eventsubscribe.base.EventSubscribe;
 
@@ -24,22 +25,24 @@ public class EventBean {
 	private EventSubscribe eventSubscribe;
 	private Object sourceObj;
 	private Object[] allArguments;
+	private Map<String, Object> extraParams;
 	private Method method;
 	private Object returnData;
 	private Throwable exception;
 	
-	public void reset(EventSubscribe eventSubscribe, Object sourceObj, Object[] allArguments, 
+	public void reset(EventSubscribe eventSubscribe, Object sourceObj, Object[] allArguments, Map<String, Object> extraParams,
 			Method method, Object returnData, Throwable exception) {
 		this.eventSubscribe = eventSubscribe;
 		this.sourceObj = sourceObj;
 		this.allArguments = allArguments;
+		this.extraParams = extraParams;
 		this.method = method;
 		this.returnData = returnData;
 		this.exception = exception;
 	}
 	
 	public void call() {
-		eventSubscribe.notify(sourceObj, allArguments, method, returnData, exception);
+		eventSubscribe.notify(sourceObj, allArguments, extraParams, method, returnData, exception);
 	}
 
 	public EventSubscribe getEventSubscribe() {

@@ -332,7 +332,7 @@ public class InstanceManage {
 				if(schedule.initialDelay() == 0) {
 					schedule.execute();
 				}
-			});// 执行一次定时任务，防止多线程类加载死锁
+			});// 在主线程中执行一次定时任务，防止多线程类加载死锁
 			instances.forEach(InstanceManage::scheduleInit);
 		});
 	}
@@ -344,7 +344,7 @@ public class InstanceManage {
 		}
 		((ScheduledExecutorService)service).scheduleAtFixedRate(() -> {
 			try {
-				schedule.execute();
+				schedule.execute();// TODO 此处需考虑重复调用问题，在windows中休眠唤醒后，会大量的执行，不按照定时间隔，需为每个schedule增加上次执行时间判断
 			} catch(Exception e) {
 				LOG.warn(e, "执行定时任务异常：{}", schedule.getClass());
 			}
