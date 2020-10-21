@@ -23,10 +23,7 @@ import com.yametech.yangjian.agent.api.log.ILogger;
 import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.util.AgentPath;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -98,7 +95,12 @@ public class LocalConfigLoader implements IConfigLoader {
         if (StringUtil.isEmpty(configPath)) {
             configPath = AgentPath.getCompatiblePath().getPath() + File.separator + "config" + File.separator + DEFAULT_CONFIG_FILE;
         }
-		Config.addConfigProperties(configPath);
+//        try {
+            Config.addConfigProperties(configPath);
+//        } catch(FileNotFoundException e) {// 开发时的兼容逻辑
+//            configPath = AgentPath.getCompatiblePath().getPath() + File.separator + "classes" + File.separator + DEFAULT_CONFIG_FILE;
+//            Config.addConfigProperties(configPath);
+//        }
         log.info("Loaded config file path: {}", configPath);
     }
 
@@ -109,6 +111,10 @@ public class LocalConfigLoader implements IConfigLoader {
         }
 		String envConfigPath = AgentPath.getCompatiblePath().getPath() + File.separator + "config" + File.separator + String.format(ENV_CONFIG_FILE_FORMAT, serviceEnv);
 		File configFile = new File(envConfigPath);
+//		if(!configFile.exists()) {// 开发时的兼容逻辑
+//            envConfigPath = AgentPath.getCompatiblePath().getPath() + File.separator + "classes" + File.separator + String.format(ENV_CONFIG_FILE_FORMAT, serviceEnv);
+//            configFile = new File(envConfigPath);
+//        }
         Properties envProperties = new Properties();
 		if (configFile.exists()) {
             try (InputStreamReader reader = new InputStreamReader(new FileInputStream(configFile), StandardCharsets.UTF_8)) {

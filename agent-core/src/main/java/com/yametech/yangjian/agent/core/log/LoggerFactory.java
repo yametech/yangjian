@@ -25,6 +25,7 @@ import com.yametech.yangjian.agent.core.util.AgentPath;
 import com.yametech.yangjian.agent.util.OSUtil;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -57,6 +58,13 @@ public class LoggerFactory implements ILoggerFactory {
         }
         try {
             Config.addConfigProperties(configPath);
+//        } catch(FileNotFoundException e) {// 开发时的兼容逻辑
+//            configPath = AgentPath.getCompatiblePath().getPath() + File.separator + "classes" + File.separator + LOG_CONFIG_NAME;
+//            try {
+//                Config.addConfigProperties(configPath);
+//            } catch (IOException ioException) {
+//                System.err.println("Init AgentLog Exception:" + ioException.getMessage());
+//            }
         } catch (IOException e) {
             System.err.println("Init AgentLog Exception:" + e.getMessage());
         }
