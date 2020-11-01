@@ -14,8 +14,8 @@ public class SecondStatisticBean {
 	private static final ILogger LOG = LoggerFactory.getLogger(SecondStatisticBean.class);
 	private static final Integer IDENTIFY_MAX_SIZE = 10000;// identify最大允许的个数
 	private static final Integer IDENTIFY_MAX_LENGTH = 300;// identify最大允许的长度
-	private long second;
-	private Map<String, Map<String, Map<StatisticType, BaseStatistic>>> statistics = new HashMap<>();
+	private final long second;
+	private final Map<String, Map<String, Map<StatisticType, BaseStatistic>>> statistics = new HashMap<>();// 此处为单线程调用，不会有并发
 	
 	public SecondStatisticBean(long second) {
 		this.second = second;

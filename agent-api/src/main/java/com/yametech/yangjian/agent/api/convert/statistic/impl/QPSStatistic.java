@@ -20,11 +20,12 @@ import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
+import com.yametech.yangjian.agent.api.convert.statistic.IStatistic;
 import com.yametech.yangjian.agent.api.convert.statistic.StatisticType;
 
 public class QPSStatistic extends BaseStatistic {
-	private LongAdder num = new LongAdder();// 当前秒数的总调用次数
-	private LongAdder errorNum = new LongAdder();// 当前秒数的总异常次数
+	private final LongAdder num = new LongAdder();// 当前秒数的总调用次数
+	private final LongAdder errorNum = new LongAdder();// 当前秒数的总异常次数
 
 	@Override
 	protected void clear() {
@@ -36,6 +37,16 @@ public class QPSStatistic extends BaseStatistic {
 	public void combine(TimeEvent timeEvent) {
 		this.num.add(timeEvent.getNumber());
 		this.errorNum.add(timeEvent.getErrorNum());
+	}
+
+	@Override
+	public void combine(IStatistic statistic) {
+		if(!(statistic instanceof QPSStatistic)) {
+			return;
+		}
+		QPSStatistic qps = (QPSStatistic) statistic;
+		this.num.add(qps.num.longValue());
+		this.errorNum.add(qps.errorNum.longValue());
 	}
 
 	@Override

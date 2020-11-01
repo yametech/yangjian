@@ -22,10 +22,16 @@ import com.yametech.yangjian.agent.api.bean.TimeEvent;
 public interface IStatistic {
 	
 	/**
-	 * 合并数据
+	 * 合并原始数据
 	 * @param timeEvent	事件对象
 	 */
 	void combine(TimeEvent timeEvent);
+
+	/**
+	 * 合并其他统计数据
+	 * @param statistic
+	 */
+	void combine(IStatistic statistic);
 	
 	/**
 	 * 重置数据

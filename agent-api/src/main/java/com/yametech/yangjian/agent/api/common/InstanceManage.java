@@ -393,7 +393,7 @@ public class InstanceManage {
     	for(IAppStatusListener spi : shutdowns) {
     		long startMillis = System.currentTimeMillis();
     		try {
-    			boolean success = spi.shutdown(Duration.ofSeconds(10));// TODO 此处增加异步关闭，避免同步关闭时耗时太久
+    			boolean success = spi.shutdown(Duration.ofSeconds(10));// TODO 此处增加异步关闭，避免同步关闭时耗时太久，但是需注意插件之间的关联性，如A必须早于B关闭，此时多线程可能会产生问题
     			if(!success) {
     				LOG.warn("执行关闭逻辑失败：{}", spi);
     			}

@@ -141,7 +141,7 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
             try {
                 previousNum = getTotalNum();
                 //noinspection BusyWait
-                Thread.sleep(502L);
+                Thread.sleep(waitMillis());
             } catch (InterruptedException e) {
                 log.warn(e, "shutdown interrupted");
                 Thread.currentThread().interrupt();
@@ -149,6 +149,10 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
             }
         }
         return true;
+    }
+
+    public long waitMillis() {
+        return 502L;
     }
 
 	@Override

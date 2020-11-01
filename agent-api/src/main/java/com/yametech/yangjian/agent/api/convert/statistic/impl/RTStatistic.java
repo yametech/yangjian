@@ -21,14 +21,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
 import com.yametech.yangjian.agent.api.bean.TimeEvent;
+import com.yametech.yangjian.agent.api.convert.statistic.IStatistic;
 import com.yametech.yangjian.agent.api.convert.statistic.StatisticType;
 
 public class RTStatistic extends BaseStatistic {
-	private LongAdder num = new LongAdder();// 当前秒数的总调用次数
-	private LongAdder errorNum = new LongAdder();// 当前秒数的总异常次数
-	private LongAdder total = new LongAdder();// 当前秒数的总耗时（毫秒）
-	private AtomicLong min = new AtomicLong(-1);// 当前秒数的最小耗时（毫秒）
-	private AtomicLong max = new AtomicLong(-1);// 当前秒数的最大耗时（毫秒）
+	private final LongAdder num = new LongAdder();// 当前秒数的总调用次数
+	private final LongAdder errorNum = new LongAdder();// 当前秒数的总异常次数
+	private final LongAdder total = new LongAdder();// 当前秒数的总耗时（毫秒）
+	private final AtomicLong min = new AtomicLong(-1);// 当前秒数的最小耗时（毫秒）
+	private final AtomicLong max = new AtomicLong(-1);// 当前秒数的最大耗时（毫秒）
 
 	@Override
 	public void combine(TimeEvent timeEvent) {
@@ -38,6 +39,19 @@ public class RTStatistic extends BaseStatistic {
 		long useTimeEach = timeEvent.getUseTime() / timeEvent.getNumber();
 		setMax(useTimeEach);
 		setMin(useTimeEach);
+	}
+
+	@Override
+	public void combine(IStatistic statistic) {
+		if(!(statistic instanceof RTStatistic)) {
+			return;
+		}
+		RTStatistic rt = (RTStatistic) statistic;
+		this.num.add(rt.num.longValue());
+		this.errorNum.add(rt.errorNum.longValue());
+		this.total.add(rt.total.longValue());
+		setMax(rt.max.get());
+		setMin(rt.min.get());
 	}
 
 	@Override

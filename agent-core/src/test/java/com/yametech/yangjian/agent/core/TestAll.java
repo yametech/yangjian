@@ -19,10 +19,10 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
 import java.util.concurrent.TimeoutException;
 
 import com.yametech.yangjian.agent.api.IConfigReader;
@@ -103,6 +103,15 @@ public class TestAll {
 	    System.err.println(Runtime.getRuntime().freeMemory());// 空闲内存
 	    System.err.println(Runtime.getRuntime().totalMemory());// 总内存
 	    System.err.println(Runtime.getRuntime().maxMemory());// 最大内存
+
+		long PERIOD_START_SECOND = LocalDateTime.of(2020, 11, 1, 0, 0,0).toEpochSecond(ZoneOffset.of("+8"));
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		for(int i = 0; i < 20; i++) {
+			long dataSecond = System.currentTimeMillis() / 1000;
+			long second = dataSecond - (dataSecond - PERIOD_START_SECOND) % 5;
+			System.err.println(sdf.format(new Date(second * 1000)) + " : " + sdf.format(new Date()));
+			Thread.sleep(1000);
+		}
 	}
 	
 	@org.junit.Test

@@ -68,7 +68,11 @@ public abstract class BaseStatistic implements IStatistic {
 		}
 		return entrys;
 	}
-	
+
+	public String getSign() {
+		return sign;
+	}
+
 	/**
 	 * 清除状态
 	 */

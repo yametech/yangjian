@@ -33,10 +33,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class RTEventConsume implements BaseConsume<ConvertTimeEvent> {
 	private static final ILogger log = LoggerFactory.getLogger(RTEventConsume.class);
-	private static final int STATISTICS_SECOND_SIZE = 1 << 3;// 每种类型的统计，内存中存放的最大统计秒数个数
-	private volatile SecondStatisticBean[] allStatistics = new SecondStatisticBean[STATISTICS_SECOND_SIZE];
+	static final int STATISTICS_SECOND_SIZE = 1 << 4;// 每种类型的统计，内存中存放的最大统计秒数个数
+	private final SecondStatisticBean[] allStatistics = new SecondStatisticBean[STATISTICS_SECOND_SIZE];
 	private long totalNum = 0;// 总消费量
-	private AtomicLong periodTotalNum = new AtomicLong(0);// 最近一个输出周期产生的事件量
+	private final AtomicLong periodTotalNum = new AtomicLong(0);// 最近一个输出周期产生的事件量
 
 	@Override
 	public boolean test(ConvertTimeEvent event) {
@@ -85,15 +85,17 @@ public class RTEventConsume implements BaseConsume<ConvertTimeEvent> {
 	}
 
 	/**
-	 * 获取当前消费时间之前的统计值，这些历史统计值是不变的
+	 * 获取当前消费时间之前的每秒统计值，这些历史统计值是不变的
+	 * @param maxSecond	输出的数据的最大时间，超出该时间的不输出，必须小于nowMillis / 1000 - 1
 	 * @return
 	 */
-	public List<BaseStatistic> getReportStatistics() {
+	public List<BaseStatistic> getReportStatistics(Long maxSecond) {
 		List<BaseStatistic> reportStatistic = new ArrayList<>();
 		long nowMillis = System.currentTimeMillis();
 		for(int i = 0; i < allStatistics.length; i++) {
 			SecondStatisticBean statistic = allStatistics[i];
-			if(statistic == null || nowMillis / 1000 - statistic.getSecond() <= 1) {// 不存在对应秒数的统计数据或者对应秒的统计还未完成则不输出
+			if(statistic == null || nowMillis / 1000 - statistic.getSecond() <= 1
+				|| (maxSecond != null && statistic.getSecond() > maxSecond)) {// 不存在对应秒数的统计数据或者对应秒的统计还未完成则不输出，如果在未完成的情况下输出了，会导致因并发丢失数据
 				continue;
 			}
 			for(Entry<String, Map<String, Map<StatisticType, BaseStatistic>>> entryType : statistic.getStatistics().entrySet()) {
