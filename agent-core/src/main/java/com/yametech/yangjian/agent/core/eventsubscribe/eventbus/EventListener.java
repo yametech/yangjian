@@ -63,11 +63,6 @@ public class EventListener extends BaseEventListener<EventBean> implements BaseC
 	public void accept(EventBean t) {
     	t.call();
 	}
-    
-    @Override
-    protected boolean hashShard() {
-    	return true;
-    }
 
     @Override
 	protected int eventHashCode(EventBean event) {

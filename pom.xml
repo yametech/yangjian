@@ -7,7 +7,7 @@
     <packaging>pom</packaging>
     <url>https://github.com/yametech/yangjian</url>
     <description>yangjian javaagent api</description>
-
+<!--    打包命令：clean package -Dmaven.javadoc.skip=true -f pom.xml-->
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>

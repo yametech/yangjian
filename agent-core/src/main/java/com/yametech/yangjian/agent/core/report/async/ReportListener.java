@@ -63,15 +63,10 @@ public class ReportListener extends BaseEventListener<ReportEvent> implements Ba
 	public void accept(ReportEvent t) {
     	t.call();
 	}
-    
-    @Override
-    protected boolean hashShard() {
-    	return true;
-    }
 
     @Override
 	protected int eventHashCode(ReportEvent event) {
-		return Objects.hash(event.getReportType());
+		return event.getReportType().hashCode();
 	}
     
     @Override

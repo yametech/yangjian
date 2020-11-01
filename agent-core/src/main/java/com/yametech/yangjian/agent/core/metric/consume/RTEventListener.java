@@ -26,10 +26,7 @@ import com.yametech.yangjian.agent.core.common.EventBusType;
 import com.yametech.yangjian.agent.core.metric.base.ConvertTimeEvent;
 import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 /**
@@ -38,15 +35,36 @@ import java.util.Map.Entry;
  * @date 2019年10月11日 下午4:51:45
  */
 public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
-	private static ILogger log = LoggerFactory.getLogger(RTEventListener.class);
-    private List<RTEventConsume> consumes = new ArrayList<>();
-    private IReportData report = MultiReportFactory.getReport("statistic");
-    private long previousExecuteMillis;
-    private long superIntervalMillis;
-    
+	private static final ILogger log = LoggerFactory.getLogger(RTEventListener.class);
+    private static final String CONFIG_KEY = "metricOutput.interval.metric";
+    private final List<RTEventConsume> consumes = new ArrayList<>();
+    private final IReportData report = MultiReportFactory.getReport("statistic");
+    private int interval = 1;
+
     public RTEventListener() {
 		super(EventBusType.METRIC);
 	}
+
+    @Override
+    public Set<String> configKeyOverride() {
+        return new HashSet<>(Collections.singletonList(CONFIG_KEY.replaceAll("\\.", "\\\\.")));
+    }
+
+    @Override
+    public void configKeyValueOverride(Map<String, String> kv) {
+        if (kv == null) {
+            return;
+        }
+
+        String intervalStr = kv.get(CONFIG_KEY);
+        if(intervalStr != null) {
+            try {
+                interval = Integer.parseInt(intervalStr);
+            } catch(Exception e) {
+                log.warn("{} config error: {}", CONFIG_KEY, intervalStr);
+            }
+        }
+    }
 
     @Override
     public BaseConsume<ConvertTimeEvent> getConsume() {
@@ -59,17 +77,12 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
     // 注意interval的执行间隔要低于RTEventConsume.STATISTICS_SECOND_SIZE，否则会丢失
     @Override
     public int interval() {
-    	superIntervalMillis = super.interval() * 1000L;
-    	return 1;
+//    	superIntervalMillis = super.interval() * 1000L;
+    	return interval;// TODO 支持超过1秒的周期汇总输出，需修改RTEventConsume的allStatistics汇总逻辑，直接按照周期汇总不再按照每秒汇总
     }
     
     @Override
-    public void execute() {
-    	long now = System.currentTimeMillis();
-    	if(now - previousExecuteMillis >= superIntervalMillis) {
-    		super.execute();
-    		previousExecuteMillis = now;
-    	}
+    public void executeOverride() {
         // 循环consumes输出累加统计值，或者直接输出每个的统计值，ecpark-monitor做聚合
         for (RTEventConsume consume : consumes) {
             for (BaseStatistic statistic : consume.getReportStatistics()) {
@@ -105,11 +118,6 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
             periodNum += consume.getPeriodTotalNum();
         }
         return periodNum;
-    }
-    
-    @Override
-    protected boolean hashShard() {
-    	return true;
     }
     
 	@Override

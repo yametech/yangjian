@@ -30,6 +30,7 @@ import java.time.Duration;
 import java.util.*;
 
 /**
+ * 继承该类后可实现自动打印事件一个周期的处理量及总量，也支持消费参数配置
  * @author liuzhao
  * @Description
  * @date 2019年10月11日 下午4:51:45
@@ -39,10 +40,11 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
     private static final String THREADNUM_KEY_PREFIX = "consume.threadNum.";
     private static final String INTERVAL_KEY_PREFIX = "metricOutput.interval.consume.";
     private int threadNum = 1;
-    private String configKeySuffix;
-    private IReportData report = MultiReportFactory.getReport("eventListener");
-    private String metricType;
+    private final String configKeySuffix;
+    private final IReportData report = MultiReportFactory.getReport("eventListener");
+    private final String metricType;
     private int interval = 10;
+    private long previousExecuteMillis;
     
     public BaseEventListener(EventBusType configKeySuffix) {
     	this.metricType = configKeySuffix.getMetricType();
@@ -50,13 +52,23 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
 	}
     
     @Override
-    public Set<String> configKey() {
-        return new HashSet<>(Arrays.asList(THREADNUM_KEY_PREFIX.replaceAll("\\.", "\\\\.") + configKeySuffix, 
+    public final Set<String> configKey() {
+        Set<String> configKey = new HashSet<>(Arrays.asList(THREADNUM_KEY_PREFIX.replaceAll("\\.", "\\\\.") + configKeySuffix,
         		INTERVAL_KEY_PREFIX.replaceAll("\\.", "\\\\.") + configKeySuffix));
+        Set<String> configKeyOverride = configKeyOverride();
+        if(configKeyOverride != null) {
+            configKey.addAll(configKeyOverride);
+        }
+        return configKey;
+    }
+
+    // 提供给子类重写
+    protected Set<String> configKeyOverride() {
+        return null;
     }
 
     @Override
-    public void configKeyValue(Map<String, String> kv) {
+    public final void configKeyValue(Map<String, String> kv) {
         if (kv == null) {
             return;
         }
@@ -80,6 +92,12 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
             	log.warn("{} config error: {}", INTERVAL_KEY_PREFIX + configKeySuffix, intervalStr);
             }
     	}
+        configKeyValueOverride(kv);
+    }
+
+    // 提供给子类重写
+    protected void configKeyValueOverride(Map<String, String> kv) {
+
     }
     
     @Override
@@ -93,16 +111,28 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
     }
 
     @Override
-    public void execute() {
-    	Map<String, Object> params = new HashMap<>();
-    	params.put("total_num", getTotalNum());
-    	params.put("period_seconds", interval);
-    	params.put("period_num", getPeriodNum());
-    	MetricData metricData = MetricData.get(null, "consume/" + metricType, params);
-    	if(!report.report(metricData)) {
-    		log.warn("report failed : {}", metricData);
-    	}
+    public final void execute() {
+        try {
+            long now = System.currentTimeMillis();
+            if(now - previousExecuteMillis < interval) {// 未到时间，该逻辑避免子类重置定时间隔时，可以保证输出周期不高于interval
+                return;
+            }
+            Map<String, Object> params = new HashMap<>();
+            params.put("total_num", getTotalNum());
+            params.put("period_seconds", (now - previousExecuteMillis) / 1000);
+            params.put("period_num", getPeriodNum());
+            previousExecuteMillis = now;
+            MetricData metricData = MetricData.get(null, "consume/" + metricType, params);
+            if(!report.report(metricData)) {
+                log.warn("report failed : {}", metricData);
+            }
+        } finally {
+            executeOverride();
+        }
     }
+
+    // 提供给子类重写
+    protected void executeOverride() {}
 
     @Override
     public boolean shutdown(Duration duration) {
@@ -142,19 +172,9 @@ public abstract class BaseEventListener<T> implements IAppStatusListener, Consum
 	
     protected abstract long getTotalNum();
     protected abstract long getPeriodNum();
-    
+
     /**
-     * 	是否启用hash分片，用于针对一种类型数据需要保证顺序消费的场景
-     * threadNum大于1时有用
-     * @return
-     */
-    protected boolean hashShard() {
-    	return false;
-    }
-    
-    /**
-     * 	业务hash值，用于将同类型业务绑定在一个线程消费
-     * threadNum大于1且hashShard为true时有用
+     * 	业务hash值，用于将同类型业务绑定在一个线程消费，threadNum大于1使用
      * @param event
      * @return
      */

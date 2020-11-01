@@ -70,11 +70,6 @@ public class SpanListener extends BaseEventListener<TraceSpan> implements BaseCo
     		log.warn("span report failed: {}", t.getSpan());
     	}
 	}
-    
-    @Override
-    protected boolean hashShard() {
-    	return false;
-    }
 
 //	@Override
 //	protected int eventHashCode(TraceSpan event) {
