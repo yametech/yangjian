@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 public class MockMetricServer {
 
     private Undertow server;
-    private final List<EventMetric> metrics = new ArrayList<>();
+    private final List<EventMetric> metrics = new CopyOnWriteArrayList<>();
 
     public MockMetricServer() {
         server = Undertow.builder()
