@@ -20,7 +20,7 @@ public class TestAnnotationSubscribe {
 		Service service = new Service();
 //		new Listener();
 		service.test1();
-		service.test2("2222");
+//		service.test2("2222");
 //		new AnnotationListener().self();
 //		service.test3("3333");
 //		Thread.sleep(2000);

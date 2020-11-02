@@ -24,16 +24,14 @@ import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.metric.base.ConvertTimeEvent;
 import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class RTEventConsume implements BaseConsume<ConvertTimeEvent> {
 	private static final ILogger log = LoggerFactory.getLogger(RTEventConsume.class);
-	static final int STATISTICS_SECOND_SIZE = 1 << 4;// 每种类型的统计，内存中存放的最大统计秒数个数
+	static final int STATISTICS_SECOND_SIZE = 1 << 3;// 每种类型的统计，内存中存放的最大统计秒数个数
 	private final SecondStatisticBean[] allStatistics = new SecondStatisticBean[STATISTICS_SECOND_SIZE];
 	private long totalNum = 0;// 总消费量
 	private final AtomicLong periodTotalNum = new AtomicLong(0);// 最近一个输出周期产生的事件量
@@ -86,16 +84,22 @@ public class RTEventConsume implements BaseConsume<ConvertTimeEvent> {
 
 	/**
 	 * 获取当前消费时间之前的每秒统计值，这些历史统计值是不变的
-	 * @param maxSecond	输出的数据的最大时间，超出该时间的不输出，必须小于nowMillis / 1000 - 1
+	 * @param periodSecond	周期值，用于获取周期开始时间，判断数据是否可输出
 	 * @return
 	 */
-	public List<BaseStatistic> getReportStatistics(Long maxSecond) {
+	public List<BaseStatistic> getReportStatistics(int periodSecond) {
 		List<BaseStatistic> reportStatistic = new ArrayList<>();
 		long nowMillis = System.currentTimeMillis();
 		for(int i = 0; i < allStatistics.length; i++) {
 			SecondStatisticBean statistic = allStatistics[i];
-			if(statistic == null || nowMillis / 1000 - statistic.getSecond() <= 1
-				|| (maxSecond != null && statistic.getSecond() > maxSecond)) {// 不存在对应秒数的统计数据或者对应秒的统计还未完成则不输出，如果在未完成的情况下输出了，会导致因并发丢失数据
+			if(statistic == null) {
+				continue;
+			}
+			long statisticStartSecond = statistic.getSecond();
+			if(periodSecond > 1) {
+				statisticStartSecond = RTEventListener.getPeriodStartSecond(statistic.getSecond(), periodSecond);
+			}
+			if(nowMillis / 1000 - statisticStartSecond <= periodSecond) {// 周期统计还未完成不输出，如果输出了，会因并发导致数据丢失
 				continue;
 			}
 			for(Entry<String, Map<String, Map<StatisticType, BaseStatistic>>> entryType : statistic.getStatistics().entrySet()) {

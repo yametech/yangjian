@@ -22,11 +22,16 @@ public class MetricTest {
 	
 	@Test
 	public void test() throws Exception {
-		MetricUtil.mark("MetricTest");
+		for(int i = 0; i < 20; i++) {
+			MetricUtil.mark("MetricTest");
+			Thread.sleep(500);
+		}
+		Thread.sleep(10000);
+		System.err.println("关闭服务");
 	}
 
 	@Test
 	public void test2() throws Exception {
-		MetricUtil.mark("MetricTest");
+
 	}
 }

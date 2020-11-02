@@ -40,11 +40,12 @@ import java.util.Map.Entry;
 public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
 	private static final ILogger log = LoggerFactory.getLogger(RTEventListener.class);
     private static final String CONFIG_KEY = "metricOutput.interval.metric";
+    private static final String METRIC_PERIOD_CONFIG_KEY = "metric.period.second";
     private static final long PERIOD_START_SECOND = LocalDateTime.of(2020, 11, 1, 0, 0,0).toEpochSecond(ZoneOffset.of("+8"));
     private final List<RTEventConsume> consumes = new ArrayList<>();
     private final IReportData report = MultiReportFactory.getReport("statistic");
-    private int configInterval = 1;
     private int interval = 1;
+    private int metricPeriod = 1;
     private volatile boolean shutdown = false;
 
     public RTEventListener() {
@@ -53,7 +54,8 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
 
     @Override
     public Set<String> configKeyOverride() {
-        return new HashSet<>(Collections.singletonList(CONFIG_KEY.replaceAll("\\.", "\\\\.")));
+        return new HashSet<>(Arrays.asList(CONFIG_KEY.replaceAll("\\.", "\\\\."),
+                METRIC_PERIOD_CONFIG_KEY.replaceAll("\\.", "\\\\.")));
     }
 
     @Override
@@ -65,15 +67,25 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
         String intervalStr = kv.get(CONFIG_KEY);
         if(intervalStr != null) {
             try {
-                configInterval = Integer.parseInt(intervalStr);
+                interval = Integer.parseInt(intervalStr);
             } catch(Exception e) {
                 log.warn("{} config error: {}", CONFIG_KEY, intervalStr);
             }
         }
-        if(configInterval >= RTEventConsume.STATISTICS_SECOND_SIZE / 2) {
-            interval = RTEventConsume.STATISTICS_SECOND_SIZE / 2 - 1;
-        } else {
-            interval = configInterval;
+
+        String metricPeriodStr = kv.get(METRIC_PERIOD_CONFIG_KEY);
+        if(metricPeriodStr != null) {
+            try {
+                metricPeriod = Integer.parseInt(metricPeriodStr);
+            } catch(Exception e) {
+                log.warn("{} config error: {}", METRIC_PERIOD_CONFIG_KEY, metricPeriodStr);
+            }
+        }
+
+        if(interval + metricPeriod >= RTEventConsume.STATISTICS_SECOND_SIZE) {
+            interval = 1;
+            metricPeriod = 1;
+            log.warn("{}、{}和值大于{}，设置错误，都已重置为默认值1", CONFIG_KEY, METRIC_PERIOD_CONFIG_KEY, RTEventConsume.STATISTICS_SECOND_SIZE);
         }
     }
 
@@ -96,10 +108,10 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
         // 循环consumes输出累加统计值
         for (RTEventConsume consume : consumes) {// 每个consume中的type不重叠
             Collection<BaseStatistic> statistics;
-            if(interval > 1) {
-                statistics = groupStatistic(consume.getReportStatistics(getMaxSecond()));
+            if(metricPeriod > 1) {
+                statistics = groupStatistic(consume.getReportStatistics(shutdown ? 1 : metricPeriod));
             } else {
-                statistics = consume.getReportStatistics(null);
+                statistics = consume.getReportStatistics(metricPeriod);
             }
             for (BaseStatistic statistic : statistics) {
                 Entry<String, Object>[] kvs = statistic.kv();
@@ -110,18 +122,13 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
                 for(Entry<String, Object> entry : kvs) {
                 	thisParams.put(entry.getKey(), entry.getValue());
                 }
-                thisParams.put("period", configInterval);
+                thisParams.put("period", metricPeriod);
                 MetricData metricData = MetricData.get(statistic.getSecond(), "statistic/" + statistic.getType() + "/" + statistic.statisticType().name(), thisParams);
                 if(!report.report(metricData)) {
                 	log.warn("report failed: {}", metricData);
                 }
             }
         }
-    }
-
-    // 仅输出满足完整周期的数据，避免最近一个周期不完整导致输出多出一倍的问题，但是为了避免在关闭时等待过久，在关闭时不限制最大时间，每次输出时将已完成秒内计算的结果输出
-    private Long getMaxSecond() {
-        return shutdown ? null : (System.currentTimeMillis() / 1000L) - interval;
     }
 
     /**
@@ -133,7 +140,7 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
         try {
             Map<String, BaseStatistic> groupStatistic = new HashMap<>();// key组成为：输出周期开始时间/statistic.getType()/statistic.statisticType()/sign
             for (BaseStatistic statistic : secondStatistic) {
-                long startSecond = statistic.getSecond() - (statistic.getSecond() - PERIOD_START_SECOND) % configInterval;
+                long startSecond = getPeriodStartSecond(statistic.getSecond(), metricPeriod);
                 String key = String.join("/",  startSecond + "",
                         statistic.getType(), statistic.statisticType().name(), statistic.getSign());
                 BaseStatistic groupValue = groupStatistic.get(key);
@@ -148,6 +155,10 @@ public class RTEventListener extends BaseEventListener<ConvertTimeEvent> {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    static Long getPeriodStartSecond(long startSecond, long metricPeriod) {
+        return startSecond - (startSecond - PERIOD_START_SECOND) % metricPeriod;
     }
 
     @Override
