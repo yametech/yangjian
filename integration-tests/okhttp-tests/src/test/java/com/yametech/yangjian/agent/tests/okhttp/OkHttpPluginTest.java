@@ -17,6 +17,7 @@
 package com.yametech.yangjian.agent.tests.okhttp;
 
 import com.yametech.yangjian.agent.tests.tool.AbstractHttpClientTest;
+import com.yametech.yangjian.agent.tests.tool.bean.EventMetric;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -31,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class OkHttpPluginTest extends AbstractHttpClientTest {
 
@@ -50,7 +52,6 @@ public class OkHttpPluginTest extends AbstractHttpClientTest {
         String path = "/";
         Request request = new Request.Builder().url(getBaseUrl() + path).build();
         Response response = okHttpClient.newCall(request).execute();
-        //TimeUnit.SECONDS.sleep(5);
         List<Span> spanList = mockTracerServer.waitForSpans(1, Duration.ofSeconds(5).toMillis());
         assertEquals(1, spanList.size());
         Span span = spanList.get(0);
@@ -60,6 +61,10 @@ public class OkHttpPluginTest extends AbstractHttpClientTest {
         assertNotNull(tags);
         assertEquals("GET", tags.get("http.method"));
         assertEquals("200", tags.get("status_code"));
+        List<EventMetric> metrics = mockMetricServer.waitForMetrics(1);
+        assertEquals(1, metrics.size());
+        EventMetric metric = metrics.get(0);
+        verifyMetrics(metric, "http-client", getBaseUrl() + path);
     }
 
     @Test
@@ -77,6 +82,10 @@ public class OkHttpPluginTest extends AbstractHttpClientTest {
         assertNotNull(tags);
         assertEquals("GET", tags.get("http.method"));
         assertEquals("500", tags.get("status_code"));
+        List<EventMetric> metrics = mockMetricServer.waitForMetrics(1);
+        assertEquals(1, metrics.size());
+        EventMetric metric = metrics.get(0);
+        verifyMetrics(metric, "http-client", getBaseUrl() + path);
     }
 
     @Test
@@ -94,5 +103,16 @@ public class OkHttpPluginTest extends AbstractHttpClientTest {
         assertNotNull(tags);
         assertEquals("GET", tags.get("http.method"));
         assertEquals("200", tags.get("status_code"));
+        List<EventMetric> metrics = mockMetricServer.waitForMetrics(1);
+        assertEquals(1, metrics.size());
+        EventMetric metric = metrics.get(0);
+        verifyMetrics(metric, "http-client", getBaseUrl() + path);
+    }
+
+    private void verifyMetrics(EventMetric metric, String expectedType, String expectedSign) {
+        assertEquals(expectedType, metric.getType());
+        assertEquals(1, metric.getNum());
+        assertEquals(expectedSign, metric.getSign());
+        assertTrue(metric.getRtTotal() > 0);
     }
 }

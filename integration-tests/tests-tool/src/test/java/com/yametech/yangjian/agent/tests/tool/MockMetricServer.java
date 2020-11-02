@@ -16,6 +16,8 @@
 
 package com.yametech.yangjian.agent.tests.tool;
 
+import com.yametech.yangjian.agent.api.common.StringUtil;
+import com.yametech.yangjian.agent.tests.tool.bean.EventMetric;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -25,6 +27,13 @@ import io.undertow.server.handlers.BlockingHandler;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author dengliming
@@ -33,6 +42,7 @@ import java.io.InputStreamReader;
 public class MockMetricServer {
 
     private Undertow server;
+    private final List<EventMetric> metrics = new ArrayList<>();
 
     public MockMetricServer() {
         server = Undertow.builder()
@@ -47,6 +57,42 @@ public class MockMetricServer {
 
     public void stop() {
         server.stop();
+    }
+
+    private List<EventMetric> getMetrics() {
+        List<EventMetric> copy = new ArrayList<>(metrics.size());
+        copy.addAll(metrics);
+        return copy;
+    }
+
+    public List<EventMetric> waitForMetrics(int number) {
+        return waitForMetrics(number, TimeUnit.SECONDS.toMillis(10));
+    }
+
+    public List<EventMetric> waitForMetrics(int number, long timeoutMillis) {
+        long endMillis = System.currentTimeMillis() + timeoutMillis;
+        List<EventMetric> metrics = getMetrics();
+        while (metrics.size() < number && System.currentTimeMillis() < endMillis) {
+            metrics = getMetrics();
+            try {
+                TimeUnit.MILLISECONDS.sleep(5);
+            } catch (InterruptedException e) {
+            }
+        }
+        sortMetrics(metrics);
+        return metrics;
+    }
+
+    private void sortMetrics(List<EventMetric> metrics) {
+        if (metrics == null || metrics.size() <= 1) {
+            return;
+        }
+
+        metrics.sort(Comparator.comparing(EventMetric::getEventTime));
+    }
+
+    public void clear() {
+        metrics.clear();
     }
 
     class MetricHttpHandler implements HttpHandler {
@@ -79,11 +125,57 @@ public class MockMetricServer {
             if (body != null && !"".equals(body)) {
                 parseMetrics(body);
             }
-            System.out.println("received2<<<<<" + body);
+            System.out.println("received-metrics<<<<<" + body);
         }
     }
 
+    // 格式：test/1602419501/statistic/http-client/RT?rt_max=965&rt_min=965&num=1&sign=http%3A%2F%2Flocalhost%3A49771%2F&error_total=0&rt_total=965
     private void parseMetrics(String body) {
-        // TODO
+        int start = body.indexOf("/RT");
+        if (start == -1) {
+            return;
+        }
+
+        String path = body.substring(0, start);
+        if (StringUtil.isEmpty(path)) {
+            return;
+        }
+
+        String[] paths = path.split("/");
+        if (paths.length < 4) {
+            return;
+        }
+
+        EventMetric eventMetric = new EventMetric();
+        eventMetric.setServiceName(paths[0]);
+        eventMetric.setEventTime(Long.parseLong(paths[1]));
+        eventMetric.setType(paths[3]);
+        String[] params = body.substring(start + 4).split("&");
+        for (String param : params) {
+            String[] kvs = param.split("=");
+            String key = decode(kvs[0]);
+            String val = decode(kvs[1]);
+            if ("sign".equals(key)) {
+                eventMetric.setSign(val);
+            }
+            if ("error_total".equals(key)) {
+                eventMetric.setErrorTotal(Long.parseLong(val));
+            }
+            if ("rt_total".equals(key)) {
+                eventMetric.setRtTotal(Long.parseLong(val));
+            }
+            if ("num".equals(key)) {
+                eventMetric.setNum(Long.parseLong(val));
+            }
+        }
+        metrics.add(eventMetric);
+    }
+
+    private static String decode(String str) {
+        try {
+            return URLDecoder.decode(str, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
     }
 }

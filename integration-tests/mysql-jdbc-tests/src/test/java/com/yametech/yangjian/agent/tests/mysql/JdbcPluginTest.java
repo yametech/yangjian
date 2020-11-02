@@ -17,6 +17,7 @@
 package com.yametech.yangjian.agent.tests.mysql;
 
 import com.yametech.yangjian.agent.tests.tool.AbstractAgentTest;
+import com.yametech.yangjian.agent.tests.tool.bean.EventMetric;
 import org.junit.Rule;
 import org.testcontainers.containers.MySQLContainer;
 import zipkin2.Span;
@@ -50,6 +51,9 @@ public class JdbcPluginTest extends AbstractAgentTest {
         List<Span> spans = mockTracerServer.waitForSpans(3, Duration.ofSeconds(5).toMillis());
         assertNotNull(spans);
         assertEquals(3, spans.size());
+
+        List<EventMetric> metrics = mockMetricServer.waitForMetrics(3);
+        assertNotNull(metrics);
     }
 
     private void update(String sql, Object... args) {
