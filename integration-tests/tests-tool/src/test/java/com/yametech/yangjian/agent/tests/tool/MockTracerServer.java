@@ -118,7 +118,7 @@ public class MockTracerServer {
                     e.printStackTrace();
                 }
             }
-            System.out.println("received<<<<<" + body);
+            System.out.println("received-spans<<<<<" + body);
         }
     }
 }

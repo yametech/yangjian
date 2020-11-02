@@ -31,17 +31,22 @@ import org.junit.BeforeClass;
 public abstract class AbstractAgentTest {
 
     protected static MockTracerServer mockTracerServer;
+    protected static MockMetricServer mockMetricServer;
 
     @BeforeClass
     public static void setup() {
         mockTracerServer = new MockTracerServer();
         mockTracerServer.start();
+        mockMetricServer = new MockMetricServer();
+        mockMetricServer.start();
         System.setProperty("log.config.path", "/data/www/soft/ecpark-agent/config/log.properties");
         System.setProperty(Constants.SYSTEM_PROPERTIES_PREFIX + Config.SERVICE_NAME.getKey(), "test");
         System.setProperty(Constants.CONFIG_PATH, "/data/www/soft/ecpark-agent/config/agent.properties");
         System.setProperty(Constants.EXTEND_PLUGINS_DIR, "/data/www/soft/ecpark-agent/plugins");
         YMAgent.premain(String.join(",",
                 "report.spanListener=http-span",
+                "report.http-statistic.url=http://localhost:9412/api/metric/report",
+                "report.statistic=http-statistic",
                 "spi.Trace=enable",
                 "trace.sample.strategy.mq-publish=always",
                 "trace.sample.strategy.mq-consume=always",
@@ -58,10 +63,12 @@ public abstract class AbstractAgentTest {
     @AfterClass
     public static void afterClass() {
         mockTracerServer.stop();
+        mockMetricServer.stop();
     }
 
     @Before
     public void before() {
         mockTracerServer.clear();
+        mockMetricServer.clear();
     }
 }
