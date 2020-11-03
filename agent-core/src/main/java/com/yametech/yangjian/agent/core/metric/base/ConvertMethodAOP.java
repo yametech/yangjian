@@ -102,7 +102,7 @@ public class ConvertMethodAOP extends BaseConvertAOP implements IMethodAOP<Long>
 			// TODO 此处增加批量发布，并且限制每次批量的条数，超过后分批发布
 			metricEventBus.publish(event -> {
 				// 共用对象实例，仅变更字段值，必须包含所有字段设值，否则会包含之前的值（实例共用）
-				initEvent(event, thisConvert, data, null, 0, null, 0, 0, 0);
+				initEvent(event, thisConvert, data, null, null, 0, null, 0, 0, 0);
 			});
 		}
 	}
@@ -115,19 +115,18 @@ public class ConvertMethodAOP extends BaseConvertAOP implements IMethodAOP<Long>
 			// TODO 此处增加批量发布，并且限制每次批量的条数，超过后分批发布
 			metricEventBus.publish(event -> {
 				// 共用对象实例，仅变更字段值，必须包含所有字段设值，否则会包含之前的值（实例共用）
-				initEvent(event, null, null, timeEvent.getStatisticTypes(), timeEvent.getEventTime(),
+				initEvent(event, null, null, timeEvent.getType(), timeEvent.getStatisticTypes(), timeEvent.getEventTime(),
 						timeEvent.getIdentify(), timeEvent.getUseTime(), timeEvent.getNumber(), timeEvent.getErrorNum());
 			});
 		}
 	}
 
-    private void initEvent(ConvertTimeEvent event, IAsyncConvert convert, Object data,
+    private void initEvent(ConvertTimeEvent event, IAsyncConvert convert, Object data, String type,
                            StatisticType[] statisticTypes, long eventTime, String identify, long useTime, long number, long errorNum) {
         event.setConvert(convert);
         event.setData(data);
-
         event.setStatisticTypes(statisticTypes);
-        event.setType(type);
+        event.setType(type == null ? this.type : type);
         event.setEventTime(eventTime);
         event.setIdentify(identify);
         event.setUseTime(useTime);

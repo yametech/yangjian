@@ -15,6 +15,7 @@
  */
 package com.yametech.yangjian.agent.client.test;
 
+import com.yametech.yangjian.agent.client.MetricGroupUtil;
 import com.yametech.yangjian.agent.client.MetricUtil;
 import org.junit.Test;
 
@@ -23,15 +24,34 @@ public class MetricTest {
 	@Test
 	public void test() throws Exception {
 		for(int i = 0; i < 20; i++) {
-			MetricUtil.mark("MetricTest");
-			Thread.sleep(500);
+			MetricUtil.mark("MetricTest", () -> {
+				MetricUtil.mark("MetricTest2");
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				return null;
+			});
 		}
 		Thread.sleep(10000);
 		System.err.println("关闭服务");
 	}
 
 	@Test
-	public void test2() throws Exception {
-
+	public void testGroup() throws Exception {
+		for(int i = 0; i < 20; i++) {
+			MetricGroupUtil.mark("test", "key", () -> {
+				MetricGroupUtil.mark("test2", "key2", 5);
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				return null;
+			});
+		}
+		Thread.sleep(10000);
+		System.err.println("关闭服务");
 	}
 }

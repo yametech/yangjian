@@ -25,25 +25,27 @@ import com.yametech.yangjian.agent.api.configmatch.*;
 
 import java.util.Arrays;
 
-public class MethodMetricMatcher implements IMetricMatcher {
+public class MethodMetricGroupMatcher implements IMetricMatcher {
 
     @Override
     public IConfigMatch match() {
         return new CombineOrMatch(Arrays.asList(
                 new CombineAndMatch(Arrays.asList(
-                        new ClassMatch("com.yametech.yangjian.agent.client.MetricUtil"),
+                        new ClassMatch("com.yametech.yangjian.agent.client.MetricGroupUtil"),
+                        new MethodNameMatch("mark"),
+                        new MethodArgumentNumMatch(4),
+                        new MethodArgumentIndexMatch(0, "java.lang.String"),
+                        new MethodArgumentIndexMatch(1, "java.lang.String"),
+                        new MethodArgumentIndexMatch(2, "int"),
+                        new MethodArgumentIndexMatch(3, "java.util.function.Supplier")
+                )),
+                new CombineAndMatch(Arrays.asList(
+                        new ClassMatch("com.yametech.yangjian.agent.client.MetricGroupUtil"),
                         new MethodNameMatch("mark"),
                         new MethodArgumentNumMatch(3),
                         new MethodArgumentIndexMatch(0, "java.lang.String"),
-                        new MethodArgumentIndexMatch(1, "int"),
-                        new MethodArgumentIndexMatch(2, "java.util.function.Supplier")
-                )),
-                new CombineAndMatch(Arrays.asList(
-                        new ClassMatch("com.yametech.yangjian.agent.client.MetricUtil"),
-                        new MethodNameMatch("mark"),
-                        new MethodArgumentNumMatch(2),
-                        new MethodArgumentIndexMatch(0, "java.lang.String"),
-                        new MethodArgumentIndexMatch(1, "int")
+                        new MethodArgumentIndexMatch(1, "java.lang.String"),
+                        new MethodArgumentIndexMatch(2, "int")
                 ))
         ));
     }
@@ -55,7 +57,7 @@ public class MethodMetricMatcher implements IMetricMatcher {
 
     @Override
     public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
-        return new LoadClassKey("com.yametech.yangjian.agent.plugin.client.metric.MethodMetricConvert");
+        return new LoadClassKey("com.yametech.yangjian.agent.plugin.client.metric.MethodMetricGroupConvert");
     }
 
 }

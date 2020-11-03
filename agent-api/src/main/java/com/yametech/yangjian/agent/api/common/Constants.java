@@ -81,6 +81,7 @@ public class Constants {
         public static final String HIKARICP = "hikaricp";
         public static final String MYSQL_TABLE = "mysql-table";
         public static final String MYSQL_SQL = "mysql-sql";
+        public static final String CUSTOM = "custom";
     }
 
     public static class ReportType {

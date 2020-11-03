@@ -2,3 +2,4 @@ com.yametech.yangjian.agent.plugin.client.trace.CustomMarkTraceMatcher
 com.yametech.yangjian.agent.plugin.client.metric.CollectInstanceMatcher
 com.yametech.yangjian.agent.plugin.client.metric.MethodMetricMatcher
 com.yametech.yangjian.agent.plugin.client.metric.MetricAnnotationMatcher
+com.yametech.yangjian.agent.plugin.client.metric.MethodMetricGroupMatcher
