@@ -35,7 +35,7 @@ A Java performance monitoring tool based on JavaAgent, with strong scalability a
 
 ## Build
 
-Execute `mvn clean package -DskipTests=true` in the project root path. The `deploy` directory file, which is generated in the root directory, is the deployment file.
+Execute `mvn clean package -Dmaven.javadoc.skip=true -DskipTests=true` in the project root path. The `deploy` directory file, which is generated in the root directory, is the deployment file.
 
 The build process requires `JDK8+`.
 ## Extend（Interface）

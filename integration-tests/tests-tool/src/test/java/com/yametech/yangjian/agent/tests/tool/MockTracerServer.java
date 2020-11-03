@@ -30,6 +30,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,7 +39,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class MockTracerServer {
 
-    private final List<Span> spans = new ArrayList<>();
+    private final List<Span> spans = new CopyOnWriteArrayList<>();
     private Undertow server;
 
     public MockTracerServer() {
