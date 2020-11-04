@@ -21,7 +21,12 @@ import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
 import com.yametech.yangjian.agent.api.common.Constants;
-import com.yametech.yangjian.agent.api.configmatch.*;
+import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
+import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
+import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodArgumentIndexMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodArgumentNumMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodNameMatch;
 
 import java.util.Arrays;
 
@@ -50,7 +55,7 @@ public class MethodMetricMatcher implements IMetricMatcher {
 
     @Override
     public String type() {
-        return Constants.EventType.CUSTOM;
+        return Constants.EventType.METHOD;
     }
 
     @Override
