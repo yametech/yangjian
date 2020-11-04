@@ -23,7 +23,7 @@ public class CommandResult {
     private boolean isSuccess;
     private byte[] content;
 
-    public CommandResult(boolean isSuccess, byte[] content){
+    public CommandResult(boolean isSuccess, byte[] content) {
         this.isSuccess = isSuccess;
         this.content = content;
     }

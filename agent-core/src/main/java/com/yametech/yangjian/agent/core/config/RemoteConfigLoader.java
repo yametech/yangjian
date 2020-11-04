@@ -149,7 +149,7 @@ public class RemoteConfigLoader implements IConfigLoader, ISchedule {
                 }
             }
         } catch (IOException e) {
-            logger.error(e, "[Ecpark-Agent] load remote config {} error.", url, e);
+            logger.error(e, "[Ecpark-Agent] load remote config {} error.", url);
         }
     }
 

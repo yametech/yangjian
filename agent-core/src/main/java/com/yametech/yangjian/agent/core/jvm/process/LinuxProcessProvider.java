@@ -15,12 +15,12 @@
  */
 package com.yametech.yangjian.agent.core.jvm.process;
 
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
 import com.yametech.yangjian.agent.core.jvm.collector.CPUCollector;
 import com.yametech.yangjian.agent.core.jvm.command.CommandExecutor;
 import com.yametech.yangjian.agent.core.jvm.command.CommandResult;
 import com.yametech.yangjian.agent.core.jvm.metrics.ProcessMetrics;
-import com.yametech.yangjian.agent.api.log.ILogger;
-import com.yametech.yangjian.agent.api.log.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -61,12 +61,12 @@ public enum LinuxProcessProvider {
 
             return metrics;
         } catch (Exception e) {
-            logger.error("Fail to get process metrics", e);
+            logger.error(e, "Fail to get process metrics");
             return new ProcessMetrics();
         }
     }
 
-    private double getMemory() throws Exception {
+    private double getMemory() {
         CommandResult result = new CommandExecutor().execute(new String[]{"/bin/sh", "-c", MEMORY_COMMAND});
         if (result.isSuccess()) {
             String data = new String(result.getContent(), StandardCharsets.UTF_8);
@@ -76,11 +76,11 @@ public enum LinuxProcessProvider {
             if (matcher.matches()) {
                 return Double.valueOf(matcher.group(1));
             } else {
-                logger.error("Fail to match memory," + data);
+                logger.error("Fail to match memory,{}", data);
             }
             return 0d;
         }
-        logger.error("Fail to get memory," + new String(result.getContent()));
+        logger.error("Fail to get memory,{}", new String(result.getContent()));
         return 0d;
     }
 }

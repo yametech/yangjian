@@ -15,12 +15,12 @@
  */
 package com.yametech.yangjian.agent.core.jvm.command;
 
+import com.yametech.yangjian.agent.api.log.ILogger;
+import com.yametech.yangjian.agent.api.log.LoggerFactory;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import com.yametech.yangjian.agent.api.log.ILogger;
-import com.yametech.yangjian.agent.api.log.LoggerFactory;
 
 /**
  * @author zcn
@@ -30,20 +30,20 @@ public class CommandExecutor {
 
     private final static ILogger logger = LoggerFactory.getLogger(CommandExecutor.class);
 
-    public CommandResult execute(String[] commands){
+    public CommandResult execute(String[] commands) {
         try {
             Process process = Runtime.getRuntime().exec(commands);
             return acquire(process);
-        }catch (IOException e) {
-            logger.error(e, "Fail to execute command , command: {}");
+        } catch (IOException e) {
+            logger.error(e, "Fail to execute command , command: {}", commands);
             return new CommandResult(false, e.getLocalizedMessage().getBytes());
         }
     }
 
-    private CommandResult acquire(Process process) throws IOException{
+    private CommandResult acquire(Process process) throws IOException {
         try {
             byte[] error = readStream(process.getErrorStream());
-            if(error.length != 0){
+            if (error.length != 0) {
                 return new CommandResult(false, error);
             }
 
@@ -57,13 +57,13 @@ public class CommandExecutor {
         }
     }
 
-    private byte[] readStream(InputStream inputStream) throws IOException{
+    private byte[] readStream(InputStream inputStream) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         int bufSize = 1024;
         byte[] buff = new byte[bufSize];
         int len = 0;
-        while( (len = inputStream.read(buff, 0 , bufSize)) != -1){
-            outputStream.write(buff,0, len);
+        while ((len = inputStream.read(buff, 0, bufSize)) != -1) {
+            outputStream.write(buff, 0, len);
         }
         return outputStream.toByteArray();
     }

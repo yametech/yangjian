@@ -56,22 +56,5 @@ public final class CPUCollector implements IMetricsCollector {
             this.lastTime = now;
         }
     }
-
-    //just for test
-    public static void main(String[] args) throws Exception {
-        CPUCollector cpuCollector = new CPUCollector();
-        for (int i = 0; i < 2; i++) {
-            new Thread(() -> {
-                while (true) {
-                    long bac = 1000000;
-                    bac = bac >> 1;
-                }
-            }).start();
-        }
-        while (true) {
-            Thread.sleep(2000);
-            System.out.println(cpuCollector.calculateCpuUsage());
-        }
-    }
 }
 
