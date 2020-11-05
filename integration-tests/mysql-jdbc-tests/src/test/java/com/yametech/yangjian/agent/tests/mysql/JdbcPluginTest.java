@@ -28,11 +28,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.Duration;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class JdbcPluginTest extends AbstractAgentTest {
 
@@ -48,9 +47,9 @@ public class JdbcPluginTest extends AbstractAgentTest {
         update("CREATE TABLE ym_apm (id INT NOT NULL, name VARCHAR(255))");
         update("UPDATE ym_apm SET name=12 WHERE id=?", 1001);
 
-        List<Span> spans = mockTracerServer.waitForSpans(3, Duration.ofSeconds(5).toMillis());
+        List<Span> spans = mockTracerServer.waitForSpans(3);
         assertNotNull(spans);
-        assertEquals(3, spans.size());
+        assertTrue(spans.size() >= 3);
 
         List<EventMetric> metrics = mockMetricServer.waitForMetrics(3);
         assertNotNull(metrics);
@@ -74,7 +73,7 @@ public class JdbcPluginTest extends AbstractAgentTest {
     }
 
     private Connection getConnection() throws Exception {
-        String url = mysql.getJdbcUrl() + "?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai";
+        String url = mysql.getJdbcUrl() + "?useSSL=false&useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai";
         Class.forName("com.mysql.jdbc.Driver");//注册mysql数据库驱动
         return DriverManager.getConnection(url, mysql.getUsername(), mysql.getPassword());
     }
