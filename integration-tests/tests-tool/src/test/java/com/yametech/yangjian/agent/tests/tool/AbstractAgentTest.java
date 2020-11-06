@@ -56,7 +56,12 @@ public abstract class AbstractAgentTest {
                 "trace.sample.strategy.http-client=always",
                 "trace.sample.strategy.redis=always",
                 "trace.sample.strategy.mysql=always",
-                "trace.sample.strategy.mongo=always"
+                "trace.sample.strategy.mongo=always",
+                "metricOutput.interval.consume.metric=1",
+                "metricOutput.interval.consume.trace=1",
+                "metric.period.second=1",
+                // all test redis key use `TS` as prefix
+                "redis.key.rule=TS"
                 ), ByteBuddyAgent.install());
     }
 

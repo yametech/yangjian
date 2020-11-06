@@ -18,7 +18,6 @@ package com.yametech.yangjian.agent.plugin.jedis.trace;
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
-import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.MicrosClock;
@@ -26,7 +25,9 @@ import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanCreater;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
-import com.yametech.yangjian.agent.plugin.jedis.context.ContextConstants;
+import redis.clients.jedis.Connection;
+import redis.clients.jedis.Protocol;
+import redis.clients.jedis.commands.ProtocolCommand;
 
 import java.lang.reflect.Method;
 
@@ -49,30 +50,26 @@ public class JedisMethodSpanCreater implements ISpanCreater<SpanInfo> {
 
     @Override
     public BeforeResult<SpanInfo> before(Object thisObj, Object[] allArguments, Method method) throws Throwable {
-        if (!(thisObj instanceof IContext)) {
-            return null;
-        }
         if (!spanSample.sample()) {
-            return null;
-        }
-        String url = (String) ((IContext) thisObj)._getAgentContext(ContextConstants.REDIS_URL_CONTEXT_KEY);
-        if (StringUtil.isEmpty(url)) {
             return null;
         }
         long startTime = MICROS_CLOCK.nowMicros();
         if (startTime == -1L) {
             return null;
         }
+        String command = getStringCommand((ProtocolCommand) allArguments[0]);
+        if (StringUtil.isEmpty(command)) {
+            return null;
+        }
         Span span = tracer.nextSpan()
                 .kind(Span.Kind.CLIENT)
-                .name(String.format(SPAN_NAME_FORMAT, method.getName()))
+                .name(String.format(SPAN_NAME_FORMAT, command))
                 .tag(Constants.Tags.COMPONENT, Constants.Component.JEDIS)
-                .tag(Constants.Tags.PEER, url)
+                .tag(Constants.Tags.PEER, getPeer((Connection) thisObj))
                 .start(startTime);
-        if (allArguments.length > 0 && allArguments[0] instanceof String) {
-            span.tag(Constants.Tags.DB_STATEMENT, method.getName() + " " + allArguments[0]);
-        } else if (allArguments.length > 0 && allArguments[0] instanceof byte[]) {
-            span.tag(Constants.Tags.DB_STATEMENT, method.getName());
+        byte[][] args = (byte[][]) allArguments[1];
+        if (args != null && args.length > 0) {
+            span.tag(Constants.Tags.DB_STATEMENT, command + " " + StringUtil.encode(args[0]));
         }
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }
@@ -92,5 +89,19 @@ public class JedisMethodSpanCreater implements ISpanCreater<SpanInfo> {
             span.getScope().close();
         }
         return ret;
+    }
+
+    private String getStringCommand(ProtocolCommand command) {
+        if (command instanceof Protocol.Command) {
+            return ((Protocol.Command) command).name();
+        } else {
+            // Protocol.Command is the only implementation in the Jedis lib as of 3.1 but this will save
+            // us if that changes
+            return StringUtil.encode(command.getRaw());
+        }
+    }
+
+    private String getPeer(Connection connection) {
+        return connection.getHost() + ":" + connection.getPort();
     }
 }

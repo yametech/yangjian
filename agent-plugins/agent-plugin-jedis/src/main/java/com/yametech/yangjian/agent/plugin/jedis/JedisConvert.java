@@ -40,29 +40,29 @@ import com.yametech.yangjian.agent.plugin.jedis.bean.RedisKeyBean;
  */
 public class JedisConvert implements IMethodAsyncConvert, IConfigReader {
 	private List<String> keyRules = new CopyOnWriteArrayList<>();
-    
+
     @Override
     public List<Object> convert(Object thisObj, long startTime, Object[] allArguments, Method method, Object ret,
     		Throwable t, Map<Class<?>, Object> globalVar) throws Throwable {
-        if (allArguments == null || allArguments.length == 0) {
+        byte[][] args = (byte[][]) allArguments[1];
+        if (args == null || args.length == 0) {
             return null;
         }
-        String key = null;
-        if (allArguments[0] instanceof String) {
-            key = (String) allArguments[0];
-        } else if (allArguments[0] instanceof byte[]) {
-            key = StringUtil.encode((byte[]) allArguments[0]);
+
+        String key = StringUtil.encode(args[0]);
+        if (StringUtil.isEmpty(key)) {
+            return null;
         }
         long now = System.currentTimeMillis();
         return Arrays.asList(new RedisKeyBean(Arrays.asList(key), now, now - startTime));
     }
-    
+
     @Override
     public List<TimeEvent> convert(Object eventBean) {
     	RedisKeyBean redisKeyBean = (RedisKeyBean) eventBean;
         return getMatchKeyTimeEvents(redisKeyBean);
     }
-    
+
     public List<TimeEvent> getMatchKeyTimeEvents(RedisKeyBean redisKeyBean) {
         Map<String, Integer> matchKeyNums = new HashMap<>();
         for (String key : redisKeyBean.getKeys()) {
@@ -96,7 +96,7 @@ public class JedisConvert implements IMethodAsyncConvert, IConfigReader {
                 .filter(r -> key.indexOf(r) != -1)
                 .collect(Collectors.toSet());
     }
-    
+
     @Override
     public Set<String> configKey() {
         return new HashSet<>(Arrays.asList("redis\\.key\\.rule", "redis\\.key\\.rule\\..*"));
@@ -115,10 +115,10 @@ public class JedisConvert implements IMethodAsyncConvert, IConfigReader {
         keyRules.clear();// 此处没有原子的方法可以直接替换其中的元素，所以在有更新时可能导致短暂的无配置数据
         keyRules.addAll(kv.values());
     }
-    
+
     @Override
     public ConfigNotifyType notifyType() {
     	return ConfigNotifyType.CHANGE;
     }
-    
+
 }

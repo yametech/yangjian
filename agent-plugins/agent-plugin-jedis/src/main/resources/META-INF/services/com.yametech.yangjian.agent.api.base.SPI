@@ -1,7 +1,6 @@
 com.yametech.yangjian.agent.plugin.jedis.JedisMatcher
 com.yametech.yangjian.agent.plugin.jedis.context.JedisConstructorMatcher
 com.yametech.yangjian.agent.plugin.jedis.trace.JedisMethodTraceMatcher
-com.yametech.yangjian.agent.plugin.jedis.trace.JedisClusterMethodTraceMatcher
 com.yametech.yangjian.agent.plugin.jedis.JedisConstructorMatcher$JedisConstructorWithUriArgMatcher
 com.yametech.yangjian.agent.plugin.jedis.JedisConstructorMatcher$JedisConstructorWithStringArgMatcher
 com.yametech.yangjian.agent.plugin.jedis.JedisConstructorMatcher$JedisConstructorWithShardInfoArgMatcher

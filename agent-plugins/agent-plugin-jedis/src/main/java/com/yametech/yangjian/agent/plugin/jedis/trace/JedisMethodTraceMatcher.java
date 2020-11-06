@@ -19,15 +19,9 @@ import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
-import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
-import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
-import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
-import com.yametech.yangjian.agent.api.configmatch.MethodRegexMatch;
 import com.yametech.yangjian.agent.api.trace.ITraceMatcher;
 import com.yametech.yangjian.agent.api.trace.TraceType;
 import com.yametech.yangjian.agent.plugin.jedis.bean.JedisMethodMatcher;
-
-import java.util.Arrays;
 
 /**
  * @author dengliming
@@ -42,13 +36,7 @@ public class JedisMethodTraceMatcher implements ITraceMatcher {
 
     @Override
     public IConfigMatch match() {
-        /**
-         * redis.clients.jedis.Jedis
-         */
-        return new CombineAndMatch(Arrays.asList(
-                new ClassMatch("redis.clients.jedis.Jedis"),
-                JedisMethodMatcher.INSTANCE.JedisMethodMatch()
-        ));
+        return JedisMethodMatcher.INSTANCE.sendCommandMatcher();
     }
 
     @Override

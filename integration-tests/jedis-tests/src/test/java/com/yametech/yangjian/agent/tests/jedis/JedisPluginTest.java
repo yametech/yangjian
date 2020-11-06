@@ -17,12 +17,11 @@
 package com.yametech.yangjian.agent.tests.jedis;
 
 import com.yametech.yangjian.agent.tests.tool.AbstractAgentTest;
+import com.yametech.yangjian.agent.tests.tool.bean.EventMetric;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 import redis.embedded.RedisServer;
 import zipkin2.Span;
 
@@ -38,8 +37,8 @@ import static org.junit.Assert.assertNotNull;
  */
 public class JedisPluginTest extends AbstractAgentTest {
 
-    private JedisPool pool;
     private RedisServer redisServer;
+    private Jedis jedis;
 
     @Before
     public void setUp() {
@@ -50,59 +49,55 @@ public class JedisPluginTest extends AbstractAgentTest {
                 .setting("bind localhost")
                 .build();
         redisServer.start();
-        pool = new JedisPool(initJedisPoolConfig(), "localhost", 6379);
+        jedis = new Jedis("localhost", 6379);
     }
 
     @After
     public void tearDown() {
-        pool.destroy();
+        jedis.close();
         redisServer.stop();
     }
 
     @Test
     public void test1() {
-        try (Jedis jedis = pool.getResource()) {
-            jedis.select(0);
-            String key1 = "TS:2", key2 = "test1";
-            jedis.set(key1, "12");
-            jedis.hset(key2, "k1", "13");
-            jedis.get(key1);
-        }
+        String key1 = "TS:2", key2 = "TS:1";
+        jedis.set(key1, "12");
+        jedis.hset(key2, "k1", "13");
+        jedis.get(key1);
         List<Span> spans = mockTracerServer.waitForSpans(3, Duration.ofSeconds(5).toMillis());
         assertNotNull(spans);
         assertEquals(3, spans.size());
+
+        List<EventMetric> metrics = mockMetricServer.waitForMetrics(1);
+        assertEquals(1, metrics.size());
+        EventMetric metric = metrics.get(0);
+        assertEquals("TS", metric.getSign());
+        assertEquals(3, metric.getNum());
+        assertEquals("redis-key", metric.getType());
     }
 
     @Test
     public void testSet() {
-        try (Jedis jedis = pool.getResource()) {
-            jedis.select(0);
-            jedis.sadd("set", "k1");
-        }
+        jedis.sadd("TS:SET", "k1");
         List<Span> spans = mockTracerServer.waitForSpans(1, Duration.ofSeconds(5).toMillis());
         assertNotNull(spans);
         assertEquals(1, spans.size());
+
+        List<EventMetric> metrics = mockMetricServer.waitForMetrics(1);
+        assertEquals(1, metrics.size());
+        EventMetric metric = metrics.get(0);
+        assertEquals("TS", metric.getSign());
+        assertEquals(1, metric.getNum());
+        assertEquals("redis-key", metric.getType());
     }
 
     @Test
     public void testList() {
-        try (Jedis jedis = pool.getResource()) {
-            jedis.select(0);
-            jedis.lpush("list:1", "k1");
-        }
+        jedis.lpush("TS:LIST:1", "k1");
         List<Span> spans = mockTracerServer.waitForSpans(1, Duration.ofSeconds(5).toMillis());
         assertNotNull(spans);
         assertEquals(1, spans.size());
-    }
-
-    private static JedisPoolConfig initJedisPoolConfig() {
-        //设置连接池的相关配置
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMaxTotal(2);
-        poolConfig.setMaxIdle(1);
-        poolConfig.setMaxWaitMillis(2000);
-        poolConfig.setTestOnBorrow(false);
-        poolConfig.setTestOnReturn(false);
-        return poolConfig;
+        List<EventMetric> metrics = mockMetricServer.waitForMetrics(1);
+        assertEquals(1, metrics.size());
     }
 }
