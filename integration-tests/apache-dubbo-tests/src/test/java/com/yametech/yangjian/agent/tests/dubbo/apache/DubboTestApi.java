@@ -24,4 +24,6 @@ public interface DubboTestApi {
 
     void hello(String name);
     void heart();
+
+    String genericCall(int a, Long b, String k, Object[] args);
 }

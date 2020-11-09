@@ -49,7 +49,8 @@ public class DubboClientMatcher implements IMetricMatcher {
 					new MethodRegexMatch(".*org\\.apache\\.dubbo\\.rpc\\.proxy\\.InvokerInvocationHandler\\.invoke\\(.*")
 				)),
 				new MethodArgumentNumMatch(3),
-				new MethodArgumentIndexMatch(1, "java.lang.reflect.Method")
+				new MethodArgumentIndexMatch(1, "java.lang.reflect.Method"),
+				new MethodArgumentIndexMatch(2, "java.lang.Object[]")
 			));
 	}
 

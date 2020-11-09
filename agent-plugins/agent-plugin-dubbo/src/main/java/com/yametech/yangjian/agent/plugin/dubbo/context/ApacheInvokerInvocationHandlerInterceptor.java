@@ -25,9 +25,11 @@ import com.yametech.yangjian.agent.plugin.dubbo.util.DubboSpanUtil;
 import org.apache.dubbo.common.URL;
 
 import static com.yametech.yangjian.agent.plugin.dubbo.context.ContextConstants.DUBBO_GROUP;
+import static com.yametech.yangjian.agent.plugin.dubbo.context.ContextConstants.DUBBO_INTERFACE;
+import static com.yametech.yangjian.agent.plugin.dubbo.context.ContextConstants.IS_GENERIC;
 
 /**
- * 增强类为了获取dubbo group
+ * 增强类为了获取dubbo group以及是否泛化调用
  *
  * @author dengliming
  */
@@ -50,6 +52,16 @@ public class ApacheInvokerInvocationHandlerInterceptor implements IConstructorLi
         if (StringUtil.notEmpty(group)) {
             ((IContext) thisObj)._setAgentContext(DUBBO_GROUP, group);
         }
+
+        String isGeneric = url.getParameter("generic");
+        if (Boolean.parseBoolean(isGeneric)) {
+            String interfaceName = url.getParameter("interface");
+            if (StringUtil.notEmpty(interfaceName)) {
+                ((IContext) thisObj)._setAgentContext(DUBBO_INTERFACE, interfaceName);
+            }
+        }
+        ((IContext) thisObj)._setAgentContext(IS_GENERIC, isGeneric);
         LOG.info("ApacheInvokerInvocationHandlerInterceptor({})", url.toString());
     }
+
 }

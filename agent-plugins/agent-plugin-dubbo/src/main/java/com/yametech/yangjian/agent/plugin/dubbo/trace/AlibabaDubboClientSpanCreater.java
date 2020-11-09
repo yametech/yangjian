@@ -69,7 +69,15 @@ public class AlibabaDubboClientSpanCreater extends AlibabaDubboSpanCreater<IDubb
         }
         URL url = invoker.getUrl();
         String group = url.getParameter("group");
-        String methodId = DubboSpanUtil.getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes());
+        boolean isGeneric = Boolean.parseBoolean(url.getParameter("generic"));
+        String methodId = null;
+        // 泛化调用
+        if (isGeneric) {
+            methodId = DubboSpanUtil.getGenericInterfaceName(url.getParameter("interface"), invocation.getArguments());
+        }
+        if (methodId == null) {
+            methodId = DubboSpanUtil.getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes());
+        }
         Span span = tracer.nextSpan()
                 .kind(Kind.CLIENT)
                 .name(methodId)

@@ -54,6 +54,36 @@ public class DubboSpanUtil {
     }
 
     /**
+     * 获取dubbo泛化调用实际的方法名
+     *
+     * @param interfaceName 实际的接口名
+     * @param args 对应org.apache.dubbo.rpc.service.GenericService.$invoke的args参数
+     * @return
+     */
+    public static String getGenericInterfaceName(String interfaceName, Object[] args) {
+        if (StringUtil.isEmpty(interfaceName) || args.length < 2) {
+            return null;
+        }
+
+        try {
+            StringBuilder sb = new StringBuilder();
+            String methodName = args[0].toString();
+            String[] parameterTypes = (String[]) args[1];
+            sb.append(interfaceName).append(".").append(methodName).append("(");
+            for (int i = 0; i < parameterTypes.length; i++) {
+                sb.append(parameterTypes[i].substring(parameterTypes[i].lastIndexOf(".") + 1));
+                if (i < (parameterTypes.length - 1)) {
+                    sb.append(',');
+                }
+            }
+            return sb.append(")").toString();
+        } catch (Throwable t) {
+            //
+        }
+        return null;
+    }
+
+    /**
      * 设置tags
      *
      * @param span

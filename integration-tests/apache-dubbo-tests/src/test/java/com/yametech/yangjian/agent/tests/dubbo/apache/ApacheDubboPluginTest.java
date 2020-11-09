@@ -17,11 +17,14 @@
 package com.yametech.yangjian.agent.tests.dubbo.apache;
 
 import com.yametech.yangjian.agent.tests.tool.AbstractAgentTest;
+import com.yametech.yangjian.agent.tests.tool.bean.EventMetric;
 import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.ProtocolConfig;
 import org.apache.dubbo.config.ReferenceConfig;
 import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.config.ServiceConfig;
+import org.apache.dubbo.rpc.service.GenericService;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import zipkin2.Span;
 
@@ -35,13 +38,20 @@ import static org.junit.Assert.assertNotNull;
  * @author dengliming
  * @date 2020/9/22
  */
-public class DubboPluginTest extends AbstractAgentTest {
+public class ApacheDubboPluginTest extends AbstractAgentTest {
 
-    private DubboTestApi dubboTestApi;
+    private static DubboTestApi dubboTestApi;
+    private static GenericService genericService;
+
+    @BeforeClass
+    public static void init() {
+        initDubboConfig();
+        dubboTestApi = referenceConfig.get();
+        genericService = genericReferenceConfig.get();
+    }
 
     @Test
     public void testHeart() {
-        DubboTestApi dubboTestApi = getDubboService();
         dubboTestApi.heart();
         List<Span> spans = mockTracerServer.waitForSpans(2, Duration.ofSeconds(5).toMillis());
         assertNotNull(spans);
@@ -52,11 +62,13 @@ public class DubboPluginTest extends AbstractAgentTest {
         assertEquals(Span.Kind.CLIENT, spans.get(0).kind());
         assertEquals("com.yametech.yangjian.agent.tests.dubbo.apache.DubboTestApiImpl.heart()", spans.get(1).name());
         assertEquals(Span.Kind.SERVER, spans.get(1).kind());
+        List<EventMetric> metrics = mockMetricServer.waitForMetrics(2);
+        assertNotNull(metrics);
+        assertEquals(2, metrics.size());
     }
 
     @Test
     public void testHello() {
-        DubboTestApi dubboTestApi = getDubboService();
         dubboTestApi.hello("hi");
         List<Span> spans = mockTracerServer.waitForSpans(2, Duration.ofSeconds(5).toMillis());
         assertNotNull(spans);
@@ -66,20 +78,37 @@ public class DubboPluginTest extends AbstractAgentTest {
         assertEquals(Span.Kind.CLIENT, spans.get(0).kind());
         assertEquals("com.yametech.yangjian.agent.tests.dubbo.apache.DubboTestApiImpl.hello(String)", spans.get(1).name());
         assertEquals(Span.Kind.SERVER, spans.get(1).kind());
+        List<EventMetric> metrics = mockMetricServer.waitForMetrics(2);
+        assertNotNull(metrics);
+        assertEquals(2, metrics.size());
     }
 
-    public DubboTestApi getDubboService() {
-        if (dubboTestApi == null) {
-            dubboTestApi = buildDubboTestApi();
-        }
-        return dubboTestApi;
+    @Test
+    public void testGenericService() {
+        Object result = genericService.$invoke("genericCall", new String[]{"int", "java.lang.Long", "java.lang.String", "java.lang.Object[]"}, new Object[]{1, 2L, "GenericService", new Object[]{"a"}});
+        assertEquals("GenericService", result);
+        List<Span> spans = mockTracerServer.waitForSpans(2);
+        assertNotNull(spans);
+        assertEquals(2, spans.size());
+        assertEquals(spans.get(0).traceId(), spans.get(1).parentId());
+        assertEquals("com.yametech.yangjian.agent.tests.dubbo.apache.DubboTestApi.genericCall(int,Long,String,Object[])", spans.get(0).name());
+        assertEquals(Span.Kind.CLIENT, spans.get(0).kind());
+        assertEquals("com.yametech.yangjian.agent.tests.dubbo.apache.DubboTestApiImpl.genericCall(int,Long,String,Object[])", spans.get(1).name());
+        assertEquals(Span.Kind.SERVER, spans.get(1).kind());
+        List<EventMetric> metrics = mockMetricServer.waitForMetrics(2);
+        assertNotNull(metrics);
+        assertEquals(2, metrics.size());
+        assertEquals("com.yametech.yangjian.agent.tests.dubbo.apache.DubboTestApiImpl.genericCall(int,Long,String,Object[])", metrics.get(0).getSign());
+        assertEquals("com.yametech.yangjian.agent.tests.dubbo.apache.DubboTestApi.genericCall(int,Long,String,Object[])", metrics.get(1).getSign());
     }
 
     private static ReferenceConfig<DubboTestApi> referenceConfig;
 
     private static ServiceConfig<DubboTestApi> serviceConfig;
 
-    private DubboTestApi buildDubboTestApi() {
+    private static ReferenceConfig<GenericService> genericReferenceConfig;
+
+    private static void initDubboConfig() {
         ApplicationConfig providerAppConfig = new ApplicationConfig();
         providerAppConfig.setName("dubbo-demo");
 
@@ -105,10 +134,14 @@ public class DubboPluginTest extends AbstractAgentTest {
         referenceConfig.setUrl("dubbo://localhost:" + getPort());
         referenceConfig.setTimeout(3000);
 
-        return referenceConfig.get();
+        genericReferenceConfig = new ReferenceConfig<>();
+        genericReferenceConfig.setApplication(providerAppConfig);
+        genericReferenceConfig.setInterface(DubboTestApi.class);
+        genericReferenceConfig.setUrl("dubbo://localhost:" + getPort());
+        genericReferenceConfig.setGeneric(true);
     }
 
-    private int getPort() {
+    private static int getPort() {
         return 20901;
     }
 }

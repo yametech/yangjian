@@ -15,29 +15,27 @@
  */
 package com.yametech.yangjian.agent.plugin.dubbo.trace;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-
+import brave.Span;
+import brave.Span.Kind;
+import brave.Tracing;
 import brave.propagation.ExtraFieldPropagation;
+import brave.propagation.TraceContext;
+import com.yametech.yangjian.agent.api.bean.BeforeResult;
+import com.yametech.yangjian.agent.api.common.BraveUtil;
 import com.yametech.yangjian.agent.api.common.Constants;
 import com.yametech.yangjian.agent.api.common.StringUtil;
+import com.yametech.yangjian.agent.api.trace.ISpanSample;
+import com.yametech.yangjian.agent.api.trace.SpanInfo;
+import com.yametech.yangjian.agent.api.trace.custom.IDubboClientCustom;
+import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
 import com.yametech.yangjian.agent.plugin.dubbo.util.DubboSpanUtil;
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.RpcContext;
 
-import com.yametech.yangjian.agent.api.bean.BeforeResult;
-import com.yametech.yangjian.agent.api.common.BraveUtil;
-import com.yametech.yangjian.agent.api.trace.ISpanSample;
-import com.yametech.yangjian.agent.api.trace.SpanInfo;
-import com.yametech.yangjian.agent.api.trace.custom.IDubboClientCustom;
-import com.yametech.yangjian.agent.api.trace.custom.IDubboCustom;
-
-import brave.Span;
-import brave.Span.Kind;
-import brave.Tracing;
-import brave.propagation.TraceContext;
+import java.lang.reflect.Method;
+import java.util.Map;
 
 import static com.yametech.yangjian.agent.api.common.Constants.Tags.DUBBO_GROUP;
 
@@ -71,7 +69,16 @@ public class ApacheDubboClientSpanCreater extends ApacheDubboSpanCreater<IDubboC
         }
         URL url = invoker.getUrl();
         String group = url.getParameter("group");
-        String methodId = DubboSpanUtil.getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes());
+        boolean isGeneric = Boolean.parseBoolean(url.getParameter("generic"));
+        String methodId = null;
+        // 泛化调用
+        if (isGeneric) {
+            methodId = DubboSpanUtil.getGenericInterfaceName(url.getParameter("interface"), invocation.getArguments());
+        }
+        if (methodId == null) {
+            methodId = DubboSpanUtil.getSpanName(invoker.getInterface().getName(), invocation.getMethodName(), invocation.getParameterTypes());
+        }
+
         Span span = tracer.nextSpan()
                 .kind(Kind.CLIENT)
                 .name(methodId)

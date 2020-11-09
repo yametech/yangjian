@@ -23,8 +23,11 @@ import com.yametech.yangjian.agent.api.common.LRUCache;
  */
 public class ContextConstants {
 
-    public static String DUBBO_VERSION = "_dv_";
     public static String DUBBO_GROUP = "_dg_";
+    public static String DUBBO_INTERFACE = "_di_";
+    public static String IS_GENERIC = "_ig_";
+    public static String APACHE_GENERIC_SERVICE_CLASS = "org.apache.dubbo.rpc.service.GenericService";
+    public static String ALIBABA_GENERIC_SERVICE_CLASS = "com.alibaba.dubbo.rpc.service.GenericService";
 
     public static final LRUCache<String, String> INTF_MAPPING_CACHE = new LRUCache();
 }

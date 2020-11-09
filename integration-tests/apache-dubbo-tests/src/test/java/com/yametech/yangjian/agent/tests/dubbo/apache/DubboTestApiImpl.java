@@ -30,4 +30,9 @@ public class DubboTestApiImpl implements DubboTestApi {
     public void heart() {
         System.err.println("heart~");
     }
+
+    @Override
+    public String genericCall(int a, Long b, String k, Object[] args) {
+        return k;
+    }
 }
