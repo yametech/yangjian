@@ -12,6 +12,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>alibaba-dubbo-tests</module>
 		<module>apache-dubbo-tests</module>
 		<module>httpclient-tests</module>
 		<module>jedis-tests</module>

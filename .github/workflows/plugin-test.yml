@@ -20,47 +20,20 @@ jobs:
     - name: Build Integration Tests with Maven
       run: sudo mvn clean install -Dbuild.skip.test=true -P integration-tests-only -f pom.xml
 
-    - name: Test Jedis Plugin (3.0.0~3.3.0)
-      run: |
-        versions=("3.0.0" "3.3.0")
-        for version in ${versions[@]}
-        do
-          echo Start to test jedis-$version
-          sudo mvn -Dmaven.javadoc.skip=true -Dgpg.skip -Djedis.version=$version -P integration-tests-only -pl :jedis-tests clean verify -f pom.xml
-        done
+    - name: Test Jedis Plugin
+      run: bash integration-tests/jedis-tests/bin/run-test.sh
 
-    - name: Test Apache Dubbo Plugin (2.7.3)
-      run: |
-        versions=("2.7.3")
-        for version in ${versions[@]}
-        do
-          echo Start to test apache-dubbo-$version
-          sudo mvn -Dmaven.javadoc.skip=true -Dgpg.skip -Ddubbo.version=$version -P integration-tests-only -pl :apache-dubbo-tests clean verify -f pom.xml
-        done
+    - name: Test Alibaba Dubbo Plugin
+      run: bash integration-tests/alibaba-dubbo-tests/bin/run-test.sh
 
-    - name: Test HttpClient Plugin (4.3.6)
-      run: |
-        versions=("4.3.6")
-        for version in ${versions[@]}
-        do
-          echo Start to test httpclient-$version
-          sudo mvn -Dmaven.javadoc.skip=true -Dgpg.skip -Dhttpclient.version=$version -P integration-tests-only -pl :httpclient-tests clean verify -f pom.xml
-        done
+    - name: Test Apache Dubbo Plugin
+      run: bash integration-tests/apache-dubbo-tests/bin/run-test.sh
 
-    - name: Test Jdbc Plugin (6.0.6)
-      run: |
-        versions=("6.0.6")
-        for version in ${versions[@]}
-        do
-          echo Start to test mysql-connector-java-$version
-          sudo mvn -Dmaven.javadoc.skip=true -Dgpg.skip -Dmysql-connector-java.version=$version -P integration-tests-only -pl :mysql-jdbc-tests clean verify -f pom.xml
-        done
+    - name: Test HttpClient Plugin
+      run: bash integration-tests/httpclient-tests/bin/run-test.sh
 
-    - name: Test Okhttp Plugin (3.12.0)
-      run: |
-        versions=("3.12.0")
-        for version in ${versions[@]}
-        do
-          echo Start to test okhttp-$version
-          sudo mvn -Dmaven.javadoc.skip=true -Dgpg.skip -Dokhttp.version=$version -P integration-tests-only -pl :okhttp-tests clean verify -f pom.xml
-        done
+    - name: Test Jdbc Plugin
+      run: bash integration-tests/mysql-jdbc-tests/bin/run-test.sh
+
+    - name: Test Okhttp Plugin
+      run: bash integration-tests/okhttp-tests/bin/run-test.sh
