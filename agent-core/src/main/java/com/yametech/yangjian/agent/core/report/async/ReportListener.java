@@ -15,12 +15,11 @@
  */
 package com.yametech.yangjian.agent.core.report.async;
 
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
-
 import com.yametech.yangjian.agent.core.common.BaseEventListener;
 import com.yametech.yangjian.agent.core.common.EventBusType;
 import com.yametech.yangjian.agent.util.eventbus.consume.BaseConsume;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author liuzhao
@@ -31,17 +30,17 @@ public class ReportListener extends BaseEventListener<ReportEvent> implements Ba
 //	private static final ILogger log = LoggerFactory.getLogger(EventListener.class);
     private AtomicLong totalNum = new AtomicLong(0);// 总消费量
 	private AtomicLong periodTotalNum = new AtomicLong(0);// 最近一个输出周期产生的事件量
-    
+
 	public ReportListener() {
 		super(EventBusType.REPORT);
 	}
-	
+
     @Override
     public BaseConsume<ReportEvent> getConsume() {
         // 该方法会调用parallelism次，如果返回同一个实例且parallelism>0，则实例为多线程消费
         return this;
     }
-    
+
     @Override
     protected long getTotalNum() {
         return totalNum.get();
@@ -58,7 +57,7 @@ public class ReportListener extends BaseEventListener<ReportEvent> implements Ba
 		periodTotalNum.getAndIncrement();
 		return true;
 	}
-    
+
     @Override
 	public void accept(ReportEvent t) {
     	t.call();
@@ -68,10 +67,10 @@ public class ReportListener extends BaseEventListener<ReportEvent> implements Ba
 	protected int eventHashCode(ReportEvent event) {
 		return event.getReportType().hashCode();
 	}
-    
+
     @Override
     public int weight() {
     	return super.weight() + 50;
     }
-    
+
 }
