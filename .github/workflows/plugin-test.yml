@@ -1,9 +1,15 @@
 name: plugin-test
 
 on:
+  pull_request:
+    paths-ignore:
+      - "**.md"
   push:
+    branches:
+      - master
     paths-ignore:
       - '**.md'
+
 jobs:
   # TODO 后面可以分每个插件使用一个job并且yml配置文件分开
   integration-tests:
@@ -15,10 +21,10 @@ jobs:
       with:
         java-version: 1.8
     - name: Build Agent with Maven
-      run: sudo mvn clean install -Pagent -Dmaven.javadoc.skip=true -Dgpg.skip -Dmaven.test.skip=true -f pom.xml
+      run: sudo mvn clean install -Pagent -Dmaven.javadoc.skip=true -Dgpg.skip -Dmaven.test.skip=true
 
     - name: Build Integration Tests with Maven
-      run: sudo mvn clean install -Dbuild.skip.test=true -P integration-tests-only -f pom.xml
+      run: sudo mvn clean install -Dbuild.skip.test=true -P integration-tests-only
 
     - name: Test Jedis Plugin
       run: bash integration-tests/jedis-tests/bin/run-test.sh

@@ -12,5 +12,5 @@ versions=`grep -v -E "^$|^#" ${supported_version_file}`
 for version in ${versions}
   do
     echo Start to test httpclient-$version
-    sudo mvn -Dmaven.javadoc.skip=true -Dgpg.skip -Dhttpclient.version=$version -Pintegration-tests-only -pl :httpclient-tests clean verify -f pom.xml
+    sudo mvn -Dhttpclient.version=$version -Pintegration-tests-only -pl :httpclient-tests clean verify
 done

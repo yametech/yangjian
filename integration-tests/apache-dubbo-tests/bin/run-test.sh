@@ -12,5 +12,5 @@ versions=`grep -v -E "^$|^#" ${supported_version_file}`
 for version in ${versions}
   do
     echo Start to test apache-dubbo-$version
-    sudo mvn -Dmaven.javadoc.skip=true -Dgpg.skip -Ddubbo.version=$version -Pintegration-tests-only -pl :apache-dubbo-tests clean verify -f pom.xml
+    sudo mvn -Ddubbo.version=$version -Pintegration-tests-only -pl :apache-dubbo-tests clean verify
 done

@@ -12,5 +12,5 @@ versions=`grep -v -E "^$|^#" ${supported_version_file}`
 for version in ${versions}
   do
     echo Start to test jedis-$version
-    sudo mvn -Dmaven.javadoc.skip=true -Dgpg.skip -Djedis.version=$version -Pintegration-tests-only -pl :jedis-tests clean verify -f pom.xml
+    sudo mvn -Djedis.version=$version -Pintegration-tests-only -pl :jedis-tests clean verify
 done

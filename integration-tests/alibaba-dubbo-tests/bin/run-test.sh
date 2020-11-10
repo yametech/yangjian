@@ -12,5 +12,5 @@ versions=`grep -v -E "^$|^#" ${supported_version_file}`
 for version in ${versions}
   do
     echo Start to test alibaba-dubbo-$version
-    sudo mvn -Dmaven.javadoc.skip=true -Dgpg.skip -Dalibaba.dubbo.version=$version -Pintegration-tests-only -pl :alibaba-dubbo-tests clean verify -f pom.xml
+    sudo mvn -Dalibaba.dubbo.version=$version -Pintegration-tests-only -pl :alibaba-dubbo-tests clean verify
 done

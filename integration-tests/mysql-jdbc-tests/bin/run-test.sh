@@ -12,5 +12,5 @@ versions=`grep -v -E "^$|^#" ${supported_version_file}`
 for version in ${versions}
   do
     echo Start to test mysql-connector-java-$version
-    sudo mvn -Dmaven.javadoc.skip=true -Dgpg.skip -Dmysql-connector-java.version=$version -Pintegration-tests-only -pl :mysql-jdbc-tests clean verify -f pom.xml
+    sudo mvn -Dmysql-connector-java.version=$version -Pintegration-tests-only -pl :mysql-jdbc-tests clean verify
 done

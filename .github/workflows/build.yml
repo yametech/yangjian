@@ -1,9 +1,15 @@
 name: build
 
 on:
+  pull_request:
+    paths-ignore:
+      - "**.md"
   push:
+    branches:
+      - master
     paths-ignore:
       - '**.md'
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,4 +20,4 @@ jobs:
         with:
           java-version: 1.8
       - name: Build with Maven
-        run: sudo mvn  -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dgpg.skip -P all clean install --file pom.xml
+        run: sudo mvn -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dgpg.skip -Pall clean install
