@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.yametech.yangjian.agent.plugin.mongo.context;
 
 import com.yametech.yangjian.agent.api.base.IContext;
 import com.yametech.yangjian.agent.api.bean.BeforeResult;
+import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.interceptor.IMethodAOP;
 
 import java.lang.reflect.Method;
@@ -38,9 +40,14 @@ public class CreateOperationExecutorInterceptor implements IMethodAOP {
     @Override
     public Object after(Object thisObj, Object[] allArguments, Method method, BeforeResult beforeResult, Object ret,
                         Throwable t, Map globalVar) throws Throwable {
-        if (ret instanceof IContext) {
+        if (!(ret instanceof IContext) || !(thisObj instanceof IContext)) {
+            return ret;
+        }
+
+        String mongoServerUrl = (String) ((IContext) thisObj)._getAgentContext(ContextConstants.MONGO_SERVER_URL);
+        if (StringUtil.notEmpty(mongoServerUrl)) {
             // 已经增强OperationExecutor
-            ((IContext) ret)._setAgentContext(ContextConstants.MONGO_SERVER_URL, ((IContext) thisObj)._getAgentContext(ContextConstants.MONGO_SERVER_URL));
+            ((IContext) ret)._setAgentContext(ContextConstants.MONGO_SERVER_URL, mongoServerUrl);
         }
         return ret;
     }
