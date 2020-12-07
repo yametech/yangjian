@@ -215,7 +215,7 @@
                         <include>**/test/java/**/*.java</include>
                     </includes>
                     <excludes>
-                        <exclude>**/README.md</exclude>
+                        <exclude>**/*.md</exclude>
                         <exclude>**/agent-plugin-mysql/**/main/java/**/druid/**/*.java</exclude>
                         <exclude>**/yangjian-agent-util/**/json/**/*.java</exclude>
 
