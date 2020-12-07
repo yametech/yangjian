@@ -1,6 +1,6 @@
 # yangjian
 
-[简体中文](README_CN.md) | English
+English | [简体中文](README_CN.md)
 
 ![build](https://github.com/yametech/yangjian/workflows/build/badge.svg) ![java-version](https://img.shields.io/badge/JDK-1.8+-brightgreen.svg) ![maven](https://img.shields.io/badge/maven-3.5+-brightgreen.svg) [![License](https://img.shields.io/github/license/yametech/yangjian)](/LICENSE)
 

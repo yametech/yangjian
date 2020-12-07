@@ -1,6 +1,6 @@
 # 杨戬(yangjian)
 
-简体中文 | [English](README.md)
+[English](README.md) | 简体中文
 
 ![build](https://github.com/yametech/yangjian/workflows/build/badge.svg) ![java-version](https://img.shields.io/badge/JDK-1.8+-brightgreen.svg) ![maven](https://img.shields.io/badge/maven-3.5+-brightgreen.svg) [![License](https://img.shields.io/github/license/yametech/yangjian)](/LICENSE)
 
