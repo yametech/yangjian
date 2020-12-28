@@ -43,3 +43,9 @@ jobs:
 
     - name: Test Okhttp Plugin
       run: bash integration-tests/okhttp-tests/bin/run-test.sh
+
+    - name: Test MongoDB Plugin
+      run: bash integration-tests/mongodb-tests/bin/run-test.sh
+
+    - name: Test Spring Data MongoDB Plugin
+      run: bash integration-tests/spring-data-mongodb-tests/bin/run-test.sh

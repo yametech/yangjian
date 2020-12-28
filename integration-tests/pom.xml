@@ -19,6 +19,8 @@
 		<module>mysql-jdbc-tests</module>
 		<module>okhttp-tests</module>
 		<module>tests-tool</module>
+		<module>spring-data-mongodb-tests</module>
+		<module>mongodb-tests</module>
 	</modules>
 
 	<dependencies>
