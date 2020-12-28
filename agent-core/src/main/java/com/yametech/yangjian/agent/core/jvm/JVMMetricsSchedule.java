@@ -116,6 +116,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfi
         params.put("non_heap", memoryMetrics.getNonHeapUsed());
         params.put("cpu", processMetrics.getCpuUsagePercent());
         params.put("memory_total", processMetrics.getMemoryUsage());
+        params.put("sys_mem_total", processMetrics.getSysMemTotal());
     	report.report(MetricData.get(null, CoreConstants.BASE_PATH_STATUS + Constants.Status.RESOURCES, params));
     }
 

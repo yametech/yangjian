@@ -26,6 +26,10 @@ public class ProcessMetrics implements IMetrics {
      * 进程内存使用
      */
     private double memoryUsage = 0.0d;
+    /**
+     * 系统总内存
+     */
+    private long sysMemTotal = 0L;
 
     public double getCpuUsagePercent() {
         return cpuUsagePercent;
@@ -41,5 +45,13 @@ public class ProcessMetrics implements IMetrics {
 
     public void setMemoryUsage(double memoryUsage) {
         this.memoryUsage = memoryUsage;
+    }
+
+    public long getSysMemTotal() {
+        return sysMemTotal;
+    }
+
+    public void setSysMemTotal(long sysMemTotal) {
+        this.sysMemTotal = sysMemTotal;
     }
 }

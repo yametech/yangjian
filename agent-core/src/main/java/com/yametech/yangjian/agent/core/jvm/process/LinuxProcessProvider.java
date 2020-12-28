@@ -25,7 +25,12 @@ import com.yametech.yangjian.agent.core.jvm.metrics.ProcessMetrics;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,6 +40,9 @@ import java.util.regex.Pattern;
  */
 public enum LinuxProcessProvider {
 
+    /**
+     * singleton instance
+     */
     INSTANCE;
 
     private static ILogger logger = LoggerFactory.getLogger(LinuxProcessProvider.class);
@@ -47,40 +55,65 @@ public enum LinuxProcessProvider {
 
     private static Pattern MEMORY_PATTERN = Pattern.compile("[^0-9]*(\\d*)[^0-9]*");
 
+    private static final String FILE_MEM_INFO = "/proc/meminfo";
+
+    private static long sysMemTotal = getSystemMemory().getOrDefault("MemTotal", 0L);
+
     private static Integer getPid() {
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
-        String name = runtime.getName();  // format: "pid@hostname"
+        // format: "pid@hostname"
+        String name = runtime.getName();
         return Integer.parseInt(name.substring(0, name.indexOf('@')));
     }
 
     public ProcessMetrics getProcessMetrics() {
+        ProcessMetrics metrics = new ProcessMetrics();
         try {
-            ProcessMetrics metrics = new ProcessMetrics();
             metrics.setMemoryUsage(getMemory());
             metrics.setCpuUsagePercent(cpuCollector.collect().getUsagePercent());
-
-            return metrics;
+            metrics.setSysMemTotal(sysMemTotal);
         } catch (Exception e) {
             logger.error(e, "Fail to get process metrics");
-            return new ProcessMetrics();
         }
+        return metrics;
     }
 
     private double getMemory() {
         CommandResult result = new CommandExecutor().execute(new String[]{"/bin/sh", "-c", MEMORY_COMMAND});
-        if (result.isSuccess()) {
-            String data = new String(result.getContent(), StandardCharsets.UTF_8);
-
-            Matcher matcher = MEMORY_PATTERN.matcher(data);
-
-            if (matcher.matches()) {
-                return Double.valueOf(matcher.group(1));
-            } else {
-                logger.error("Fail to match memory,{}", data);
-            }
+        if (!result.isSuccess()) {
+            logger.error("Fail to get memory,{}", new String(result.getContent()));
             return 0d;
         }
-        logger.error("Fail to get memory,{}", new String(result.getContent()));
+        String data = new String(result.getContent(), StandardCharsets.UTF_8);
+        Matcher matcher = MEMORY_PATTERN.matcher(data);
+        if (matcher.matches()) {
+            return Double.valueOf(matcher.group(1));
+        }
+        logger.error("Fail to match memory,{}", data);
         return 0d;
+    }
+
+    private static Map<String, Long> getSystemMemory() {
+        Map<String, Long> memInfo = new HashMap<>();
+        try {
+            Path path = Paths.get(FILE_MEM_INFO);
+            Files.lines(path).forEach((line) -> {
+                if (line == null || "".equals(line)) {
+                    return;
+                }
+                int beginIndex = 0;
+                int endIndex = line.indexOf(":");
+                if (endIndex != -1) {
+                    String key = line.substring(beginIndex, endIndex);
+                    beginIndex = endIndex + 1;
+                    endIndex = line.length();
+                    String memory = line.substring(beginIndex, endIndex);
+                    memInfo.put(key, Long.valueOf(memory.replace("kB", "").trim()));
+                }
+            });
+        } catch (Exception e) {
+            logger.error(e, "Fail to getSystemMemory");
+        }
+        return memInfo;
     }
 }
