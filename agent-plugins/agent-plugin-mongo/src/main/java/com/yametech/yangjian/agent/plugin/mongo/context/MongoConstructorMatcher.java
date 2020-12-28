@@ -21,7 +21,11 @@ import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
 import com.yametech.yangjian.agent.api.bean.LoadClassKey;
 import com.yametech.yangjian.agent.api.bean.MethodDefined;
-import com.yametech.yangjian.agent.api.configmatch.*;
+import com.yametech.yangjian.agent.api.configmatch.ClassMatch;
+import com.yametech.yangjian.agent.api.configmatch.CombineAndMatch;
+import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodArgumentIndexMatch;
+import com.yametech.yangjian.agent.api.configmatch.MethodConstructorMatch;
 
 import java.util.Arrays;
 
@@ -29,7 +33,8 @@ import java.util.Arrays;
  * @author dengliming
  * @date 2020/5/8
  */
-public class MongoConstructorMatcher implements IEnhanceClassMatch, InterceptorMatcher {
+public abstract class MongoConstructorMatcher implements IEnhanceClassMatch, InterceptorMatcher {
+
     @Override
     public IConfigMatch classMatch() {
         return new CombineOrMatch(Arrays.asList(
@@ -38,17 +43,43 @@ public class MongoConstructorMatcher implements IEnhanceClassMatch, InterceptorM
         ));
     }
 
-    @Override
-    public IConfigMatch match() {
-        return new CombineAndMatch(Arrays.asList(
-                classMatch(),
-                new MethodConstructorMatch(),
-                new MethodArgumentIndexMatch(0, "com.mongodb.connection.Cluster")
-        ));
+    /**
+     * for 3.x
+     */
+    public static class MongoConstructorMatcher3x extends MongoConstructorMatcher {
+
+        @Override
+        public IConfigMatch match() {
+            return new CombineAndMatch(Arrays.asList(
+                    classMatch(),
+                    new MethodConstructorMatch(),
+                    new MethodArgumentIndexMatch(0, "com.mongodb.connection.Cluster")
+            ));
+        }
+
+        @Override
+        public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
+            return new LoadClassKey("com.yametech.yangjian.agent.plugin.mongo.context.MongoConstructorInterceptor");
+        }
     }
 
-    @Override
-    public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
-        return new LoadClassKey("com.yametech.yangjian.agent.plugin.mongo.context.MongoConstructorInterceptor");
+    /**
+     * for 4.x
+     */
+    public static class MongoConstructorMatcher4x extends MongoConstructorMatcher {
+
+        @Override
+        public IConfigMatch match() {
+            return new CombineAndMatch(Arrays.asList(
+                    classMatch(),
+                    new MethodConstructorMatch(),
+                    new MethodArgumentIndexMatch(0, "com.mongodb.internal.connection.Cluster")
+            ));
+        }
+
+        @Override
+        public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
+            return new LoadClassKey("com.yametech.yangjian.agent.plugin.mongo.context.MongoClientDelegateInterceptor");
+        }
     }
 }

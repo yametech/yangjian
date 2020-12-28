@@ -39,7 +39,11 @@ public class MongoOperationMatcher implements InterceptorMatcher, IEnhanceClassM
                 new ClassMatch("com.mongodb.operation.CountOperation"),
                 new ClassMatch("com.mongodb.operation.AggregateOperation"),
                 new InterfaceMatch("com.mongodb.operation.ReadOperation"),
-                new InterfaceMatch("com.mongodb.operation.WriteOperation")
+                new InterfaceMatch("com.mongodb.operation.WriteOperation"),
+
+                // for 4.0.x
+                new InterfaceMatch("com.mongodb.internal.operation.WriteOperation"),
+                new InterfaceMatch("com.mongodb.internal.operation.WriteOperation")
         ));
     }
 
@@ -49,7 +53,7 @@ public class MongoOperationMatcher implements InterceptorMatcher, IEnhanceClassM
                 new MethodArgumentIndexMatch(0, "com.mongodb.MongoNamespace")
         ));
     }
-    
+
     @Override
     public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
     	return new LoadClassKey("com.yametech.yangjian.agent.plugin.mongo.context.MongoOperationInterceptor");

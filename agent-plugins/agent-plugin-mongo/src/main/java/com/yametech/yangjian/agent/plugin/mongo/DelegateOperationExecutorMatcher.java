@@ -15,8 +15,6 @@
  */
 package com.yametech.yangjian.agent.plugin.mongo;
 
-import java.util.Arrays;
-
 import com.yametech.yangjian.agent.api.IMetricMatcher;
 import com.yametech.yangjian.agent.api.base.IConfigMatch;
 import com.yametech.yangjian.agent.api.base.MethodType;
@@ -29,6 +27,8 @@ import com.yametech.yangjian.agent.api.configmatch.CombineOrMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodArgumentIndexMatch;
 import com.yametech.yangjian.agent.api.configmatch.MethodNameMatch;
 
+import java.util.Arrays;
+
 /**
  * mongo集合操作方法拦截
  *
@@ -38,34 +38,98 @@ import com.yametech.yangjian.agent.api.configmatch.MethodNameMatch;
  * @author dengliming
  * @date 2019/12/13
  */
-public class DelegateOperationExecutorMatcher implements IMetricMatcher {
-
-    // 3.8.x-3.12.0
-    private static final String ARGUMENT_TYPE_1 = "com.mongodb.client.ClientSession";
-    // 3.7.x
-    private static final String ARGUMENT_TYPE_2 = "com.mongodb.session.ClientSession";
-    @Override
-    public IConfigMatch match() {
-        return new CombineAndMatch(Arrays.asList(
-                new ClassMatch("com.mongodb.client.internal.MongoClientDelegate$DelegateOperationExecutor"),
-                new MethodNameMatch("execute"),
-
-                new CombineOrMatch(Arrays.asList(
-                        new MethodArgumentIndexMatch(2, ARGUMENT_TYPE_1),
-                        new MethodArgumentIndexMatch(3, ARGUMENT_TYPE_1),
-                        new MethodArgumentIndexMatch(1, ARGUMENT_TYPE_2),
-                        new MethodArgumentIndexMatch(2, ARGUMENT_TYPE_2)
-                ))
-        ));
-    }
+public abstract class DelegateOperationExecutorMatcher implements IMetricMatcher {
 
     @Override
     public String type() {
         return Constants.EventType.MONGO;
     }
-    
+
     @Override
     public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
     	return new LoadClassKey("com.yametech.yangjian.agent.plugin.mongo.DelegateOperationExecutorConvert");
+    }
+
+    /**
+     * for 3.7.x
+     */
+    public static class DelegateOperationExecutorMatcher37 extends DelegateOperationExecutorMatcher {
+
+        private static final String ARGUMENT_TYPE = "com.mongodb.session.ClientSession";
+
+        @Override
+        public IConfigMatch match() {
+            return new CombineAndMatch(Arrays.asList(
+                    new ClassMatch("com.mongodb.client.internal.MongoClientDelegate$DelegateOperationExecutor"),
+                    new MethodNameMatch("execute"),
+
+                    new CombineOrMatch(Arrays.asList(
+                            new MethodArgumentIndexMatch(1, ARGUMENT_TYPE),
+                            new MethodArgumentIndexMatch(2, ARGUMENT_TYPE)
+                    )),
+
+                    new CombineOrMatch(Arrays.asList(
+                            new MethodArgumentIndexMatch(0, "com.mongodb.operation.ReadOperation"),
+                            new MethodArgumentIndexMatch(0, "com.mongodb.operation.WriteOperation")
+                    ))
+            ));
+        }
+    }
+
+    /**
+     * for 3.8.x-3.12.0
+     */
+    public static class DelegateOperationExecutorMatcher38 extends DelegateOperationExecutorMatcher {
+
+        private static final String ARGUMENT_TYPE = "com.mongodb.client.ClientSession";
+
+        @Override
+        public IConfigMatch match() {
+            return new CombineAndMatch(Arrays.asList(
+                    new ClassMatch("com.mongodb.client.internal.MongoClientDelegate$DelegateOperationExecutor"),
+                    new MethodNameMatch("execute"),
+
+                    new CombineOrMatch(Arrays.asList(
+                            new MethodArgumentIndexMatch(2, ARGUMENT_TYPE),
+                            new MethodArgumentIndexMatch(3, ARGUMENT_TYPE)
+                    )),
+
+                    new CombineOrMatch(Arrays.asList(
+                            new MethodArgumentIndexMatch(0, "com.mongodb.operation.ReadOperation"),
+                            new MethodArgumentIndexMatch(0, "com.mongodb.operation.WriteOperation")
+                    ))
+            ));
+        }
+    }
+
+    /**
+     * for 4.x
+     */
+    public static class DelegateOperationExecutorMatcher40 extends DelegateOperationExecutorMatcher {
+
+        private static final String ARGUMENT_TYPE = "com.mongodb.client.ClientSession";
+
+        @Override
+        public IConfigMatch match() {
+            return new CombineAndMatch(Arrays.asList(
+                    new ClassMatch("com.mongodb.client.internal.MongoClientDelegate$DelegateOperationExecutor"),
+                    new MethodNameMatch("execute"),
+
+                    new CombineOrMatch(Arrays.asList(
+                            new MethodArgumentIndexMatch(2, ARGUMENT_TYPE),
+                            new MethodArgumentIndexMatch(3, ARGUMENT_TYPE)
+                    )),
+
+                    new CombineOrMatch(Arrays.asList(
+                            new MethodArgumentIndexMatch(0, "com.mongodb.internal.operation.ReadOperation"),
+                            new MethodArgumentIndexMatch(0, "com.mongodb.internal.operation.WriteOperation")
+                    ))
+            ));
+        }
+
+        @Override
+        public LoadClassKey loadClass(MethodType type, MethodDefined methodDefined) {
+            return new LoadClassKey("com.yametech.yangjian.agent.plugin.mongo.DelegateOperationExecutor4xConvert");
+        }
     }
 }

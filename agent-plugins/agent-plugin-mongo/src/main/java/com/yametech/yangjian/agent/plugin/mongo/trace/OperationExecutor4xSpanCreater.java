@@ -27,15 +27,14 @@ import com.yametech.yangjian.agent.api.common.StringUtil;
 import com.yametech.yangjian.agent.api.trace.ISpanSample;
 import com.yametech.yangjian.agent.api.trace.SpanInfo;
 import com.yametech.yangjian.agent.plugin.mongo.context.ContextConstants;
-import com.yametech.yangjian.agent.plugin.mongo.util.MongoUtil;
+import com.yametech.yangjian.agent.plugin.mongo.util.MongoSync4xUtil;
 
 import java.lang.reflect.Method;
 
 /**
- * @author dengliming
- * @date 2020/5/8
+ * for mongodb-driver-sync-4.0.x
  */
-public class OperationExecutorSpanCreater extends AbstractSpanCreater {
+public class OperationExecutor4xSpanCreater extends AbstractSpanCreater {
 
     private static final MicrosClock MICROS_CLOCK = new MicrosClock();
     private static final String SPAN_NAME_FORMAT = "MongoDB/%s";
@@ -84,7 +83,7 @@ public class OperationExecutorSpanCreater extends AbstractSpanCreater {
         if (StringUtil.notEmpty(database)) {
             span.tag(Constants.Tags.DATABASE, database);
         }
-        span.tag(Constants.Tags.DB_STATEMENT, executeMethod + MongoUtil.getTraceParam(allArguments[0]));
+        span.tag(Constants.Tags.DB_STATEMENT, executeMethod + MongoSync4xUtil.getTraceParam(allArguments[0]));
         return new BeforeResult<>(null, new SpanInfo(span, tracer.withSpanInScope(span)), null);
     }
 }

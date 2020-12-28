@@ -34,7 +34,10 @@ import java.util.Arrays;
 public class MongoClientImplMatcher implements IEnhanceClassMatch, InterceptorMatcher {
     @Override
     public IConfigMatch classMatch() {
-        return new ClassMatch("com.mongodb.client.MongoClientImpl");
+        return new CombineOrMatch(Arrays.asList(
+                new ClassMatch("com.mongodb.client.MongoClientImpl"),
+                new ClassMatch("com.mongodb.client.internal.MongoClientImpl")
+        ));
     }
 
     @Override
