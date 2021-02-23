@@ -2,7 +2,7 @@
 
 [English](README.md) | 简体中文
 
-![build](https://github.com/yametech/yangjian/workflows/build/badge.svg) ![java-version](https://img.shields.io/badge/JDK-1.8+-brightgreen.svg) ![maven](https://img.shields.io/badge/maven-3.5+-brightgreen.svg) [![License](https://img.shields.io/github/license/yametech/yangjian)](/LICENSE)
+![build](https://github.com/yametech/yangjian/workflows/build/badge.svg) ![plugin-test](https://github.com/yametech/yangjian/actions/workflows/plugin-test.yml/badge.svg) ![java-version](https://img.shields.io/badge/JDK-1.8+-brightgreen.svg) ![maven](https://img.shields.io/badge/maven-3.5+-brightgreen.svg) [![License](https://img.shields.io/github/license/yametech/yangjian)](/LICENSE)
 
 yangjian-agent是一个基于javaagent运行的java性能监控工具，具备较强的扩展性与性能
 
