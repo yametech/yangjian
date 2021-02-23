@@ -117,6 +117,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfi
         params.put("cpu", processMetrics.getCpuUsagePercent());
         params.put("memory_total", processMetrics.getMemoryUsage());
         params.put("sys_mem_total", processMetrics.getSysMemTotal());
+        params.put("interval", interval);
     	report.report(MetricData.get(null, CoreConstants.BASE_PATH_STATUS + Constants.Status.RESOURCES, params));
     }
 
@@ -128,6 +129,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfi
             params.put(bufferPoolMetrics.getName() + "_buffer_pool_memory_used", bufferPoolMetrics.getMemoryUsed());
             params.put(bufferPoolMetrics.getName() + "_buffer_pool_memory_capacity", bufferPoolMetrics.getMemoryCapacity());
         }
+        params.put("interval", interval);
         report.report(MetricData.get(null, CoreConstants.BASE_PATH_STATUS + Constants.Status.RESOURCES, params));
     }
 
@@ -143,6 +145,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfi
         params.put("class_total", classMetrics.getTotal());
         params.put("class_loaded", classMetrics.getLoaded());
         params.put("class_unloaded", classMetrics.getUnloaded());
+        params.put("interval", interval);
         report.report(MetricData.get(null, CoreConstants.BASE_PATH_STATUS + Constants.Status.RESOURCES, params));
     }
 
@@ -159,6 +162,7 @@ public class JVMMetricsSchedule implements IAppStatusListener, ISchedule, IConfi
         params.put("thread_terminated", threadMetrics.getTerminated());
         params.put("thread_peak", threadMetrics.getPeak());
         params.put("thread_news", threadMetrics.getNews());
+        params.put("interval", interval);
         report.report(MetricData.get(null, CoreConstants.BASE_PATH_STATUS + Constants.Status.RESOURCES, params));
     }
 }
