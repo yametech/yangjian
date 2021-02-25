@@ -23,8 +23,12 @@ import com.yametech.yangjian.agent.core.log.LogEvent;
  * @date: 2019-10-14
  */
 public class ThreadConverter implements IConverter<LogEvent> {
+
+    // TODO 可配置
+    private static final String DEFAULT_PREFIX = "YJ_AGENT ";
+
     @Override
     public String convert(LogEvent event) {
-        return Thread.currentThread().getName();
+        return DEFAULT_PREFIX + Thread.currentThread().getName();
     }
 }
