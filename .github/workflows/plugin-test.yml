@@ -27,25 +27,25 @@ jobs:
       run: sudo mvn clean install -Dbuild.skip.test=true -P integration-tests-only
 
     - name: Test Jedis Plugin
-      run: bash integration-tests/jedis-tests/bin/run-test.sh
+      run: bash integration-tests/jedis-tests/script/run-test.sh
 
     - name: Test Alibaba Dubbo Plugin
-      run: bash integration-tests/alibaba-dubbo-tests/bin/run-test.sh
+      run: bash integration-tests/alibaba-dubbo-tests/script/run-test.sh
 
     - name: Test Apache Dubbo Plugin
-      run: bash integration-tests/apache-dubbo-tests/bin/run-test.sh
+      run: bash integration-tests/apache-dubbo-tests/script/run-test.sh
 
     - name: Test HttpClient Plugin
-      run: bash integration-tests/httpclient-tests/bin/run-test.sh
+      run: bash integration-tests/httpclient-tests/script/run-test.sh
 
     - name: Test Jdbc Plugin
-      run: bash integration-tests/mysql-jdbc-tests/bin/run-test.sh
+      run: bash integration-tests/mysql-jdbc-tests/script/run-test.sh
 
     - name: Test Okhttp Plugin
-      run: bash integration-tests/okhttp-tests/bin/run-test.sh
+      run: bash integration-tests/okhttp-tests/script/run-test.sh
 
     - name: Test MongoDB Plugin
-      run: bash integration-tests/mongodb-tests/bin/run-test.sh
+      run: bash integration-tests/mongodb-tests/script/run-test.sh
 
     - name: Test Spring Data MongoDB Plugin
-      run: bash integration-tests/spring-data-mongodb-tests/bin/run-test.sh
+      run: bash integration-tests/spring-data-mongodb-tests/script/run-test.sh
