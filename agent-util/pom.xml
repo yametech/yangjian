@@ -18,7 +18,7 @@
 		<build.skip.test>true</build.skip.test>
 		<disruptor.version>3.4.2</disruptor.version>
 		<slf4j-api.version>1.7.28</slf4j-api.version>
-		<log4j-core.version>2.13.2</log4j-core.version>
+		<log4j-core.version>2.16.0</log4j-core.version>
 		<reactor-core.version>3.2.6.RELEASE</reactor-core.version>
 		<fastjson.version>1.2.61</fastjson.version>
 <!--     	<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths> -->
